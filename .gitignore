@@ -9,6 +9,7 @@ data/
 
 # 프로젝트 파일
 *.pyproj
+*.sln
 
 # 특정 텍스트 파일들
 api.txt
