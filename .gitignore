@@ -1,0 +1,17 @@
+# 파이썬 캐시 폴더 (모든 하위 폴더 포함)
+**/__pycache__/
+
+# Visual Studio 설정 폴더 (모든 하위 폴더 포함)
+**/.vs/
+
+# 데이터 폴더
+data/
+
+# 프로젝트 파일
+*.pyproj
+
+# 특정 텍스트 파일들
+api.txt
+piver.txt
+cookies.txt
+gemin_ver.txt
