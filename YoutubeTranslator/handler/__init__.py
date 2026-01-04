@@ -40,7 +40,7 @@ class UIHandlers(LogInterface, SystemInterface, TranslateInterface, DownloadInte
         self.url_manager = UrlManager()
         self.download = DownloadHandler(self, self.url_manager, self.path, self.page) # 일꾼 객체 생성 및 연결
 
-    def load_settings(self):
+    def init_settings(self):
         """
         [마스터 초기화] 앱 시작 시 각 핸들러들의 초기 상태를 세팅합니다.
         """
@@ -53,9 +53,7 @@ class UIHandlers(LogInterface, SystemInterface, TranslateInterface, DownloadInte
         if hasattr(self.app, 'list_tabs'):
             # Simple 탭의 파일 목록(원본/결과) 및 큐 리스트 초기화
             self.simple.initialize_tab_lists(self.app.list_tabs.simple_tab)
-            
-            # 3. Download 탭 초기화 (폴더 스캔 및 리스트 갱신)
-            # DownloadHandler 내부의 refresh_folder_lists 호출
+            self.detail.initialize_tab_lists(self.app.list_tabs.detail_tab)            
             self.download.refresh_folder_lists()
             
         self.log("✅ 모든 탭의 데이터 초기화가 완료되었습니다.")

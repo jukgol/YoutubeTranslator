@@ -5,9 +5,8 @@ def get_selected_line(widget):
     """위젯에서 현재 선택된(커서가 있는) 줄의 텍스트를 가져옵니다."""
     try:
         # Tkinter Text 위젯의 현재 행 텍스트 추출
-        line = widget.get("insert linestart", "insert lineend").strip()
-        if not line or line.startswith("-"): 
-            return None
+        line = widget.get_selected()       
+        
         return line
     except Exception:
         return None

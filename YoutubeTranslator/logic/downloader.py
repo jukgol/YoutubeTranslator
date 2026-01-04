@@ -1,6 +1,7 @@
 ﻿import yt_dlp
 import os
 import re
+import asyncio
 
 # =========================================================
 # [1] 도구 함수
@@ -134,8 +135,7 @@ def get_ydl_opts(path_manager, mode="full", log_callback=None):
 # [4] 메인 실행 함수 (PathManager 인자 추가)
 # =========================================================
 
-def download_video_full(url, path_manager, log_callback=None):
-    # PathManager 생성자에서 이미 폴더를 생성하므로 별도 호출 불필요
+async def download_video_full_async(url, path_manager, log_callback=None):
     progress_hook_wrapper.last_file = None
 
     if log_callback:
@@ -145,20 +145,26 @@ def download_video_full(url, path_manager, log_callback=None):
 
     try:
         video_title = None
-        with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-            info = ydl.extract_info(url, download=True)
-            video_title = info.get('title', '제목_없음')
+        # yt-dlp의 실행 부분을 별도의 스레드에서 실행하도록 위임
+        def run_yt_dlp():
+            with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+                # download=True일 경우 여기서 실제 다운로드가 일어남 (Blocking 발생 지점)
+                return ydl.extract_info(url, download=True)
+
+        # asyncio.to_thread를 사용하여 UI 프리징 방지
+        info = await asyncio.to_thread(run_yt_dlp)
         
+        video_title = info.get('title', '제목_없음')
         add_record(video_title, url)
 
         if log_callback:            
-            log_callback("🎉 [성공] 모든 작업(다운로드+병합+자막)이 종료되었습니다!", replace=False)
+            log_callback("🎉 [성공] 모든 작업 완료!", replace=False)
         
         return video_title
 
     except Exception as e:
         if log_callback:
-            log_callback(f"❌ [오류] {e}", replace=False)
+            log_callback(f"❌ [오류] {str(e)}", replace=False)
         return None
 
 def download_subtitle_only(url, path_manager, log_callback=None):

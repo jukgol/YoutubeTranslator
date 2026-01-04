@@ -1,7 +1,7 @@
 ﻿import threading
 import yt_dlp
 import asyncio
-from logic.downloader import download_video_full
+from logic.downloader import download_video_full_async
 
 class DownloadHandler:
     def __init__(self, bridge, url_manager, path, page):
@@ -11,7 +11,7 @@ class DownloadHandler:
         self.is_running = False        
         self.page = page
 
-    def sync_queue_ui(self):
+    def update_queue_ui(self):
         """1번 코드의 3줄 로그 스타일로 UI 갱신"""
         all_items = self.logic.pending + self.logic.in_progress + self.logic.completed
         
@@ -19,12 +19,10 @@ class DownloadHandler:
         # (여기서는 1번 코드의 listbox_queue.insert 방식을 가정합니다)
         lines = []
         for item in all_items:
-            lines.extend(item.to_ui_lines())
-            lines.append("") # 항목 간 간격
+            lines.extend(item.to_ui_lines())            
             
         # UI 브릿지를 통해 화면 업데이트 요청
-        self.ui.ui_update_queue_display(lines) 
-        print("Aaa")
+        self.ui.ui_update_queue_display(lines)         
 
     def handle_add_url(self, url):
         """URL 추가 + 비동기 제목 가져오기"""
@@ -33,7 +31,7 @@ class DownloadHandler:
     
         if new_item:
             self.ui.ui_clear_download_url_input()
-            self.sync_queue_ui()
+            self.update_queue_ui()
             # Flet의 비동기 태스크로 실행
             self.page.run_task(self._fetch_title_async, new_item)
 
@@ -48,7 +46,7 @@ class DownloadHandler:
                 info = await asyncio.to_thread(ydl.extract_info, item.url, download=False)
                 item.title = info.get('title', item.url)
             
-            self.sync_queue_ui()
+            self.update_queue_ui()
             self.page.update() 
         except: 
             print("bbb")
@@ -57,37 +55,45 @@ class DownloadHandler:
         if self.is_running:
             self.ui.log("이미 작업이 진행 중입니다.")
             return
-        
+    
         self.is_running = True
-        threading.Thread(target=self._run_download_process, daemon=True).start()
+        # 여기서 비동기 프로세스를 '태스크'로 던집니다.
+        # 이 줄을 실행하자마자 start_download 함수는 즉시 끝납니다.
+        self.page.run_task(self._run_download_process)
 
-    def _run_download_process(self):
+    # 2. 실제 작업을 수행하는 비동기 함수
+    async def _run_download_process(self):
         """순차적 다운로드 공정"""
-        while self.is_running:
-            item = self.logic.get_next()
-            if not item: break
+        try:
+            while self.is_running:
+                item = self.logic.get_next()
+                if not item: 
+                    break
 
-            item.status = "다운로드 중"
-            self.ui.root.after(0, self.sync_queue_ui)
+                item.status = "다운로드 중"
+                self.update_queue_ui() 
 
-            # 실제 다운로드 실행 (2번 코드의 마법의 연결고리)
-            video_title = download_video_full(
-                url=item.url,
-                path_manager=self.path,
-                log_callback=self.ui.log
-            )
+                # 여기서 await로 '대기'하며 다운로드를 수행
+                video_title = await download_video_full_async(
+                    url=item.url,
+                    path_manager=self.path,
+                    log_callback=self.ui.log
+                )
 
-            if video_title:
-                item.title = video_title
-                self.logic.mark_as_done(item)
-            else:
-                self.logic.mark_as_failed(item)
+                # 결과 처리 (성공/실패)
+                if video_title:
+                    item.title = video_title
+                    self.logic.mark_as_done(item)
+                else:
+                    self.logic.mark_as_failed(item)
             
-            self.sync_queue_ui()
-            self.refresh_folder_lists()
+                self.update_queue_ui()
+                self.refresh_folder_lists()
 
-        self.is_running = False
-        self.ui.log("모든 작업을 마쳤습니다.")
+        finally:
+            self.is_running = False
+            self.ui.log("모든 작업을 마쳤습니다.")
+            self.update_queue_ui()
 
     def refresh_folder_lists(self):
         """실제 폴더를 스캔하여 UI의 영상/자막 목록을 갱신합니다."""

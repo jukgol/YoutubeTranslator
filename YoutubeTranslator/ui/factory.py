@@ -30,38 +30,54 @@ def create_button(text, color, icon=None, expand=True, height=50, on_click=None)
     )
 
 class SmartListPanel(ft.Container):
-    """
-    [통합형] 하얀 박스 디자인 + 리스트 추가 기능을 하나로 합친 위젯
-    """
-    def __init__(self, **kwargs):
-        # 내부에서 실제로 글자가 쌓일 리스트뷰
+    def __init__(self, selectable=False, **kwargs):
+        # 내부 리스트뷰 생성
         self.list_view = ft.ListView(
-            expand=True,
-            spacing=5,            
+            expand=True, 
+            spacing=0, # ListTile 사용 시 간격을 0으로 해야 깔끔합니다
         )
         
-        # 부모인 Container(하얀 박스) 설정
+        self.selectable = selectable
+        self.selected_item = None
+
+        # 부모 Container 설정 (여기서 bgcolor가 확실히 들어가야 합니다)
         super().__init__(
             content=self.list_view,
-            bgcolor=ft.Colors.WHITE,              # 내부 흰색
-            border=ft.border.all(1, ft.Colors.OUTLINE_VARIANT), # 회색 테두리
-            border_radius=6,                      # 둥근 모서리
+            bgcolor=ft.Colors.WHITE,             # [복구] 배경색 명시
+            border=ft.border.all(1, ft.Colors.OUTLINE_VARIANT),
+            border_radius=6,
             padding=5,
             expand=True,
             **kwargs
         )
 
     def add(self, text, color=ft.Colors.BLACK, size=12):
-        """내부 리스트뷰에 텍스트 추가"""
-        self.list_view.controls.append(
-            ft.Text(
-                value=str(text),
-                color=color,
-                size=size,
-                no_wrap=False,
-                selectable=True
+        if self.selectable:
+            # 선택 모드일 때는 클릭 가능한 ListTile로 포장
+            new_control = ft.ListTile(
+                title=ft.Text(value=str(text), color=color, size=size),
+                data=text,
+                on_click=self._handle_click,
+                bgcolor=ft.Colors.TRANSPARENT,
+                selected_tile_color=ft.Colors.BLUE_200,
+                visual_density=ft.VisualDensity.COMPACT,
             )
-        )
+        else:
+            # 로그 모드일 때는 기존처럼 단순 Text
+            new_control = ft.Text(value=str(text), color=color, size=size, selectable=True)
+
+        self.list_view.controls.append(new_control)
+        self.list_view.update()
+
+    def _handle_click(self, e):
+        # 1. 모든 항목 선택 해제
+        for control in self.list_view.controls:
+            if isinstance(control, ft.ListTile):
+                control.selected = False
+        
+        # 2. 클릭된 항목만 강조 및 저장
+        e.control.selected = True
+        self.selected_item = e.control.data
         self.list_view.update()
 
     def set_list(self, items, color=ft.Colors.BLACK, size=12):
@@ -72,15 +88,7 @@ class SmartListPanel(ft.Container):
         # 2. 새로운 아이템들을 리스트에 추가
         if items:
             for text in items:
-                self.list_view.controls.append(
-                    ft.Text(
-                        value=str(text),
-                        color=color,
-                        size=size,
-                        no_wrap=False,
-                        selectable=True
-                    )
-                )
+                self.add(text)
         
         # 3. 비우고 채우기가 끝난 시점에 딱 한 번만 화면 갱신
         self.list_view.update()
@@ -102,15 +110,23 @@ class SmartListPanel(ft.Container):
         else:
             # 리스트가 비어있다면 새로 추가
             self.add(text, color, size)
-
+    def get_selected(self):
+        """현재 선택된 객체(data)를 리턴합니다."""
+        return self.selected_item
+    def on_delete_click(e):
+        selected_obj = video_panel.get_selected()
+        if selected_obj:
+            print(f"선택된 객체 삭제: {selected_obj.title}")
+        else:
+            print("선택된 항목이 없습니다.")
 # --- [Factory Function] ---
 
-def create_list_field():
+def create_list_field(selectable = False):
     """
     이제 하얀 박스 그 자체이면서 .add() 기능을 가진 
     SmartListPanel 객체 하나만 리턴합니다.
     """
-    return SmartListPanel()
+    return SmartListPanel(selectable)
 
 def create_section_container(content, expand=True):
     """회색 배경의 내용물 박스 생성"""

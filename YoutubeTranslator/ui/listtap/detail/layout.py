@@ -26,7 +26,7 @@ def setup_detail_layout(self):
 
 def _add_detail_section(title, btn_text, color):
     """부품을 생성하여 프레임, 리스트위젯, 버튼을 각각 반환합니다."""
-    text_widget = f.create_list_field()
+    text_widget = f.create_list_field(True)
     main_btn = f.create_button(text=btn_text, color=color)
     
     # 레이아웃 구성

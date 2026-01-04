@@ -2,6 +2,7 @@
 import os
 from ui import selectors
 from app.path import paths
+from ui.listtap.simple import render_queue_to_widget 
 
 class Simple:
     def __init__(self):
@@ -10,8 +11,7 @@ class Simple:
         self.current_index = -1 
 
     def refresh_ui(self, widget):
-        """데이터를 들고 UI 렌더링 함수를 호출만 합니다."""
-        from ui.listtap.simple import render_queue_to_widget # 순환 참조 방지를 위해 내부 임포트 권장
+        """데이터를 들고 UI 렌더링 함수를 호출만 합니다."""        
         render_queue_to_widget(widget, self.queue, self.current_index)
 
     def add(self, filename, widget):

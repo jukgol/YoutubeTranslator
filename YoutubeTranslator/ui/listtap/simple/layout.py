@@ -10,7 +10,7 @@ def setup_simple_layout(self):
     )
 
     # 1. 원본 데이터
-    self.origin_list = f.create_list_field()
+    self.origin_list = f.create_list_field(True)
     self.add_to_queue_btn = f.create_button("리스트 추가", ft.Colors.BLUE_700)
     self.clear_queue_btn = f.create_button("큐 초기화", ft.Colors.GREY_700)
     

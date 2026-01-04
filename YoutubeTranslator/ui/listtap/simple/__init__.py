@@ -49,13 +49,33 @@ class SimpleTab(ft.Column):
 
 # 큐 렌더링 함수 (변경 없음)
 def render_queue_to_widget(widget, queue_items, current_index):    
-    if not widget: return
-    lines = []
+    if not widget:         
+        return
+
+    widget.clear()
+
     for i, filename in enumerate(queue_items):
-        prefix = "▶" if i == current_index else "  "
-        suffix = " (작업중)" if i == current_index else ""
-        lines.append(f"{prefix} {filename}{suffix}")
-        lines.append("-" * 30)
+        # 1. 상태 판별 로직
+        if i < current_index:
+            # 완료 상태
+            icon = "✅"
+            status_text = "(완료)"
+            text_color = ft.Colors.GREY_500 # 지나간 항목은 회색 처리하면 가독성이 좋아짐
+        elif i == current_index:
+            # 작업 중 상태
+            icon = "▶️"
+            status_text = "(작업중)"
+            text_color = ft.Colors.BLUE_ACCENT
+        else:
+            # 대기 중 상태
+            icon = "⏳"
+            status_text = "(대기중)"
+            text_color = ft.Colors.BLACK
+
+        # 2. 텍스트 조립 및 추가
+        t = f"{icon} {filename} {status_text}\n---------"
+        
+        # SmartListPanel의 add 메서드에 색상 옵션이 있다면 같이 넘겨주면 좋습니다.
+        widget.add(t, color=text_color)
     
-    widget.value = "\n".join(lines)
     widget.update()
