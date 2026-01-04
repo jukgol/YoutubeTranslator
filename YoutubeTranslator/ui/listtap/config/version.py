@@ -1,5 +1,5 @@
 ﻿import flet as ft
-# from .components import LabeledInput
+from .components import LabeledInput
 
 class VersionArea(ft.Row):
     def __init__(self, save_cmd, check_cmd):
@@ -19,7 +19,7 @@ class VersionArea(ft.Row):
         
         # 2. 버튼 (ElevatedButton)
         self.check_btn = ft.ElevatedButton(
-            text="남은 요청 확인",
+            content=ft.Text("남은 요청 확인"),
             on_click=lambda e: check_cmd(),
             style=ft.ButtonStyle(
                 shape=ft.RoundedRectangleBorder(radius=5),

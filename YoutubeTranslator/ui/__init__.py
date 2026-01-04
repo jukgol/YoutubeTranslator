@@ -1,22 +1,34 @@
-﻿import tkinter as tk
+﻿import flet as ft
 from .config import ConfigSection
 from .log import LogSection
 from .listtap import ListTabContainer
 
 def compose_ui(app):
     handler = app.handlers
+    page = app.page        
 
-    # 1. 설정 섹션 (등록 완료)
-    app.config_sec = ConfigSection(app.root, handler)
-    app.config_sec.pack(fill=tk.X, padx=10, pady=5)
-
-    # 2. 리스트 섹션 (Simple/Detail 탭 모두 등록 완료)
-    # ListTabContainer 내부에서 SimpleTab과 DetailTab이 스스로 배선을 처리합니다.
-    app.list_tabs = ListTabContainer(app.root, handler)
-    app.list_tabs.pack(fill=tk.BOTH, expand=True, padx=10, pady=5)
+    # 2. 리스트 섹션 (탭 컨테이너)
+    app.list_tabs = ListTabContainer(handler)
     
-    app.list_sec = app.list_tabs.detail_tab # 호환성 유지
+    # 중간 탭 영역이 화면의 남은 세로 공간을 모두 차지하도록 expand=True 설정
+    app.list_tabs.expand = True
+    app.list_sec = app.list_tabs.detail_tab # 기존 핸들러 호환성 유지
 
-    # 3. 로그 섹션 (LogSection도 동일하게 handler만 전달)
-    app.log_sec = LogSection(app.root, handler)
-    app.log_sec.pack(fill=tk.X, padx=10, pady=5)
+    # 3. 로그 섹션
+    app.log_sec = LogSection(handler)
+
+    # 4. 전체 레이아웃 조립 (Vertical Column)
+    # Tkinter의 pack(side=TOP)과 유사하게 위에서부터 순서대로 배치합니다.
+    page.add(
+        ft.Column(
+            [                
+                app.list_tabs,      # 상단 탭 영역 (확장 가능)
+                app.log_sec,        # 하단 로그 영역
+            ],
+            expand=True,            # 전체 컬럼이 페이지 높이를 꽉 채우도록 설정
+            spacing=10,             # 섹션 간 간격 (pady 대응)
+        )
+    )
+    
+    # 레이아웃을 다 그린 후 최종 페이지 업데이트
+    page.update()

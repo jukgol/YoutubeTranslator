@@ -37,6 +37,6 @@ class LogExecutor:
         except queue.Empty:
             # 큐가 비어있으면 다음 주기로 넘어감
             pass
-        finally:
+        #finally:
             # 100ms 후 다시 실행 (메인 스레드 점유 방지)
-            self.root.after(100, self._monitor)
+            #self.root.after(100, self._monitor)

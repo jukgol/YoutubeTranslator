@@ -19,4 +19,5 @@
         self.setting.check_api_usage()    
 
     def refresh_all_lists(self):
-        self.refresh.refresh_all()
+        pass
+        #self.refresh.refresh_all()

@@ -31,12 +31,13 @@ class ApiManagementRow(ft.Row):
         self.vertical_alignment = ft.CrossAxisAlignment.CENTER
 
         # 1. 선택 영역 (Combobox -> Dropdown)
-        self.combo = ft.Dropdown(
-            expand=True,
-            height=40,
-            content_padding=ft.padding.only(left=10),
-            on_change=lambda e: select_cmd() # 선택 변경 시 실행
-        )
+        self.combo = ft.Dropdown() 
+
+        # 속성은 아래처럼 따로 선언해야 최신 버전에서 에러가 안 납니다.
+        self.combo.expand = True
+        self.combo.height = 40
+        self.combo.content_padding = ft.padding.only(left=10)
+        self.combo.on_change = lambda e: select_cmd()
 
         # 2. 삭제 버튼
         self.delete_btn = ft.ElevatedButton(

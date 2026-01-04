@@ -7,7 +7,7 @@ class ConfigSection(ft.Column):
     def __init__(self, handler):
         super().__init__()
         self.handler = handler
-        self.spacing = 1  # 섹션 간 간격
+        self.spacing = 5  # 섹션 간 간격
 
         # 1. 컴포넌트 생성 (부모 인자 생략)
         self.api_area = ApiArea(

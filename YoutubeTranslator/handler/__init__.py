@@ -1,7 +1,6 @@
 ﻿from tkinter.tix import Form
 from handler.log import LogHandler
 from .setting import SettingHandler
-from .refresh import RefreshHandler
 from .process import ProcessHandler
 from .steps.full_process import FullProcessStep
 
@@ -30,7 +29,7 @@ class UIHandlers(LogInterface, SystemInterface, TranslateInterface, DownloadInte
         self.log_handler = LogHandler(log_queue)
 
     def _init_translate(self):
-        self.refresh = RefreshHandler(self)
+        #self.refresh = RefreshHandler(self)
         self.process = ProcessHandler(self)
         self.full_process = FullProcessStep(self, self.process.path_service)
         self.queue_manager = QueueManager()

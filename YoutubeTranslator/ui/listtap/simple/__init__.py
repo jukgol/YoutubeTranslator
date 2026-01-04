@@ -29,14 +29,14 @@ class SimpleTab(ft.Column):
         """로직 결과에 따라 UI 상태(라벨 색상)를 변경하는 인터페이스 메서드"""
         # Flet 대응 색상 테이블
         colors = {
-            "active": (ft.colors.BLACK, ft.colors.YELLOW_300), 
-            "done": (ft.colors.GREEN_700, ft.colors.TRANSPARENT), 
-            "error": (ft.colors.RED, ft.colors.TRANSPARENT),
-            "idle": (ft.colors.GREY_400, ft.colors.TRANSPARENT)
+            "active": (ft.Colors.BLACK, ft.Colors.YELLOW_300), 
+            "done": (ft.Colors.GREEN_700, ft.Colors.TRANSPARENT), 
+            "error": (ft.Colors.RED, ft.Colors.TRANSPARENT),
+            "idle": (ft.Colors.GREY_400, ft.Colors.TRANSPARENT)
         }
         
         if 0 <= index < len(self.process_labels):
-            fg, bg = colors.get(status, (ft.colors.BLACK, ft.colors.TRANSPARENT))
+            fg, bg = colors.get(status, (ft.Colors.BLACK, ft.Colors.TRANSPARENT))
             
             # Flet에서 배경색을 바꾸려면 해당 위젯이 ft.Container여야 합니다.
             # layout.py에서 라벨을 Container로 감싸서 생성할 예정입니다.

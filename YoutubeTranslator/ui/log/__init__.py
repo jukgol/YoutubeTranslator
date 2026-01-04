@@ -1,37 +1,67 @@
-﻿import tkinter as tk
-from .bridge import register_log_bridge
+﻿import flet as ft
+# 기존 모듈 임포트 (Flet 버전으로 수정되었다고 가정)
+#from .bridge import register_log_bridge
 from .print_text import PrintText
 
-class LogSection(tk.LabelFrame):
-    def __init__(self, parent, handler): # refresh_cmd 대신 handler를 받음
-        super().__init__(parent, text=" 작업 로그 ", padx=5, pady=5)
+class LogSection(ft.Column):
+    def __init__(self, handler):
+        # Flet은 parent를 인자로 넘기지 않습니다.
+        super().__init__()
         self.handler = handler
-        
+        self.spacing = 10  # 위젯 간 간격
+
         # 1. 위젯 생성
         self.setup_widgets()
+        
+        # 2. Printer 생성 (Flet용으로 수정된 PrintText에 TextField 전달)
         self.printer = PrintText(self.log_text)
-        # 2. 핸들러와 연결 (인터페이스 초기화 포함)
-        register_log_bridge(self)
+        
+        # 3. 핸들러와 연결 (bridge.py)
+        #register_log_bridge(self)
 
     def setup_widgets(self):
-        # 기존 코드와 동일
-        log_frame = tk.Frame(self)
-        log_frame.pack(fill=tk.BOTH, expand=True)
+        """Tkinter의 LabelFrame과 Text+Scrollbar 구조를 Flet으로 재구성"""
+        
+        # 로그 출력창 (Tkinter의 Text 위젯 대응)
+        self.log_text = ft.TextField(
+            multiline=True,
+            read_only=True,      # state=tk.DISABLED 대응
+            min_lines=8,         # height=8 대응
+            max_lines=8,
+            expand=True,
+            bgcolor=ft.Colors.with_opacity(0.05, ft.Colors.ON_SURFACE), # #f8f8f8 느낌
+            text_size=12,
+            text_style=ft.TextStyle(font_family="Consolas"), # 로그용 고정폭 글꼴
+            content_padding=10,
+        )
 
-        scrollbar = tk.Scrollbar(log_frame)
-        scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
+        # 버튼 생성
+        self.refresh_btn = ft.ElevatedButton(
+            text="🔄 목록 새로고침",
+            style=ft.ButtonStyle(shape=ft.RoundedRectangleBorder(radius=5))
+        )
+        self.clear_log_btn = ft.ElevatedButton(
+            text="🗑️ 로그 초기화",
+            style=ft.ButtonStyle(shape=ft.RoundedRectangleBorder(radius=5))
+        )
 
-        # 핸들러가 제어할 수 있도록 self.log_text로 유지
-        self.log_text = tk.Text(log_frame, height=8, state=tk.DISABLED, 
-                                bg="#f8f8f8", yscrollcommand=scrollbar.set)
-        self.log_text.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
-        scrollbar.config(command=self.log_text.yview)
+        # 버튼들을 담을 가로 Row (Tkinter의 btn_frame 대응)
+        btn_row = ft.Row(
+            controls=[self.refresh_btn, self.clear_log_btn],
+            alignment=ft.MainAxisAlignment.CENTER,
+            spacing=10
+        )
 
-        btn_frame = tk.Frame(self)
-        btn_frame.pack(pady=5)
-
-        self.refresh_btn = tk.Button(btn_frame, text="🔄 목록 새로고침")
-        self.refresh_btn.pack(side=tk.LEFT, padx=5)
-
-        self.clear_log_btn = tk.Button(btn_frame, text="🗑️ 로그 초기화")
-        self.clear_log_btn.pack(side=tk.LEFT, padx=5)
+        # 전체 레이아웃 구성 (LabelFrame 시각적 구현)
+        self.controls = [
+            ft.Text(" 작업 로그 ", weight=ft.FontWeight.BOLD), # LabelFrame의 text 대응
+            ft.Container(
+                content=ft.Column([
+                    self.log_text,
+                    btn_row
+                ], spacing=10),
+                border=ft.border.all(1, ft.Colors.OUTLINE), # 테두리
+                border_radius=8,
+                padding=10,
+            )
+        ]

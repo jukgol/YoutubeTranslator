@@ -1,7 +1,8 @@
-﻿import tkinter as tk
+﻿import flet as ft
 
 class PrintText:
-    def __init__(self, log_widget):
+    def __init__(self, log_widget: ft.TextField):
+        # log_widget은 LogSection에서 넘겨받은 ft.TextField 객체입니다.
         self.log_text = log_widget
 
     def render(self, data):
@@ -9,41 +10,44 @@ class PrintText:
         if not self.log_text:
             return
 
-        # 1. 분기 로직 (Executor에서 이동됨)
         if data.get("type") == "clear":
             self._clear_widget()
         else:
             self._print_to_widget(data)
+            
+        # Flet 위젯의 값이 변했으므로 화면을 갱신합니다.
+        self.log_text.update()
 
     def _clear_widget(self):
         """위젯 전체 삭제"""
-        self.log_text.config(state=tk.NORMAL)
-        self.log_text.delete("1.0", tk.END)
-        self.log_text.config(state=tk.DISABLED)
+        self.log_text.value = ""
 
     def _print_to_widget(self, data):
-        """정밀한 출력 로직 (줄 꼬임 방지)"""
+        """정밀한 출력 로직 (Flet 문자열 조작 방식)"""
         msg = data.get("msg", "")
         replace = data.get("replace", False)
+        
+        # 현재 입력된 전체 텍스트를 가져옵니다.
+        current_value = self.log_text.value if self.log_text.value else ""
 
-        self.log_text.config(state=tk.NORMAL)
-        try:
-            if replace:
-                # 1. 마지막 줄 교체 (정확히 한 줄만 타격)
-                # end-1c는 마지막 자동 줄바꿈 직전 위치입니다.
-                last_line_idx = self.log_text.index("end-1c linestart")
-                self.log_text.delete(last_line_idx, "end-1c")
-                self.log_text.insert("end-1c", msg)
+        if replace:
+            # 1. 마지막 줄 교체 로직
+            # 줄 단위로 나눈 뒤 마지막 요소를 새 메시지로 바꿉니다.
+            lines = current_value.split("\n")
+            if lines:
+                lines[-1] = msg 
+                self.log_text.value = "\n".join(lines)
             else:
-                # 2. 새 줄 추가 (내용이 하나라도 있으면 무조건 줄바꿈)
-                # "1.0"에서 "end-1c"까지의 길이가 0보다 크면 내용이 있는 것임
-                current_content = self.log_text.get("1.0", "end-1c")
-                if len(current_content) > 0:
-                    self.log_text.insert(tk.END, f"\n{msg}")
-                else:
-                    self.log_text.insert(tk.END, msg)
-            
-            # 항상 최하단으로 스크롤
-            self.log_text.see(tk.END)
-        finally:
-            self.log_text.config(state=tk.DISABLED)
+                self.log_text.value = msg
+        else:
+            # 2. 새 줄 추가 로직
+            if current_value:
+                # 내용이 있으면 줄바꿈 후 추가
+                self.log_text.value = f"{current_value}\n{msg}"
+            else:
+                # 첫 내용이면 그냥 추가
+                self.log_text.value = msg
+        
+        # 항상 최하단으로 스크롤 (Flet의 scroll_to 활용)
+        # offset=-1은 가장 마지막 지점을 의미합니다.
+        self.log_text.scroll_to(offset=-1, duration=100)
