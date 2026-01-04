@@ -1,13 +1,15 @@
 ﻿import threading
 import yt_dlp
+import asyncio
 from logic.downloader import download_video_full
 
 class DownloadHandler:
-    def __init__(self, bridge, url_manager, path):
+    def __init__(self, bridge, url_manager, path, page):
         self.ui = bridge
         self.logic = url_manager
         self.path = path
-        self.is_running = False
+        self.is_running = False        
+        self.page = page
 
     def sync_queue_ui(self):
         """1번 코드의 3줄 로그 스타일로 UI 갱신"""
@@ -21,29 +23,35 @@ class DownloadHandler:
             lines.append("") # 항목 간 간격
             
         # UI 브릿지를 통해 화면 업데이트 요청
-        self.ui.ui_update_queue_display(lines)        
+        self.ui.ui_update_queue_display(lines) 
+        print("Aaa")
 
     def handle_add_url(self, url):
         """URL 추가 + 비동기 제목 가져오기"""
         new_item, msg = self.logic.add_url(url)
         self.ui.log(msg)
-        
+    
         if new_item:
             self.ui.ui_clear_download_url_input()
             self.sync_queue_ui()
-            # 별도 쓰레드에서 제목 가져오기 실행
-            threading.Thread(target=self._fetch_title_async, args=(new_item,), daemon=True).start()
+            # Flet의 비동기 태스크로 실행
+            self.page.run_task(self._fetch_title_async, new_item)
 
-    def _fetch_title_async(self, item):
+    async def _fetch_title_async(self, item):
         """yt-dlp로 제목만 가져와서 UI 갱신"""
         try:
             ydl_opts = {'quiet': True, 'extract_flat': True, 'no_warnings': True}
+        
+            # 핵심: yt-dlp의 동기 작업을 비동기 루프에서 '안전하게' 별도 쓰레드로 위임
             with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-                info = ydl.extract_info(item.url, download=False)
+                # ydl.extract_info는 동기 함수이므로 to_thread로 감싸야 UI가 안 멈춤
+                info = await asyncio.to_thread(ydl.extract_info, item.url, download=False)
                 item.title = info.get('title', item.url)
-            # 메인 스레드에서 UI 갱신
-            self.ui.root.after(0, self.sync_queue_ui)
-        except: pass
+            
+            self.sync_queue_ui()
+            self.page.update() 
+        except: 
+            print("bbb")
 
     def start_download(self):
         if self.is_running:
@@ -75,10 +83,8 @@ class DownloadHandler:
             else:
                 self.logic.mark_as_failed(item)
             
-            self.ui.root.after(0, self.sync_queue_ui)
-            # 폴더 목록 갱신 (2번 코드 기능)
-            if hasattr(self, 'refresh_folder_lists'):
-                self.ui.root.after(0, self.refresh_folder_lists)
+            self.sync_queue_ui()
+            self.refresh_folder_lists()
 
         self.is_running = False
         self.ui.log("모든 작업을 마쳤습니다.")

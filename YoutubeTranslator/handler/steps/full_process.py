@@ -20,7 +20,7 @@ class FullProcessStep:
     def execute(self):
         #큐에 있는 파일들을 순차적으로 실제 공정 실행
         # 1. 큐 확인
-        if not self.handler.queue_manager or not self.handler.queue_manager.queue:
+        if not self.handler.simple or not self.handler.simple.queue:
             messagebox.showwarning("경고", "큐에 처리할 파일이 없습니다.")
             return
 
@@ -39,13 +39,12 @@ class FullProcessStep:
         # 비동기 스레드에서 '큐 전체 순회 공정' 실행
         run_async_process(
             self.handler.app.root,
-            lambda: self._run_queue_full_sequence(api_key, rule, model_name),
-            self.handler.refresh_all_lists,
+            lambda: self._run_queue_full_sequence(api_key, rule, model_name),            
             self.handler.log
         )
     def execute_test(self):
         """[기존 유지] 큐에 있는 파일들을 순차적으로 순회 테스트"""
-        if not self.handler.queue_manager or not self.handler.queue_manager.queue:
+        if not self.handler.simple or not self.handler.simple.queue:
             from tkinter import messagebox
             messagebox.showwarning("경고", "큐에 처리할 파일이 없습니다.")
             return
@@ -56,11 +55,10 @@ class FullProcessStep:
         # 비동기 스레드에서 실행
         run_async_process(
             self.handler.app.root,
-            lambda: self.handler.queue_manager.run_test_loop(
+            lambda: self.handler.simple.run_test_loop(
                 self.handler.log, 
                 lambda: self.is_stopped
-            ),
-            self.handler.refresh_all_lists,
+            ),            
             self.handler.log
         )
 
@@ -90,8 +88,7 @@ class FullProcessStep:
 
             # --- 5단계: 최종 완료 ---
             self.handler.simple_tab.set_step_status(4, "done")
-            self.handler.log(f"🎉 모든 공정 완료!")
-            self.handler.app.root.after(0, self.handler.refresh_all_lists)
+            self.handler.log(f"🎉 모든 공정 완료!")            
 
         except Exception as e:
             self.handler.log(f"❌ 통합 공정 중 치명적 에러: {str(e)}")
@@ -99,7 +96,7 @@ class FullProcessStep:
             # 파일 목록
     def _run_queue_full_sequence(self, api_key, rule, model_name):
         """큐를 하나씩 돌며 _run_sequence를 호출하는 실질적인 루프"""
-        queue_mgr = self.handler.queue_manager
+        queue_mgr = self.handler.simple
         
         for i in range(len(queue_mgr.queue)):
             if self.is_stopped:

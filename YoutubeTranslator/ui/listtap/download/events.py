@@ -1,20 +1,16 @@
-﻿from app import paths  # 모듈 자체를 가져옵니다.
+﻿from app import paths
 from app.path_service import open_folder_in_explorer
 
-def connect_download_events(self):
-
-    """버튼 클릭 시 UI 데이터를 추출하여 핸들러로 보냅니다."""
-    h = self.handler
+def connect_download_events(self, handler):
+    """버튼과 키 입력을 핸들러의 로직 함수와 연결합니다."""
+    h = handler
     
-    # URL 추가 버튼: UI가 직접 Entry 값을 읽어서 '데이터(문자열)'만 핸들러에게 전달
-    self.add_url_btn.config(command=lambda: h.process_add_download_url(self.url_entry.get().strip()))
-    
-    # 엔터 키 바인딩
-    self.url_entry.bind("<Return>", lambda e: h.process_add_download_url(self.url_entry.get().strip()))
+    # URL 추가 (버튼 클릭 & 엔터 입력)
+    self.add_url_btn.on_click = lambda _: h.process_add_download_url(self.url_entry.value.strip())
+    self.url_entry.on_submit = lambda _: h.process_add_download_url(self.url_entry.value.strip())
 
-    # 다운로드 시작 버튼
-    self.download_btn.config(command=h.process_start_download)
+    # 다운로드 시작
+    self.download_btn.on_click = lambda _: h.process_start_download()
 
-    self.open_video_folder_btn.config(
-        command=lambda: open_folder_in_explorer(paths.video_dir)
-    )
+    # 폴더 열기
+    self.open_video_folder_btn.on_click = lambda _: open_folder_in_explorer(paths.video_dir)

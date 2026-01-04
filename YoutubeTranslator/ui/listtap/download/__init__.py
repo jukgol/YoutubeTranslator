@@ -1,20 +1,25 @@
 ﻿import flet as ft
 from .layout import setup_download_layout
-# from .events import connect_download_events  # 나중에 연결
-#from .bridge import register_download_bridge
+from .events import connect_download_events
+from .bridge import register_download_bridge
 
 class DownloadTab(ft.Column):
-    def __init__(self, handler):
-        super().__init__()
-        self.handler = handler
-        self.expand = True  # 탭 공간을 가득 채우도록 설정
+    def __init__(self):
+        super().__init__()        
+        self.expand = True
         
-        # 1. 화면 구성 (layout.py 호출)
+        # 1. 껍데기 생성 (Layout)
         setup_download_layout(self)
+
+    def setup_handler(self, h):
+        """
+        [리팩토링 통합] 흩어져 있던 브릿지와 이벤트를 이 곳에서 배선합니다.
+        이제 부모 컨테이너는 이 함수 하나만 호출하면 됩니다.
+        """
+        # A. 출력 배선 (Handler가 UI를 조종할 수 있게 함)
+        register_download_bridge(self, h)
         
-        # 2. 핸들러와 위젯 직접 연결 (참조 등록)
-        # 로직 연결은 나중에 하더라도, 핸들러가 위젯을 찾을 수 있게 브릿지는 미리 호출합니다.
-        #register_download_bridge(self)
+        # B. 입력 배선 (UI가 Handler를 호출할 수 있게 함)
+        connect_download_events(self, h)
         
-        # 3. 이벤트 바인딩 (나중에 진행)
-        # connect_download_events(self)
+        print("✅ DownloadTab: 입출력 브릿지 및 이벤트 배선 완료")

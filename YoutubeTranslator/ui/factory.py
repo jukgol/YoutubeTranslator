@@ -29,44 +29,88 @@ def create_button(text, color, icon=None, expand=True, height=50, on_click=None)
         style=ft.ButtonStyle(shape=ft.RoundedRectangleBorder(radius=5))
     )
 
+class SmartListPanel(ft.Container):
+    """
+    [통합형] 하얀 박스 디자인 + 리스트 추가 기능을 하나로 합친 위젯
+    """
+    def __init__(self, **kwargs):
+        # 내부에서 실제로 글자가 쌓일 리스트뷰
+        self.list_view = ft.ListView(
+            expand=True,
+            spacing=5,            
+        )
+        
+        # 부모인 Container(하얀 박스) 설정
+        super().__init__(
+            content=self.list_view,
+            bgcolor=ft.Colors.WHITE,              # 내부 흰색
+            border=ft.border.all(1, ft.Colors.OUTLINE_VARIANT), # 회색 테두리
+            border_radius=6,                      # 둥근 모서리
+            padding=5,
+            expand=True,
+            **kwargs
+        )
+
+    def add(self, text, color=ft.Colors.BLACK, size=12):
+        """내부 리스트뷰에 텍스트 추가"""
+        self.list_view.controls.append(
+            ft.Text(
+                value=str(text),
+                color=color,
+                size=size,
+                no_wrap=False,
+                selectable=True
+            )
+        )
+        self.list_view.update()
+
+    def set_list(self, items, color=ft.Colors.BLACK, size=12):
+        """기존 내용을 모두 지우고 새로운 리스트로 교체합니다. 업데이트는 마지막에 한 번만 수행합니다."""
+        # 1. 화면 갱신 없이 내부 리스트만 비움
+        self.list_view.controls.clear()
+        
+        # 2. 새로운 아이템들을 리스트에 추가
+        if items:
+            for text in items:
+                self.list_view.controls.append(
+                    ft.Text(
+                        value=str(text),
+                        color=color,
+                        size=size,
+                        no_wrap=False,
+                        selectable=True
+                    )
+                )
+        
+        # 3. 비우고 채우기가 끝난 시점에 딱 한 번만 화면 갱신
+        self.list_view.update()
+
+    def clear(self):
+        """내부 리스트뷰 비우기"""
+        self.list_view.controls.clear()
+        self.list_view.update()
+
+    def replace_last(self, text, color=ft.Colors.BLACK, size=12):
+        """마지막 줄의 내용만 변경합니다. (주로 진행률 표시 등에 사용)"""
+        if self.list_view.controls:
+            # 마지막 Text 위젯의 값만 변경
+            last_control = self.list_view.controls[-1]
+            last_control.value = str(text)
+            last_control.color = color
+            last_control.size = size
+            self.list_view.update()
+        else:
+            # 리스트가 비어있다면 새로 추가
+            self.add(text, color, size)
+
+# --- [Factory Function] ---
+
 def create_list_field():
     """
-    [완성형 디자인]
-    흰색 컨테이너(배경/테두리 담당) 안에 투명 텍스트 필드(입력 담당)를 넣는 구조
+    이제 하얀 박스 그 자체이면서 .add() 기능을 가진 
+    SmartListPanel 객체 하나만 리턴합니다.
     """
-    
-    # 1. 투명한 텍스트 필드 (기능 담당)
-    text_widget = ft.TextField(
-        multiline=True,
-        expand=True,
-        text_size=12,
-        content_padding=10, # 글자가 박스 벽에 너무 붙지 않게 여백
-        
-        # 완전 투명 설정
-        bgcolor=ft.Colors.TRANSPARENT,
-        focused_bgcolor=ft.Colors.TRANSPARENT,
-        border=ft.InputBorder.NONE,
-        focused_border_width=0,
-        filled=False,
-        
-        text_style=ft.TextStyle(font_family="Consolas"),
-        cursor_color=ft.Colors.BLACK,
-    )
-
-    # 2. 흰색 컨테이너 (디자인 담당)
-    # 이 녀석이 실제 우리 눈에 보이는 '하얀 리스트 박스'가 됩니다.
-    list_container = ft.Container(
-        content=text_widget,  # 투명 텍스트 필드를 안에 넣음
-        
-        expand=True,          # 공간 채우기
-        bgcolor=ft.Colors.WHITE, # 여기가 진짜 배경색 (변하지 않음)
-        
-        # 테두리 설정 (클릭해도 색 안 변함)
-        border=ft.border.all(1, ft.Colors.OUTLINE_VARIANT),
-        border_radius=ft.border_radius.all(6), # 모서리 둥글게
-    )
-
-    return list_container
+    return SmartListPanel()
 
 def create_section_container(content, expand=True):
     """회색 배경의 내용물 박스 생성"""

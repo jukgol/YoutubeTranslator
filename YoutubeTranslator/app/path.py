@@ -3,12 +3,12 @@
 class PathManager:
     def __init__(self):
         # --- [1. 폴더 경로 정의] ---
-        self.origin_dir = os.path.join(os.getcwd(), "Origin")       # 자막 다운로드 및 원본 자막 위치
-        self.split_dir = os.path.join(os.getcwd(), "split")
-        self.translate_dir = os.path.join(os.getcwd(), "translate")
-        self.combine_dir = os.path.join(os.getcwd(), "combine")
-        self.result_final_dir = os.path.join(os.getcwd(), "result")
-        self.video_dir = os.path.join(os.getcwd(), "video")         # 영상 파일(.mp4) 저장 위치
+        self.origin_dir = os.path.join(os.getcwd(), "data/origin")       # 자막 다운로드 및 원본 자막 위치
+        self.split_dir = os.path.join(os.getcwd(), "data/split")
+        self.translate_dir = os.path.join(os.getcwd(), "data/translate")
+        self.combine_dir = os.path.join(os.getcwd(), "data/combine")
+        self.result_final_dir = os.path.join(os.getcwd(), "data/result")
+        self.video_dir = os.path.join(os.getcwd(), "data/video")         # 영상 파일(.mp4) 저장 위치
         
         # --- [2. 파일 경로 정의] ---
         self.api_file = "api.txt"

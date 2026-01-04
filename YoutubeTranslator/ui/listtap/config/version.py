@@ -19,7 +19,7 @@ class VersionArea(ft.Row):
         
         # 2. 버튼 (ElevatedButton)
         self.check_btn = ft.ElevatedButton(
-            content=ft.Text("남은 요청 확인"),
+            text="남은 요청 확인",
             on_click=lambda e: check_cmd(),
             style=ft.ButtonStyle(
                 shape=ft.RoundedRectangleBorder(radius=5),

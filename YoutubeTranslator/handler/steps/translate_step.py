@@ -33,8 +33,7 @@ class TranslateStep:
             lambda: process_folder_queue(
                 resultfolder, api_key, rule, model_name, 
                 self.handler.log, self.handler.update_timer_log
-            ),
-            self.handler.refresh_all_lists,
+            ),            
             self.handler.log
         )
 
@@ -46,7 +45,6 @@ class TranslateStep:
         file_path = self.path_service.get_split_folder_path(filename)
         run_async_process(
             self.handler.app.root,
-            lambda: translate_test_logic(file_path, self.handler.log, self.handler.update_timer_log),
-            self.handler.refresh_all_lists,
+            lambda: translate_test_logic(file_path, self.handler.log, self.handler.update_timer_log),            
             self.handler.log
         )

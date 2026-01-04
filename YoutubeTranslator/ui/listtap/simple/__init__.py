@@ -1,33 +1,36 @@
 ﻿import flet as ft
 from .layout import setup_simple_layout
-# from .events import connect_simple_events # 나중에 연결
+from .events import connect_simple_events
 
 class SimpleTab(ft.Column):
-    def __init__(self, handler):
+    def __init__(self):
         super().__init__()
-        self.handler = handler
         self.expand = True
-        self.process_labels = [] # layout.py에서 생성된 라벨(Container)들이 담길 리스트
+        self.process_labels = [] # layout.py에서 생성된 라벨들이 담길 리스트
 
-        # 1. UI 그리기 (Flet 버전 layout.py 호출)
+        # 1. UI 그리기 (그릇 만들기)
+        # 이제 __init__에서는 레이아웃만 잡고, 배선(Handler)은 기다립니다.
         setup_simple_layout(self)
-        
-        # 2. 핸들러에 UI 제어 창구 등록
-        self._register_to_handler()
-        
-        # 3. 버튼 이벤트 연결 (나중에 진행)
-        # connect_simple_events(self)
 
-    def _register_to_handler(self):
-        """핸들러가 이 탭의 위젯을 조작할 수 있도록 함수 등록"""
-        h = self.handler
+    def setup_handler(self, h):
+        """
+        [리팩토링 핵심] 흩어져 있던 핸들러 관련 배선을 이 곳으로 모두 모았습니다.
+        중앙 register_handler 함수에 의해 호출됩니다.
+        """
+        # A. 핸들러에 UI 제어 창구 및 위젯 등록 (Logic <-> UI)
         h.ui_update_simple_status = self.set_step_status
         h.simple_origin_list = self.origin_list 
         h.simple_result_list = self.result_list
+        h.simple_queue_list = self.queue_list # 큐 리스트도 핸들러가 알아야 하므로 추가
+
+        # B. 버튼 이벤트 연결 (UI -> Logic)
+        # 외부 events.py의 기능을 여기서 호출하여 배선을 완료합니다.
+        connect_simple_events(self, h)
+        
+        print("✅ SimpleTab: 핸들러 및 이벤트 배선 완료")
 
     def set_step_status(self, index, status="active"):
         """로직 결과에 따라 UI 상태(라벨 색상)를 변경하는 인터페이스 메서드"""
-        # Flet 대응 색상 테이블
         colors = {
             "active": (ft.Colors.BLACK, ft.Colors.YELLOW_300), 
             "done": (ft.Colors.GREEN_700, ft.Colors.TRANSPARENT), 
@@ -37,33 +40,22 @@ class SimpleTab(ft.Column):
         
         if 0 <= index < len(self.process_labels):
             fg, bg = colors.get(status, (ft.Colors.BLACK, ft.Colors.TRANSPARENT))
-            
-            # Flet에서 배경색을 바꾸려면 해당 위젯이 ft.Container여야 합니다.
-            # layout.py에서 라벨을 Container로 감싸서 생성할 예정입니다.
             target_container = self.process_labels[index]
-            target_text = target_container.content # Container 안의 Text 위젯
+            target_text = target_container.content 
             
             target_container.bgcolor = bg
             target_text.color = fg
-            
             target_container.update()
 
+# 큐 렌더링 함수 (변경 없음)
 def render_queue_to_widget(widget, queue_items, current_index):    
-    if not widget:
-        return
-
-    # Flet TextField는 Tag(강조색) 기능이 Tkinter처럼 자유롭지 않습니다.
-    # 가장 쉬운 1:1 대응 방법은 강조 항목 앞에 "▶" 같은 표시를 붙이는 것입니다.
+    if not widget: return
     lines = []
     for i, filename in enumerate(queue_items):
-        if i == current_index:
-            lines.append(f"▶ {filename} (작업중)")
-        else:
-            lines.append(f"  {filename}")
+        prefix = "▶" if i == current_index else "  "
+        suffix = " (작업중)" if i == current_index else ""
+        lines.append(f"{prefix} {filename}{suffix}")
         lines.append("-" * 30)
     
     widget.value = "\n".join(lines)
     widget.update()
-    
-    # 최신 항목으로 스크롤 (Flet의 scroll_to)
-    # widget.scroll_to(offset=-1, duration=300) # 필요시 사용

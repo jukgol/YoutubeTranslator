@@ -19,8 +19,7 @@ class CombineStep:
             lambda: combine_parts_logic(
                 folder_name, self.handler.path.translate_dir, 
                 self.handler.path.combine_dir, self.handler.log
-            ),
-            self.handler.refresh_all_lists,
+            ),            
             self.handler.log
         )
 
@@ -43,7 +42,6 @@ class CombineStep:
             lambda: combine_timeline_logic(
                 combined_path, origin_path, 
                 self.handler.path.result_final_dir, self.handler.log
-            ),
-            self.handler.refresh_all_lists,
+            ),            
             self.handler.log
         )

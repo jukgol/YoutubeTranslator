@@ -15,12 +15,12 @@ class SubtitleSplitterApp:
         self.page.title = "Gemini 자막 매니저 v1.1"
     
         # 1. 창 크기 설정
-        self.page.window_width = 1400
-        self.page.window_height = 800
+        self.page.window.width = 1400
+        self.page.window.height = 1000
     
         # 2. 최소 크기 제한 (이보다 작아지지 않음)
-        self.page.window_min_width = 1200
-        self.page.window_min_height = 600
+        self.page.window.min_width = 1200
+        self.page.window.min_height = 600
     
         # 4. 여백 제거 (창 끝까지 사용)
         self.page.padding = 10 
@@ -37,6 +37,8 @@ class SubtitleSplitterApp:
         self.path = paths
         self.configdata = AppConfig()
 
+        self.setup_ui()
+
         # 5. 중앙 핸들러(UIHandlers) 생성
         self.handlers = UIHandlers(
             self, 
@@ -45,22 +47,24 @@ class SubtitleSplitterApp:
             self.log_executor.get_queue()
         )
         
-        # 6. UI 구성 (섹션 배치 및 위젯 생성)
-        self.setup_ui()
+        self._register_ui_to_handlers()
         
-        # 7. 로그 출력 엔진 시작
-        if hasattr(self, 'log_sec') and self.log_sec.printer:            
-            self.log_executor.start_executor(self.log_sec.printer)
+    # SubtitleSplitterApp 클래스 내부 (Step 7)
+        if hasattr(self, 'log_sec') and self.log_sec.printer:
+    # 내부에서 알아서 run_task를 하므로, 여기서는 그냥 실행만 명령합니다.
+            self.log_executor.start(self.log_sec.printer)
 
-        # 8. 초기 작업 실행
-        self.handlers.load_settings()      # 기존 설정 불러오기
-        self.handlers.refresh_all_lists()  # 파일 목록 새로고침
-        
-        # 9. 모든 변경 사항을 최종적으로 화면에 반영
-        self.page.update()
+        # 8. 초기 작업 실행        
+        self.handlers.init_settings()        
 
     def setup_ui(self):
         """외부 ui.py의 compose_ui 함수를 호출하여 화면을 조립합니다."""
         # 이 시점에 self.page.controls에 위젯들이 추가됩니다.
         from ui import compose_ui
         compose_ui(self)
+
+    def _register_ui_to_handlers(self):
+        """UI 객체들과 핸들러 로직을 최종적으로 연결하는 마스터 배선함"""
+        # ListTabContainer 내부의 모든 탭(Simple, Detail, Download, Config) 배선 가동
+        if hasattr(self, 'list_tabs'):
+            self.list_tabs.setup_handler(self.handlers)

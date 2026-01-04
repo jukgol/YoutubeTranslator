@@ -1,17 +1,17 @@
-﻿def connect_simple_events(self):
-    """버튼과 핸들러의 기능을 연결합니다 (데이터 중심 방식)"""
-    h = self.handler
+﻿def connect_simple_events(self, h):
+    """버튼과 핸들러의 기능을 Flet 방식으로 연결합니다."""   
     
-    self.add_to_queue_btn.config(command=lambda: h.process_add_to_queue(self)
-)
-
-    self.clear_queue_btn.config(command=lambda: h.process_clear_queue(self))
+    # .config 대신 .on_click 사용
+    # Flet 이벤트 객체(e)를 무시하기 위해 lambda _: 를 사용합니다.
+    self.add_to_queue_btn.on_click = lambda _: h.process_add_to_queue(self)
+    self.clear_queue_btn.on_click = lambda _: h.process_clear_queue(self)
     
-    # 3. 번역 시작 (필요 시 위젯의 상태를 인자로 넘김)
-    self.queue_start_btn.config(command=h.process_full_start)
+    # 3. 번역 시작
+    self.queue_start_btn.on_click = lambda _: h.process_full_start()
     
     # 4. 멈춤 버튼들
-    self.queue_stop_btn.config(command=h.process_full_stop)
-    self.status_stop_btn.config(command=h.process_full_stop)
+    self.queue_stop_btn.on_click = lambda _: h.process_full_stop()
+    self.status_stop_btn.on_click = lambda _: h.process_full_stop()
 
-    self.move_file_btn.config(command=lambda: h.process_copy_to_video(self))
+    # 5. 파일 이동
+    self.move_file_btn.on_click = lambda _: h.process_copy_to_video(self)

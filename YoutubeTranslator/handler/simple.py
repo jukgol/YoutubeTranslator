@@ -1,8 +1,9 @@
 ﻿import time
 import os
 from ui import selectors
+from app.path import paths
 
-class QueueManager:
+class Simple:
     def __init__(self):
         # 이제 초기화 시 위젯이 필요 없습니다. 핸들러보다 먼저 생성되어도 안전합니다.
         self.queue = []  
@@ -90,3 +91,33 @@ class QueueManager:
             # refresh_handler.refresh_all() 
         else:
             log_callback(f"❌ 복사 실패: {message}")
+
+
+    def update_file_list_widget(self, widget, folder_path):
+        """특정 폴더의 파일 목록을 읽어 SmartListPanel에 채웁니다."""
+        if not os.path.exists(folder_path):
+            return
+            
+        # 1. 폴더 내 파일 목록 가져오기
+        try:
+            files = [f for f in os.listdir(folder_path) if os.path.isfile(os.path.join(folder_path, f))]
+            files.sort() # 가나다순 정렬
+        except Exception as e:
+            print(f"폴더 읽기 오류: {e}")
+            return
+
+        # 2. SmartListPanel에 내장된 set_list 함수 사용
+        # widget(SmartListPanel)이 이미 가지고 있는 기능을 활용합니다.
+        widget.set_list(files)
+
+    def initialize_tab_lists(self, tab):
+        """앱 시작 시 또는 새로고침 시 모든 목록을 최신화합니다."""
+        self
+        # 1. 원본 리스트 (origin_dir -> origin_list)
+        self.update_file_list_widget(tab.origin_list, paths.origin_dir)
+        
+        # 2. 결과 리스트 (result_final_dir -> result_list)
+        self.update_file_list_widget(tab.result_list, paths.result_final_dir)
+        
+        # 3. 큐 리스트 (핸들러 내부 queue -> queue_list)
+        self.refresh_ui(tab.queue_list)

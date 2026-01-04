@@ -4,43 +4,40 @@ from .simple import SimpleTab
 from .download import DownloadTab
 from .config import ConfigSection
 
-# 1. ft.Column을 상속받아 진짜 UI 객체로 만듭니다.
 class ListTabContainer(ft.Column): 
-    def __init__(self, handler):
-        # 2. 부모 클래스(ft.Column)의 생성자를 가장 먼저 호출합니다. (필수)
+    def __init__(self):
         super().__init__() 
-        self.expand = True  # 화면 전체를 채우도록 설정
-        
-        self.handler = handler
+        self.expand = True         
 
-        # 탭 컨텐츠 생성
-        self.config_sec = ConfigSection(handler)
-        self.detail_tab = DetailTab(handler)
-        self.simple_tab = SimpleTab(handler)
-        self.download_tab = DownloadTab(handler)
+        # 1. 자식 탭 인스턴스 생성 (아직 배선은 되지 않은 상태)
+        self.download_tab = DownloadTab()
+        self.simple_tab = SimpleTab()
+        self.detail_tab = DetailTab()
+        self.config_sec = ConfigSection()
 
-        # 3. self.control이라는 변수 대신, self.controls 리스트에 UI 요소를 담습니다.
+        # 2. 레이아웃 배치
         self.controls = [
             ft.Tabs(
                 selected_index=0,
                 tabs=[
-                    ft.Tab(
-                        text=" 영상 다운로드 ",
-                        content=self.download_tab,                        
-                    ),
-                    ft.Tab(
-                        text=" 한번에 번역 ",
-                        content=self.simple_tab,                        
-                    ),
-                    ft.Tab(
-                        text=" 세분화 번역 ",
-                        content=self.detail_tab,                        
-                    ),
-                    ft.Tab(
-                        text=" 설정 번역 ",
-                        content=self.config_sec,                        
-                    ),
+                    ft.Tab(text=" 영상 다운로드 ", content=self.download_tab),
+                    ft.Tab(text=" 한번에 번역 ", content=self.simple_tab),
+                    ft.Tab(text=" 세분화 번역 ", content=self.detail_tab),
+                    ft.Tab(text=" 설정 ", content=self.config_sec), # 텍스트 정리
                 ],
                 expand=True,
             )
         ]
+
+    def setup_handler(self, h):
+        """
+        [최종 마스터 스위치]
+        이 함수 한 번의 호출로 모든 자식 탭의 배선(Wiring)을 일괄 가동합니다.
+        """
+        # 각 자식 탭들이 가진 표준화된 배선 함수를 순서대로 호출
+        self.download_tab.setup_handler(h)
+        self.simple_tab.setup_handler(h)
+        self.detail_tab.setup_handler(h)
+        self.config_sec.setup_handler(h)
+        
+        print("🚀 [Master] 모든 UI 탭과 핸들러 배선이 완료되었습니다.")

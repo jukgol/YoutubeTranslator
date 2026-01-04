@@ -1,5 +1,5 @@
 ﻿class SystemInterface:
-    def load_settings(self):
+    def load_config_settings(self):
         self.setting.load()
         self.setting.load_api_list()
 
@@ -18,6 +18,3 @@
     def process_check_usage(self):
         self.setting.check_api_usage()    
 
-    def refresh_all_lists(self):
-        pass
-        #self.refresh.refresh_all()

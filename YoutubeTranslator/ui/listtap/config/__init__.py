@@ -4,59 +4,63 @@ from .version import VersionArea
 from .rule import RuleArea
 
 class ConfigSection(ft.Column):
-    def __init__(self, handler):
+    def __init__(self):
         super().__init__()
-        self.handler = handler
-        self.spacing = 5  # 섹션 간 간격
+        self.spacing = 1
+        self.handler = None
+        # 1. 컴포넌트 생성 (그릇 만들기)
+        self.api_area = ApiArea(select_cmd=self._on_api_select, delete_cmd=self._on_api_add)
+        self.version_area = VersionArea(save_cmd=self._on_config_save, check_cmd=self._on_check_usage)
+        self.rule_area = RuleArea(save_cmd=self._on_config_save)
 
-        # 1. 컴포넌트 생성 (부모 인자 생략)
-        self.api_area = ApiArea(
-            select_cmd=self._on_api_select, 
-            delete_cmd=self._on_api_add
-        )
-        
-        self.version_area = VersionArea(
-            save_cmd=self._on_config_save, 
-            check_cmd=self._on_check_usage
-        )
-        
-        self.rule_area = RuleArea(
-            save_cmd=self._on_config_save
-        )
-
-        # 2. 위젯 참조 유지 (기존 핸들러 호환성)
+        # 2. 위젯 참조 유지
         self.api_combobox = self.api_area.api_combobox
         self.api_entry = self.api_area.api_entry
         self.ver_entry = self.version_area.ver_entry
         self.remaining_label = self.version_area.remaining_label
         self.rule_text = self.rule_area.rule_text
 
-        # 3. 레이아웃 조립 (LabelFrame 느낌 구현)
+        # 3. 레이아웃 조립
+        self._build_layout()
+
+    def _build_layout(self):
+        self.expand = True  # 섹션 전체가 창 크기에 맞춰 확장되도록 설정
+        
         self.controls = [
             ft.Text(" 설정 (자동 저장됨) ", weight=ft.FontWeight.BOLD, size=14),
             ft.Container(
                 content=ft.Column([
                     self.api_area,
-                    ft.Divider(height=1, color=ft.Colors.OUTLINE_VARIANT), # 구분선 추가
+                    ft.Divider(height=1, color=ft.Colors.OUTLINE_VARIANT),
                     self.version_area,
-                    self.rule_area,
-                ], spacing=10),
+                    self.rule_area, # 여기서 RuleArea가 남은 모든 공간을 다 쓰게 됨
+                ], 
+                spacing=10, 
+                expand=True # 컨테이너 내부 컬럼이 창 크기에 맞춰 늘어나도록 함
+                ),
                 border=ft.border.all(1, ft.Colors.OUTLINE),
                 border_radius=8,
                 padding=15,
+                expand=True, # 컨테이너도 부모 공간을 꽉 채움
             )
         ]
 
-        # 4. [핵심] 핸들러 등록 (기존 로직 1:1 유지)
-        self.handler.ui_set_api_list = self.set_api_list
-        self.handler.ui_set_config_data = self.set_config_data
-        self.handler.ui_update_usage_status = self.update_usage_status
-        self.handler.ui_clear_api_input = self.clear_api_input
+    def setup_handler(self, h):
+        """
+        [표준화] 다른 탭들과 형식을 맞추기 위해 핸들러 등록 로직을 이리로 모았습니다.
+        이제 중앙 제어 장치가 이 함수만 실행하면 배선이 끝납니다.
+        """
+        self.handler = h
 
-    # --- [데이터 추출 및 핸들러 호출부 (Push)] ---
+        h.ui_set_api_list = self.set_api_list
+        h.ui_set_config_data = self.set_config_data
+        h.ui_update_usage_status = self.update_usage_status
+        h.ui_clear_api_input = self.clear_api_input
+        
+        print("✅ ConfigSection: 핸들러 및 인터페이스 배선 완료")
 
+    # --- [사용자님이 작성하신 Push/Callback 로직은 그대로 유지] ---
     def _on_config_save(self, e=None):
-        """Flet TextField는 .value로 값을 가져옵니다."""
         version = self.ver_entry.value.strip() if self.ver_entry.value else ""
         rule = self.rule_text.value.strip() if self.rule_text.value else ""
         self.handler.setting.save(version, rule)
@@ -67,7 +71,6 @@ class ConfigSection(ft.Column):
         self.clear_api_input()
 
     def _on_api_select(self, e=None):
-        """Dropdown의 선택값은 .value에 저장됩니다."""
         selected = self.api_combobox.value
         self.handler.setting.handle_select(selected)
 
@@ -75,15 +78,12 @@ class ConfigSection(ft.Column):
         api_key = self.api_combobox.value.strip() if self.api_combobox.value else ""
         self.handler.setting.check_api_usage(api_key)
 
-    # --- [핸들러가 호출하는 인터페이스 (Callback)] ---
-
     def set_config_data(self, version, rule):
         self.ver_entry.value = version
         self.rule_text.value = rule
-        self.update() # Flet은 값 변경 후 update() 필수
+        self.update()
 
     def set_api_list(self, keys):
-        # Dropdown 옵션 갱신
         self.api_combobox.options = [ft.dropdown.Option(k) for k in (keys if keys else ["없음"])]
         self.api_combobox.value = keys[0] if keys else "없음"
         self.update()
@@ -93,11 +93,7 @@ class ConfigSection(ft.Column):
         self.update()
 
     def update_usage_status(self, text, status_type="normal"):
-        colors = {
-            "normal": ft.Colors.BLUE, 
-            "error": ft.Colors.RED, 
-            "success": ft.Colors.GREEN_700
-        }
+        colors = {"normal": ft.Colors.BLUE, "error": ft.Colors.RED, "success": ft.Colors.GREEN_700}
         self.remaining_label.value = text
         self.remaining_label.color = colors.get(status_type, ft.Colors.BLACK)
         self.update()

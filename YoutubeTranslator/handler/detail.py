@@ -1,10 +1,10 @@
-﻿# handler/process.py
+﻿# handler/detail.py
 from app.path_service import SubtitlePathService
 from .steps.split_step import SplitStep
 from .steps.translate_step import TranslateStep
 from .steps.combine_step import CombineStep
 
-class ProcessHandler:
+class Detail:
     def __init__(self, handler):
         self.handler = handler
         self.path_service = SubtitlePathService(handler.path)

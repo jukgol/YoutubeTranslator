@@ -21,7 +21,6 @@ class SplitStep:
         
         run_async_process(
             self.handler.app.root,
-            lambda: split_subtitle_logic(file_path, self.handler.path.origin_dir, self.handler.log),
-            self.handler.refresh_all_lists,
+            lambda: split_subtitle_logic(file_path, self.handler.path.origin_dir, self.handler.log),            
             self.handler.log
         )
