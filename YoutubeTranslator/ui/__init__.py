@@ -6,15 +6,10 @@ from .listtap import ListTabContainer
 def compose_ui(app):    
     page = app.page        
 
-    # 2. 리스트 섹션 (탭 컨테이너)
-    app.list_tabs = ListTabContainer()
-    
     # 중간 탭 영역이 화면의 남은 세로 공간을 모두 차지하도록 expand=True 설정
     app.list_tabs.expand = True
-    app.list_sec = app.list_tabs.detail_tab # 기존 핸들러 호환성 유지
-
-    # 3. 로그 섹션
-    app.log_sec = LogSection()
+    app.list_sec = app.list_tabs.detail_tab # 기존 핸들러 호환성 유지    # 3. 로그 섹션
+    
 
     # 4. 전체 레이아웃 조립 (Vertical Column)
     # Tkinter의 pack(side=TOP)과 유사하게 위에서부터 순서대로 배치합니다.

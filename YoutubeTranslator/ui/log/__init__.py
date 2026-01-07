@@ -2,6 +2,7 @@
 
 from .print_text import PrintText
 from .panel import LogPanel
+from .bridge import register_log_bridge
 
 class LogSection(ft.Column):
     def __init__(self):
@@ -51,3 +52,6 @@ class LogSection(ft.Column):
                 padding=10,
             )
         ]
+
+    def setup_handler(self, h):
+        register_log_bridge(self, h)

@@ -7,6 +7,7 @@ class DetailTab(ft.Column):
         super().__init__()        
         self.expand = True
         
+        self.on_active = None
         # 1. UI 외형 구축 (가구 배치)
         # 껍데기만 먼저 만듭니다.
         setup_detail_layout(self)

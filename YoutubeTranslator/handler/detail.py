@@ -9,6 +9,7 @@ class Detail:
     def __init__(self, handler):
         self.handler = handler
         self.path_service = SubtitlePathService(handler.path)
+        self.tab = None
         
         # 담당자들을 각각 생성하여 할당
         self.split_step = SplitStep(handler, self.path_service)
@@ -48,22 +49,59 @@ class Detail:
         # widget(SmartListPanel)이 이미 가지고 있는 기능을 활용합니다.
         widget.set_list(files)
 
+    def update_folder_list_widget(self, widget, folder_path):
+        """특정 폴더 내의 '하위 폴더' 목록만 읽어 SmartListPanel에 채웁니다."""
+        if not os.path.exists(folder_path):
+            return
+            
+        try:
+            # os.path.isdir을 사용하여 폴더(디렉토리)만 골라냅니다.
+            folders = [f for f in os.listdir(folder_path) if os.path.isdir(os.path.join(folder_path, f))]
+            folders.sort()
+            widget.set_list_folder(folders, folder_path)
+        except Exception as e:
+            print(f"폴더 읽기 오류 (Folders): {e}")
+
     def initialize_tab_lists(self, tab):
-        """앱 시작 시 Detail 탭의 5단계 리스트를 각각의 폴더와 연결하여 초기화합니다."""
-        # UIHandlers로부터 전달받은 path 객체 사용
-        paths = self.handler.path
+        """앱 시작 시 UI 객체를 등록하고 모든 리스트를 한 번 최신화합니다."""
+        self.tab = tab 
         
-        # 1. 원본 리스트 (data/origin)
-        self.update_file_list_widget(tab.origin_list, paths.origin_dir)
-        
-        # 2. 스플릿 리스트 (data/split)
-        self.update_file_list_widget(tab.split_list, paths.split_dir)
-        
-        # 3. 번역 리스트 (data/translate)
-        self.update_file_list_widget(tab.translated_list, paths.translate_dir)
-        
-        # 4. 합치기 리스트 (data/combine)
-        self.update_file_list_widget(tab.combine_list, paths.combine_dir)
-        
-        # 5. 결과 리스트 (data/result)
-        self.update_file_list_widget(tab.result_list, paths.result_final_dir)
+        # 초기화 시 5개 리스트를 모두 갱신
+        self.refresh_origin()
+        self.refresh_split()
+        self.refresh_translate()
+        self.refresh_combine()
+        self.refresh_result()
+
+    def refresh_all(self):
+        self.refresh_origin()
+        self.refresh_split()
+        self.refresh_translate()
+        self.refresh_combine()
+        self.refresh_result()
+    # --- 5단계 리스트별 전용 호출 함수 (파라미터 없음) ---
+
+    def refresh_origin(self):
+        """1단계: 파일 표시"""
+        if self.tab:
+            self.update_file_list_widget(self.tab.origin_list, self.handler.path.origin_dir)
+
+    def refresh_split(self):
+        """2단계: 폴더 표시 (수정됨)"""
+        if self.tab:
+            self.update_folder_list_widget(self.tab.split_list, self.handler.path.split_dir)
+
+    def refresh_translate(self):
+        """3단계: 폴더 표시 (수정됨)"""
+        if self.tab:
+            self.update_folder_list_widget(self.tab.translated_list, self.handler.path.translate_dir)
+
+    def refresh_combine(self):
+        """4단계: 파일 표시"""
+        if self.tab:
+            self.update_file_list_widget(self.tab.combine_list, self.handler.path.combine_dir)
+
+    def refresh_result(self):
+        """5단계: 파일 표시"""
+        if self.tab:
+            self.update_file_list_widget(self.tab.result_list, self.handler.path.result_final_dir)

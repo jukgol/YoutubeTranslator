@@ -26,6 +26,7 @@ class ListTabContainer(ft.Column):
                     ft.Tab(text=" 설정 ", content=self.config_sec), # 텍스트 정리
                 ],
                 expand=True,
+                on_change=self.on_tab_change
             )
         ]
 
@@ -41,3 +42,16 @@ class ListTabContainer(ft.Column):
         self.config_sec.setup_handler(h)
         
         print("🚀 [Master] 모든 UI 탭과 핸들러 배선이 완료되었습니다.")
+
+    def on_tab_change(self, e):
+        """
+        [중앙 제어소] 
+        탭이 클릭되면 Flet이 이 함수를 호출합니다.
+        여기서 현재 선택된 탭의 클래스를 찾아 'on_active'를 대신 실행해줍니다.
+        """
+        # 1. 현재 선택된 탭의 content(클래스 인스턴스)를 가져옵니다.
+        current_tab = e.control.tabs[e.control.selected_index].content
+        
+        # 2. 해당 클래스에 'on_active'라는 함수가 정의되어 있는지 확인 후 실행합니다.
+        if hasattr(current_tab, "on_active"):
+            current_tab.on_active(e)

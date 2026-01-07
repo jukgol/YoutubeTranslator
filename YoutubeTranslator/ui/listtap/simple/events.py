@@ -15,3 +15,5 @@
 
     # 5. 파일 이동
     self.move_file_btn.on_click = lambda _: h.process_copy_to_video(self)
+
+    self.on_active = lambda _: h.simple.refresh_all()

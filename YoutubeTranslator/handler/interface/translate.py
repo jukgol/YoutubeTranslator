@@ -36,6 +36,6 @@
         self.simple.handle_copy_file(
             tab, 
             self.path,
-            self.refresh, 
+            self.simple.refresh_all, 
             self.log
         )

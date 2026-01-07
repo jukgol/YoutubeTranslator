@@ -54,7 +54,13 @@ class UIHandlers(LogInterface, SystemInterface, TranslateInterface, DownloadInte
             # Simple 탭의 파일 목록(원본/결과) 및 큐 리스트 초기화
             self.simple.initialize_tab_lists(self.app.list_tabs.simple_tab)
             self.detail.initialize_tab_lists(self.app.list_tabs.detail_tab)            
-            self.download.refresh_folder_lists()
-            
+            self.download.refresh_folder_lists()            
+        
         self.log("✅ 모든 탭의 데이터 초기화가 완료되었습니다.")
         
+
+    def refresh_all(self):
+        self.download.refresh_folder_lists()
+        self.simple.refresh_all()
+        self.detail.refresh_all()
+        self.log("🔄 모든 목록을 초기화했습니다.")

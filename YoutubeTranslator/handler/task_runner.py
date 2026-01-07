@@ -1,16 +1,24 @@
 ﻿# handler/task_runner.py
 
-def run_async_process(app_root, logic_func, refresh_callback, log_callback):
-    def wrapper():
-        try:
-            logic_func()
-            # 성공 시 콜백 실행
-            app_root.after(0, refresh_callback)
+def run_async_process(handler, updateUI, logic_func,  *args):    
+    """
+    logic_func: 실행할 비동기 로직 (함수 이름)
+    on_complete: 로직 종료 후 실행할 콜백 함수 (UI 업데이트 등)
+    *args: logic_func에 전달할 인자들
+    """
+    async def internal_wrapper():
+        try:            
+            # 1. 순수 로직 실행 (전달받은 인자들을 여기서 풂)
+            await logic_func(*args)
+            
+            # 2. 로직이 에러 없이 종료되면 콜백 실행
+            if updateUI:                
+                updateUI()                
+                
         except Exception as e:
-            # [수정 포인트] e의 내용을 즉시 문자열(error_msg)로 복사해둡니다.
+            # 로직 실행 중 에러 발생 시 로그 출력
             error_msg = str(e)
-            # 이제 lambda는 사라진 'e' 대신 안전하게 저장된 'error_msg'를 사용합니다.
-            app_root.after(0, lambda: log_callback(f"❌ 작업 중 치명적 오류: {error_msg}"))
+            handler.log(f"❌ 작업 중 치명적 오류: {error_msg}")
 
-    import threading
-    threading.Thread(target=wrapper, daemon=True).start()
+    # Flet의 비동기 태스크로 래퍼를 실행
+    handler.page.run_task(internal_wrapper)    

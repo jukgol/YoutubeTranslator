@@ -1,7 +1,7 @@
 ﻿import os
 import re
 
-def combine_parts_logic(folder_name, translate_dir, combine_dir, log_callback):
+async def combine_parts_logic(folder_name, translate_dir, combine_dir, log_callback):
     try:
         source_folder = os.path.join(translate_dir, folder_name)
         if not os.path.exists(source_folder):

@@ -53,3 +53,4 @@ class LogHandler:
                 "msg": f"{timestamp}{message}", 
                 "replace": False
             })
+    

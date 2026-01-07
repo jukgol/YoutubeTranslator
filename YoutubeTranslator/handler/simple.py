@@ -9,6 +9,7 @@ class Simple:
         # 이제 초기화 시 위젯이 필요 없습니다. 핸들러보다 먼저 생성되어도 안전합니다.
         self.queue = []  
         self.current_index = -1 
+        self.tab = None
 
     def refresh_ui(self, widget):
         """데이터를 들고 UI 렌더링 함수를 호출만 합니다."""        
@@ -69,7 +70,7 @@ class Simple:
         4번 결과 리스트에서 선택된 파일을 Video 폴더로 실제로 복사합니다.
         """ 
         # 1. 파일명 추출
-        filename = selectors.get_pure_filename(tab.result_list)
+        filename = tab.result_list.get_selected()
     
         if not filename:
             log_callback("⚠️ 복사할 파일을 결과 리스트에서 선택해주세요.")
@@ -111,13 +112,33 @@ class Simple:
         widget.set_list(files)
 
     def initialize_tab_lists(self, tab):
-        """앱 시작 시 또는 새로고침 시 모든 목록을 최신화합니다."""
-        self
-        # 1. 원본 리스트 (origin_dir -> origin_list)
-        self.update_file_list_widget(tab.origin_list, paths.origin_dir)
+        """앱 시작 시 UI 객체를 등록하고 3개의 리스트를 최신화합니다."""
+        self.tab = tab       
         
-        # 2. 결과 리스트 (result_final_dir -> result_list)
-        self.update_file_list_widget(tab.result_list, paths.result_final_dir)
-        
-        # 3. 큐 리스트 (핸들러 내부 queue -> queue_list)
-        self.refresh_ui(tab.queue_list)
+        # 초기화 시 3개 리스트 갱신
+        self.refresh_origin()
+        self.refresh_result()
+        self.refresh_queue()
+
+    def refresh_all(self):
+        self.refresh_origin()
+        self.refresh_result()
+        self.refresh_queue()
+
+    # --- 3개 리스트별 전용 호출 함수 (파라미터 없음) ---
+
+    def refresh_origin(self):
+        """1. 원본 리스트 갱신 (origin_dir -> origin_list)"""
+        if self.tab:
+            self.update_file_list_widget(self.tab.origin_list, paths.origin_dir)
+
+    def refresh_result(self):
+        """2. 결과 리스트 갱신 (result_final_dir -> result_list)"""
+        if self.tab:
+            self.update_file_list_widget(self.tab.result_list, paths.result_final_dir)
+
+    def refresh_queue(self):
+        """3. 큐 리스트 갱신 (handler 내부 queue -> queue_list)"""
+        if self.tab:
+            # 큐는 폴더가 아니므로 기존에 만드신 refresh_ui를 활용합니다.
+            self.refresh_ui(self.tab.queue_list)

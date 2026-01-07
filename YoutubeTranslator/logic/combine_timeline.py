@@ -1,5 +1,6 @@
 ﻿import os
 import re
+import asyncio
 
 # [추가] 인덱스(숫자) 누락 확인 함수
 def check_missing_indices(file_path, label, log_callback):
@@ -26,7 +27,7 @@ def check_missing_indices(file_path, label, log_callback):
     except:
         return False
 
-def combine_timeline_logic(combined_text_path, origin_srt_path, result_dir, log_callback):
+async def combine_timeline_logic(combined_text_path, origin_srt_path, result_dir, log_callback):
     try:
         # --- [추가 부분: 작업 시작 전 인덱스 전수 검사] ---
         # 원본과 번역본 둘 다 숫자가 순서대로 있는지 확인합니다.
@@ -68,7 +69,7 @@ def combine_timeline_logic(combined_text_path, origin_srt_path, result_dir, log_
             
             translated_lines.append(clean_text)
 
-       
+        await asyncio.sleep(0.1) 
 
         # ------------------------------
         # 3. 상세 비교 로그 출력

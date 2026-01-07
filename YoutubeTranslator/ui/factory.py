@@ -1,4 +1,5 @@
-﻿import flet as ft
+﻿import os
+import flet as ft
 
 # --- [1. Style Constants: 디자인 통합 제어 변수] ---
 SECTION_BG_COLOR = ft.Colors.BLACK
@@ -114,13 +115,72 @@ class SmartListPanel(ft.Container):
         """현재 선택된 객체(data)를 리턴합니다."""
         return self.selected_item
     def on_delete_click(e):
-        selected_obj = video_panel.get_selected()
-        if selected_obj:
-            print(f"선택된 객체 삭제: {selected_obj.title}")
-        else:
-            print("선택된 항목이 없습니다.")
-# --- [Factory Function] ---
+        #selected_obj = video_panel.get_selected()
+        #if selected_obj:
+        #   print(f"선택된 객체 삭제: {selected_obj.title}")
+        #else:
+        #    print("선택된 항목이 없습니다.")
+        pass
 
+    def set_list_folder(self, folders, directory):
+        """폴더와 파일 목록을 하나의 문자열로 합쳐서 '단 하나의 개체'로 생성합니다."""
+        self.list_view.controls.clear()
+    
+        if not folders:
+            self.list_view.update()
+            return
+
+        for folder in folders:
+            # 1. 이 폴더 묶음을 대표할 전체 텍스트 조립 시작
+            display_text = f"📁 {folder}"
+            full_folder_path = os.path.join(directory, folder)
+        
+            if os.path.exists(full_folder_path):
+                files = sorted([f for f in os.listdir(full_folder_path) if f.lower().endswith('.txt')])
+            
+                for f in files:
+                    # 파일명 슬라이싱
+                    if "_Part" in f:
+                        display_part = f[f.find("Part"):]
+                        line = f"   └─ {display_part}"
+                    else:
+                        line = f"   └─ {f}"
+                
+                    # 2. 줄바꿈(\n)을 넣어 하나의 긴 텍스트로 만듦
+                    display_text += f"\n{line}"
+        
+            # 3. [핵심] 폴더와 파일 목록이 합쳐진 이 '거대 텍스트'로 개체 생성
+            # 이렇게 하면 파일 부분을 눌러도 결국 'folder' 데이터가 반환됩니다.
+            self._add_tree_item(display_text, folder, is_child=False)
+        
+            # 각 폴더(개체) 사이의 구분선
+            self.list_view.controls.append(ft.Divider(height=1, color=ft.Colors.OUTLINE_VARIANT))
+
+        self.list_view.update()
+
+    def _add_tree_item(self, text, folder_name, is_child=False):
+        """트리 항목을 생성하여 추가합니다. 클릭 시 데이터는 항상 '부모 폴더명'을 가집니다."""
+        # 자식 파일인 경우 글자색을 약간 연하게, 크기를 작게 설정하여 계층감 표현
+        text_color = ft.Colors.BLACK54 if is_child else ft.Colors.BLACK
+        text_size = 11 if is_child else 12
+
+        if self.selectable:
+            # 선택 모드일 때는 클릭 가능한 ListTile로 생성
+            new_control = ft.ListTile(
+                title=ft.Text(value=text, color=text_color, size=text_size),
+                data=folder_name,  # [핵심] 자식을 눌러도 부모 폴더명이 반환됨
+                on_click=self._handle_click,
+                bgcolor=ft.Colors.TRANSPARENT,
+                selected_tile_color=ft.Colors.BLUE_50,
+                visual_density=ft.VisualDensity.COMPACT,
+            )
+        else:
+            # 로그 모드일 때는 단순 Text
+            new_control = ft.Text(value=text, color=text_color, size=text_size, selectable=True)
+
+        self.list_view.controls.append(new_control)
+
+# --- [Factory Function] ---
 def create_list_field(selectable = False):
     """
     이제 하얀 박스 그 자체이면서 .add() 기능을 가진 
@@ -195,3 +255,5 @@ def add_input_section(title, input_widget, content_widget, buttons):
     btn_row = ft.Row(buttons, spacing=BTN_SPACING)
 
     return _assemble_section(title_label, section_box, btn_row)
+
+

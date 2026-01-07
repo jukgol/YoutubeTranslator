@@ -1,5 +1,6 @@
 ﻿import re
 import os
+import asyncio
 
 def get_line_count_split_groups(detected_eps, ep_map, has_start=False):
     all_units = []
@@ -31,7 +32,7 @@ def get_line_count_split_groups(detected_eps, ep_map, has_start=False):
 
     return groups
 
-def split_subtitle_logic(file_path, origin_dir, log_callback):
+async def split_subtitle_logic(file_path, origin_dir, log_callback):
     """에피소드/라인 수 기준 분할 및 타임라인 제거 저장"""
     
     with open(file_path, 'r', encoding='utf-8') as f:

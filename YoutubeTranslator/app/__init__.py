@@ -6,6 +6,8 @@ from .path import paths
 from .config import AppConfig
 from handler import UIHandlers
 from .logexcutor import LogExecutor
+from ui.listtap import ListTabContainer
+from ui.log import LogSection
 
 class SubtitleSplitterApp:
     def __init__(self, page: ft.Page):
@@ -61,6 +63,8 @@ class SubtitleSplitterApp:
         """외부 ui.py의 compose_ui 함수를 호출하여 화면을 조립합니다."""
         # 이 시점에 self.page.controls에 위젯들이 추가됩니다.
         from ui import compose_ui
+        self.list_tabs = ListTabContainer()
+        self.log_sec = LogSection()
         compose_ui(self)
 
     def _register_ui_to_handlers(self):
@@ -68,3 +72,5 @@ class SubtitleSplitterApp:
         # ListTabContainer 내부의 모든 탭(Simple, Detail, Download, Config) 배선 가동
         if hasattr(self, 'list_tabs'):
             self.list_tabs.setup_handler(self.handlers)
+
+        self.log_sec.setup_handler(self.handlers)

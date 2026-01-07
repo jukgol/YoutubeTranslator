@@ -8,4 +8,4 @@ from .translate import translate_test_logic
 from .combine import combine_parts_logic
 from .combine_timeline import combine_timeline_logic
 
-from .queue_translate import process_folder_queue
+from handler.steps.translate_queue import process_folder_queue

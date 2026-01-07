@@ -22,4 +22,5 @@ def connect_detail_events(self, handler):
     # 5. 결과 확인 및 마무리
     self.btn_final.on_click = lambda _: h.detail.handle_final_check()
 
+    self.on_active = lambda _: h.detail.refresh_all()
     print("⚡ DetailTab: 5단계 공정 이벤트 배선 완료")

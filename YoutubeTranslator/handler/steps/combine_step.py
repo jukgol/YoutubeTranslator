@@ -11,15 +11,18 @@ class CombineStep:
 
     def execute_parts(self):
         """3. 번역 파트 합치기"""
-        folder_name = selectors.get_folder_context(self.handler.translated_listbox)
-        if not folder_name: return
+        folder_name = self.handler.translated_listbox.get_selected()
+        if not folder_name: 
+            self.handler.log(f"합치기 {folder_name}가 없습니다.")
+            return
 
         run_async_process(
-            self.handler.app.root,
-            lambda: combine_parts_logic(
-                folder_name, self.handler.path.translate_dir, 
-                self.handler.path.combine_dir, self.handler.log
-            ),            
+            self.handler,
+            self.handler.detail.refresh_combine,
+            combine_parts_logic,
+            folder_name, 
+            self.handler.path.translate_dir,
+            self.handler.path.combine_dir, 
             self.handler.log
         )
 
@@ -38,10 +41,10 @@ class CombineStep:
             return
 
         run_async_process(
-            self.handler.app.root,
-            lambda: combine_timeline_logic(
-                combined_path, origin_path, 
-                self.handler.path.result_final_dir, self.handler.log
-            ),            
+            self.handler,
+            self.handler.detail.refresh_result,
+            combine_timeline_logic,
+            combined_path, origin_path, 
+            self.handler.path.result_final_dir, 
             self.handler.log
         )

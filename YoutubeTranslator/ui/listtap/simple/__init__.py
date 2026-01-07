@@ -11,6 +11,7 @@ class SimpleTab(ft.Column):
         # 1. UI 그리기 (그릇 만들기)
         # 이제 __init__에서는 레이아웃만 잡고, 배선(Handler)은 기다립니다.
         setup_simple_layout(self)
+        self.on_active = None
 
     def setup_handler(self, h):
         """

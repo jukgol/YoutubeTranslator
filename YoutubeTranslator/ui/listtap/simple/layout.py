@@ -37,7 +37,7 @@ def setup_simple_layout(self):
     self.status_frame = f.add_section(" 3. 진행 상태 ", status_content, [self.status_stop_btn])
 
     # 4. 최종 결과
-    self.result_list = f.create_list_field()
+    self.result_list = f.create_list_field(True)
     self.move_file_btn = f.create_button("파일 복사", ft.Colors.PURPLE_700)
     
     self.result_frame = f.add_section(

@@ -1,6 +1,7 @@
 ﻿import os
 import time
-from .translate import translate_subtitle_logic
+import asyncio
+from logic.translate import translate_subtitle_logic
 
 # --- [추가] 폴더 내 모든 파일을 삭제하는 함수 ---
 def clear_folder_contents(folder_path):
@@ -12,7 +13,7 @@ def clear_folder_contents(folder_path):
     else:
         os.makedirs(folder_path)
 
-def process_folder_queue(folder_path, api_key, rule, model_name, log_callback, update_timer_callback):
+async def process_folder_queue(folder_path, api_key, rule, model_name, log_callback, update_timer_callback):
     """
     폴더 내의 txt 파일들을 하나씩 번역하고, 
     각 파일 완료 시마다 60초 대기 시간을 갖는 큐 관리 함수
@@ -47,7 +48,7 @@ def process_folder_queue(folder_path, api_key, rule, model_name, log_callback, u
             log_callback(f"📄 [{index + 1}/{total_files}] 번역 시작: {filename}")
             
             # [기존 함수 실행] 
-            success = translate_subtitle_logic(
+            success = await translate_subtitle_logic(
                 file_path, 
                 api_key, 
                 rule, 
@@ -66,7 +67,7 @@ def process_folder_queue(folder_path, api_key, rule, model_name, log_callback, u
                 # 60초 카운트다운 루프
                 for i in range(60, 0, -1):
                     update_timer_callback(f"⏳ 다음 파일 대기 중... ({i}초 남음)")
-                    time.sleep(1)
+                    await asyncio.sleep(1)
                 
                 update_timer_callback("✅ 대기 종료. 다음 파일로 이동합니다.")
             else:

@@ -7,7 +7,7 @@ class DownloadTab(ft.Column):
     def __init__(self):
         super().__init__()        
         self.expand = True
-        
+        self.on_active = None
         # 1. 껍데기 생성 (Layout)
         setup_download_layout(self)
 
@@ -23,3 +23,4 @@ class DownloadTab(ft.Column):
         connect_download_events(self, h)
         
         print("✅ DownloadTab: 입출력 브릿지 및 이벤트 배선 완료")
+  
