@@ -66,9 +66,14 @@ class SmartListPanel(ft.Container):
                 data=text,
                 on_click=self._handle_click,
                 bgcolor=ft.colors.TRANSPARENT,
-                selected_tile_color=ft.colors.BLUE_200,
                 visual_density=ft.ThemeVisualDensity.COMPACT,
             )
+            # Backwards compatibility: some flet versions do not accept
+            # 'selected_tile_color' in constructor. Try to set attribute if possible.
+            try:
+                setattr(new_control, 'selected_tile_color', ft.colors.BLUE_200)
+            except Exception:
+                pass
         else:
             # 로그 모드일 때는 기존처럼 단순 Text
             new_control = ft.Text(value=str(text), color=color, size=size, selectable=True)
@@ -177,9 +182,14 @@ class SmartListPanel(ft.Container):
                 data=folder_name,  # [핵심] 자식을 눌러도 부모 폴더명이 반환됨
                 on_click=self._handle_click,
                 bgcolor=ft.colors.TRANSPARENT,
-                selected_tile_color=ft.colors.BLUE_50,
                 visual_density=ft.ThemeVisualDensity.COMPACT,
             )
+            # Backwards compatibility: some flet versions do not accept
+            # 'selected_tile_color' in constructor. Try to set attribute if possible.
+            try:
+                setattr(new_control, 'selected_tile_color', ft.colors.BLUE_50)
+            except Exception:
+                pass
         else:
             # 로그 모드일 때는 단순 Text
             new_control = ft.Text(value=text, color=text_color, size=text_size, selectable=True)
