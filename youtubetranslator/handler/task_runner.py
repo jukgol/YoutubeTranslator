@@ -7,14 +7,18 @@ def run_async_process(handler, updateUI, logic_func,  *args):
     *args: logic_func에 전달할 인자들
     """
     async def internal_wrapper():
-        try:            
+        try:
             # 1. 순수 로직 실행 (전달받은 인자들을 여기서 풂)
             await logic_func(*args)
-            
+
             # 2. 로직이 에러 없이 종료되면 콜백 실행
-            if updateUI:                
-                updateUI()                
-                
+            if updateUI:
+                updateUI()
+
+        except asyncio.CancelledError:
+            # 태스크가 외부에서 취소되면 조용히 종료
+            handler.log("⚠️ 작업이 취소되었습니다.")
+            return
         except Exception as e:
             # 로직 실행 중 에러 발생 시 로그 출력
             error_msg = str(e)

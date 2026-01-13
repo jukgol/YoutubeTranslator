@@ -27,24 +27,29 @@ class LogExecutor:
         """
         [Async Method] 실제 백그라운드에서 돌아가는 무한 루프
         """
-        while self.running:
-            updated = False
-            
-            # 1. 큐에 쌓인 데이터 일괄 처리 (Batch)
-            while not self.log_queue.empty():
-                try:
-                    data = self.log_queue.get_nowait()
-                    if self.printer:
-                        self.printer.render(data) # 리스트에 추가 (update X)
-                        updated = True
-                    self.log_queue.task_done()
-                except queue.Empty:
-                    break
+        try:
+            while self.running:
+                updated = False
+                
+                # 1. 큐에 쌓인 데이터 일괄 처리 (Batch)
+                while not self.log_queue.empty():
+                    try:
+                        data = self.log_queue.get_nowait()
+                        if self.printer:
+                            self.printer.render(data) # 리스트에 추가 (update X)
+                            updated = True
+                        self.log_queue.task_done()
+                    except queue.Empty:
+                        break
 
-            # 2. 변경사항이 있으면 딱 한 번만 비동기 업데이트
-            if updated and self.printer:
-                # LogPanel의 비동기 업데이트 메서드 호출
-                self.printer.log_text.perform_update()
+                # 2. 변경사항이 있으면 딱 한 번만 비동기 업데이트
+                if updated and self.printer:
+                    # LogPanel의 비동기 업데이트 메서드 호출
+                    self.printer.log_text.perform_update()
 
-            # 3. 제어권 양보 (유니티의 yield return)
-            await asyncio.sleep(0.1)
+                # 3. 제어권 양보 (유니티의 yield return)
+                await asyncio.sleep(0.1)
+        except asyncio.CancelledError:
+            # 태스크가 취소되면 조용히 종료합니다.
+            self.running = False
+            return

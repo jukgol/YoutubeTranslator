@@ -8,11 +8,14 @@ def compose_ui(app):
 
     # 중간 탭 영역이 화면의 남은 세로 공간을 모두 차지하도록 expand=True 설정
     app.list_tabs.expand = True
+    # DEBUG: 강제로 높이 부여(진단용) — 이 줄은 문제 확인 후 제거할 예정입니다.
+    app.list_tabs.height = 700
     app.list_sec = app.list_tabs.detail_tab # 기존 핸들러 호환성 유지    # 3. 로그 섹션
     
 
     # 4. 전체 레이아웃 조립 (Vertical Column)
     # Tkinter의 pack(side=TOP)과 유사하게 위에서부터 순서대로 배치합니다.
+    print(f"[compose_ui] before add: page.controls={len(page.controls)}")
     page.add(
         ft.Column(
             [                
@@ -23,6 +26,15 @@ def compose_ui(app):
             spacing=10,             # 섹션 간 간격 (pady 대응)
         )
     )
+    print(f"[compose_ui] after add: page.controls={len(page.controls)} types={[type(c) for c in page.controls]}")
+    col = page.controls[0]
+    print(f"[compose_ui] column.controls={len(col.controls)} types={[type(c) for c in col.controls]}")
+    try:
+        tabs = col.controls[0]
+        print(f"[compose_ui] tabs: selected_index={tabs.selected_index} tabs_count={len(tabs.tabs)} content_types={[type(tab.content) for tab in tabs.tabs]}")
+    except Exception:
+        pass
     
     # 레이아웃을 다 그린 후 최종 페이지 업데이트
     page.update()
+    print("[compose_ui] page.update() called")
