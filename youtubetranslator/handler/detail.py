@@ -1,6 +1,6 @@
 ﻿# handler/detail.py
 import os
-from app.path_service import SubtitlePathService
+from youtubetranslator.path_service import SubtitlePathService
 from .steps.split_step import SplitStep
 from .steps.translate_step import TranslateStep
 from .steps.combine_step import CombineStep

@@ -2,7 +2,7 @@
 import os
 
 # 사용자 정의 모듈 (기존 로직은 그대로 유지)
-from .path import paths
+from ..path import paths
 from .config import AppConfig
 from handler import UIHandlers
 from .logexcutor import LogExecutor

@@ -6,7 +6,7 @@ import re
 import requests  # API 쿼터 확인을 위해 추가
 import asyncio
 import google.generativeai as genai
-from app.path import paths
+from youtubetranslator.path import paths
 
 def get_quota_info(api_key, model_name):    
     return "알 수 없음", "알 수 없음" #구글에 요청하는 방법이 없다

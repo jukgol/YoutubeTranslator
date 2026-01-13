@@ -81,9 +81,6 @@ def copy_file_to_folder(source_file_path, target_folder_path):
         return False, str(e)
 
 def open_folder_in_explorer(folder_path):
-    
-    
-
     if not os.path.exists(folder_path):
         return False, f"폴더가 존재하지 않습니다: {folder_path}"
 

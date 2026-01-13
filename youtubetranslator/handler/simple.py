@@ -1,7 +1,7 @@
 ﻿import time
 import os
 from ui import selectors
-from app.path import paths
+from youtubetranslator.path import paths
 from ui.listtap.simple import render_queue_to_widget 
 
 class Simple:
@@ -81,7 +81,7 @@ class Simple:
         target_dir = path.video_dir
 
         # 3. path_service의 복사 함수 호출 (move -> copy)
-        from app.path_service import copy_file_to_folder
+        from youtubetranslator.path_service import copy_file_to_folder
         success, message = copy_file_to_folder(source_path, target_dir)
 
         # 4. 결과 처리

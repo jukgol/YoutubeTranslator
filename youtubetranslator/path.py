@@ -1,14 +1,22 @@
-﻿import os
+﻿import sys
+import os
+from pathlib import Path
 
 class PathManager:
     def __init__(self):
+        if getattr(sys, "frozen", False):
+            self.base_dir = Path(sys.executable).parent
+        else:
+            # 개발 시: 소문자 폴더의 부모(최상위) 폴더 기준
+            self.base_dir = Path(__file__).resolve().parent.parent.parent
+
         # --- [1. 폴더 경로 정의] ---
-        self.origin_dir = os.path.join(os.getcwd(), "data/origin")       # 자막 다운로드 및 원본 자막 위치
-        self.split_dir = os.path.join(os.getcwd(), "data/split")
-        self.translate_dir = os.path.join(os.getcwd(), "data/translate")
-        self.combine_dir = os.path.join(os.getcwd(), "data/combine")
-        self.result_final_dir = os.path.join(os.getcwd(), "data/result")
-        self.video_dir = os.path.join(os.getcwd(), "data/video")         # 영상 파일(.mp4) 저장 위치
+        self.origin_dir = self.base_dir / "data" / "origin"
+        self.split_dir = self.base_dir / "data" / "split"
+        self.translate_dir = self.base_dir / "data" / "translate"
+        self.combine_dir = self.base_dir / "data" / "combine"
+        self.result_final_dir = self.base_dir / "data" / "result"
+        self.video_dir = self.base_dir / "data" / "video"      # 영상 파일(.mp4) 저장 위치
         
         # --- [2. 파일 경로 정의] ---
         self.api_file = "api.txt"
@@ -16,7 +24,7 @@ class PathManager:
         self.gemini_ver_file = "gemini_ver.txt"
         
         # [추가] 쿠키 파일 경로 (유튜브 등 로그인 세션 유지용)
-        self.cookie_file = os.path.join(os.getcwd(), "cookies.txt")
+        self.cookie_file = self.base_dir/ "cookies.txt"
 
         # --- [3. 폴더 자동 생성] ---
         self.all_dirs = [

@@ -1,5 +1,5 @@
 ﻿from app import paths
-from app.path_service import open_folder_in_explorer
+from youtubetranslator.path_service import open_folder_in_explorer
 
 def connect_download_events(self, handler):
     """버튼과 키 입력을 핸들러의 로직 함수와 연결합니다."""

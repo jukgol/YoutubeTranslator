@@ -98,7 +98,7 @@ class DownloadHandler:
     def refresh_folder_lists(self):
         """실제 폴더를 스캔하여 UI의 영상/자막 목록을 갱신합니다."""
         # path_service는 프로젝트 구조에 맞게 임포트 경로를 확인해주세요.
-        from app.path_service import get_folder_files 
+        from youtubetranslator.path_service import get_folder_files 
 
         # 1. 영상 폴더 스캔
         # self.ui.path 객체는 브릿지에서 연결되어 있어야 합니다.
