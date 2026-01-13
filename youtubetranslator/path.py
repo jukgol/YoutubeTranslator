@@ -18,13 +18,14 @@ class PathManager:
         self.result_final_dir = self.base_dir / "data" / "result"
         self.video_dir = self.base_dir / "data" / "video"      # 영상 파일(.mp4) 저장 위치
         
+        config = "config"
         # --- [2. 파일 경로 정의] ---
-        self.api_file = "api.txt"
-        self.rule_file = "rule.txt"
-        self.gemini_ver_file = "gemini_ver.txt"
+        self.api_file = config / "api.txt"
+        self.rule_file = config / "rule.txt"
+        self.gemini_ver_file = config / "gemini_ver.txt"
         
         # [추가] 쿠키 파일 경로 (유튜브 등 로그인 세션 유지용)
-        self.cookie_file = self.base_dir/ "cookies.txt"
+        self.cookie_file = self.base_dir/ config /  "cookies.txt"
 
         # --- [3. 폴더 자동 생성] ---
         self.all_dirs = [
