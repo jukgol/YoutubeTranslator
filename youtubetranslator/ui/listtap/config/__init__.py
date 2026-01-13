@@ -78,22 +78,30 @@ class ConfigSection(ft.Column):
         api_key = self.api_combobox.value.strip() if self.api_combobox.value else ""
         self.handler.setting.check_api_usage(api_key)
 
+    def _safe_update(self):
+        """Call update(), but ignore if control is not yet added to the page."""
+        try:
+            self.update()
+        except AssertionError:
+            # Control not added to page yet; ignore and continue
+            return
+
     def set_config_data(self, version, rule):
         self.ver_entry.value = version
         self.rule_text.value = rule
-        self.update()
+        self._safe_update()
 
     def set_api_list(self, keys):
         self.api_combobox.options = [ft.dropdown.Option(k) for k in (keys if keys else ["없음"])]
         self.api_combobox.value = keys[0] if keys else "없음"
-        self.update()
+        self._safe_update()
 
     def clear_api_input(self):
         self.api_entry.value = ""
-        self.update()
+        self._safe_update()
 
     def update_usage_status(self, text, status_type="normal"):
         colors = {"normal": ft.Colors.BLUE, "error": ft.Colors.RED, "success": ft.Colors.GREEN_700}
         self.remaining_label.value = text
         self.remaining_label.color = colors.get(status_type, ft.Colors.BLACK)
-        self.update()
+        self._safe_update()
