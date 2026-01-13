@@ -45,9 +45,10 @@ def translate_test_logic(file_path, log_callback, timer_callback):
     try:
         filename = os.path.basename(file_path)
         original_title = filename.split('_Part')[0]
-        target_dir = os.path.join(os.getcwd(), paths.translate_dir, original_title)
-        os.makedirs(target_dir, exist_ok=True)
-        shutil.copy2(file_path, os.path.join(target_dir, filename))
+        # Use Path objects from `paths` to build consistent project paths
+        target_dir = paths.translate_dir / original_title
+        target_dir.mkdir(parents=True, exist_ok=True)
+        shutil.copy2(file_path, str(target_dir / filename))
         
         log_callback(f"🧪 테스트 모드 실행 중... ({filename})")
         for i in range(3, 0, -1):
@@ -112,13 +113,13 @@ async def _translate_subtitle_core(file_path, api_key, rule, model_name, log_cal
         translated_text = re.sub(clean_pattern, "", translated_raw, flags=re.DOTALL).strip()
 
         # 5. 폴더 구조 생성 및 저장
-        result_dir = os.path.join(os.getcwd(), paths.translate_dir, original_title)
-        if not os.path.exists(result_dir):
-            os.makedirs(result_dir)
+        result_dir = paths.translate_dir / original_title
+        if not result_dir.exists():
+            result_dir.mkdir(parents=True, exist_ok=True)
             log_callback(f"🧹 저장 폴더 생성: {result_dir}")
         
         output_name = filename.replace(".txt", "_KR.txt")
-        output_path = os.path.join(result_dir, output_name)
+        output_path = result_dir / output_name
 
         with open(output_path, 'w', encoding='utf-8') as f:
             f.write(translated_text)

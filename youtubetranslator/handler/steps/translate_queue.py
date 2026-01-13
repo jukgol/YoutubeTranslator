@@ -2,6 +2,7 @@
 import time
 import asyncio
 from logic.translate import translate_subtitle_logic
+from youtubetranslator.path import paths
 
 # --- [추가] 폴더 내 모든 파일을 삭제하는 함수 ---
 def clear_folder_contents(folder_path):
@@ -37,8 +38,8 @@ async def process_folder_queue(folder_path, api_key, rule, model_name, log_callb
 
         # --- [추가된 한 줄] 번역 결과가 저장될 폴더를 미리 비움 ---
         # 첫 번째 파일 이름을 기준으로 결과 폴더 경로를 계산하여 비웁니다.
-        result_dir = os.path.join(os.getcwd(), "translate", files[0].split('_Part')[0])
-        clear_folder_contents(result_dir) 
+        result_dir = paths.translate_dir / files[0].split('_Part')[0]
+        clear_folder_contents(str(result_dir)) 
 
         # 2. 파일별 순차 실행 루프
         for index, filename in enumerate(files):

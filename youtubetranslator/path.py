@@ -8,7 +8,7 @@ class PathManager:
             self.base_dir = Path(sys.executable).parent
         else:
             # 개발 시: 소문자 폴더의 부모(최상위) 폴더 기준
-            self.base_dir = Path(__file__).resolve().parent.parent.parent
+            self.base_dir = Path(__file__).resolve().parent.parent
 
         # --- [1. 폴더 경로 정의] ---
         self.origin_dir = self.base_dir / "data" / "origin"
