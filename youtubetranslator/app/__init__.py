@@ -14,21 +14,25 @@ class SubtitleSplitterApp:
     
     # UI 기본 설정
         self.page.title = "Gemini 자막 매니저 v1.1"
-    
-        # 1. 창 크기 설정
-        self.page.window.width = 1400
-        self.page.window.height = 1000
-    
-        # 2. 최소 크기 제한 (이보다 작아지지 않음)
-        self.page.window.min_width = 1200
-        self.page.window.min_height = 600
-    
+
+        # 1~3. 창 크기/최소값/여백 설정
+        # flet의 버전에 따라 Page.window가 없을 수 있으므로 안전하게 처리합니다.
+        if hasattr(self.page, "window"):
+            try:
+                self.page.window.width = 1400
+                self.page.window.height = 1000
+                self.page.window.min_width = 1200
+                self.page.window.min_height = 600
+                self.page.window.center()
+            except Exception as e:
+                print(f"[startup] Warning: failed to configure page.window: {e}")
+        else:
+            # 구버전 flet에서는 window 속성이 없으므로 최소한의 대체 동작
+            # (padding과 중앙 정렬만 설정해둡니다)
+            print("[startup] Notice: page.window not present; skipping window sizing")
+
         # 4. 여백 제거 (창 끝까지 사용)
-        self.page.padding = 10 
-        
-        self.page.window.center()
-        # (선택 사항) 실행 시 바로 최대화하고 싶다면 아래 주석 해제
-        # self.page.window_maximized = True
+        self.page.padding = 10
 
         # 3. 로그 실행기(Executor) 생성 (기존에 수정한 Flet용 LogExecutor)
         # 이제 root 대신 page를 넘깁니다.
