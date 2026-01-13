@@ -67,7 +67,7 @@ class SmartListPanel(ft.Container):
                 on_click=self._handle_click,
                 bgcolor=ft.colors.TRANSPARENT,
                 selected_tile_color=ft.colors.BLUE_200,
-                visual_density=ft.VisualDensity.COMPACT,
+                visual_density=ft.ThemeVisualDensity.COMPACT,
             )
         else:
             # 로그 모드일 때는 기존처럼 단순 Text
@@ -178,7 +178,7 @@ class SmartListPanel(ft.Container):
                 on_click=self._handle_click,
                 bgcolor=ft.colors.TRANSPARENT,
                 selected_tile_color=ft.colors.BLUE_50,
-                visual_density=ft.VisualDensity.COMPACT,
+                visual_density=ft.ThemeVisualDensity.COMPACT,
             )
         else:
             # 로그 모드일 때는 단순 Text
