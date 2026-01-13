@@ -19,7 +19,7 @@ class LogPanel(ft.Container):
             bgcolor=ft.colors.WHITE,
             border=ft.border.all(1, ft.colors.OUTLINE_VARIANT),
             border_radius=6,
-            padding=5,            
+            padding=2,                        
             **kwargs
         )
 
