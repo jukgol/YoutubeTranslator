@@ -18,7 +18,7 @@ def compose_ui(app):
     print(f"[compose_ui] before add: page.controls={len(page.controls)}")
     page.add(
         ft.Column(
-            [                
+            controls=[                
                 app.list_tabs,      # 상단 탭 영역 (확장 가능)
                 app.log_sec,        # 하단 로그 영역
             ],
@@ -28,6 +28,7 @@ def compose_ui(app):
     )
     print(f"[compose_ui] after add: page.controls={len(page.controls)} types={[type(c) for c in page.controls]}")
     col = page.controls[0]
+    
     print(f"[compose_ui] column.controls={len(col.controls)} types={[type(c) for c in col.controls]}")
     try:
         tabs = col.controls[0]
