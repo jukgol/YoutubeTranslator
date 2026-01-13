@@ -47,7 +47,7 @@ class LogSection(ft.Column):
                     self.log_text, # 이제 ListView가 담긴 SmartListPanel입니다.
                     btn_row
                 ], spacing=10),
-                border=ft.border.all(1, ft.Colors.OUTLINE),
+                border=ft.border.all(1, ft.colors.OUTLINE),
                 border_radius=8,
                 padding=10,
             )

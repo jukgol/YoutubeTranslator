@@ -1,6 +1,6 @@
 ﻿import flet as ft
 import asyncio
-from app import SubtitleSplitterApp # 이전에 보여주신 클래스 파일
+from youtubetranslator.app import SubtitleSplitterApp # 이전에 보여주신 클래스 파일
 
 # 1. async def로 선언하여 비동기 환경(Event Loop)을 만듭니다.
 async def main(page: ft.Page):

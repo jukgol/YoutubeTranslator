@@ -1,5 +1,5 @@
 ﻿import flet as ft
-import ui.factory as f 
+from youtubetranslator.ui import factory as f 
 
 def setup_simple_layout(self):
     """SimpleTab의 레이아웃을 구성하며, 버튼 객체를 self에 바인딩합니다."""
@@ -11,8 +11,8 @@ def setup_simple_layout(self):
 
     # 1. 원본 데이터
     self.origin_list = f.create_list_field(True)
-    self.add_to_queue_btn = f.create_button("리스트 추가", ft.Colors.BLUE_700)
-    self.clear_queue_btn = f.create_button("큐 초기화", ft.Colors.GREY_700)
+    self.add_to_queue_btn = f.create_button("리스트 추가", ft.colors.BLUE_700)
+    self.clear_queue_btn = f.create_button("큐 초기화", ft.colors.GREY_700)
     
     self.origin_frame = f.add_section(
         " 1. 원본 데이터 ", 

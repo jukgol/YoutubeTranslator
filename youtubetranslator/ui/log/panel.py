@@ -16,15 +16,15 @@ class LogPanel(ft.Container):
         # 부모인 Container(하얀 박스) 설정
         super().__init__(
             content=self.list_view,
-            bgcolor=ft.Colors.WHITE,
-            border=ft.border.all(1, ft.Colors.OUTLINE_VARIANT),
+            bgcolor=ft.colors.WHITE,
+            border=ft.border.all(1, ft.colors.OUTLINE_VARIANT),
             border_radius=6,
             padding=5,
             expand=True,
             **kwargs
         )
 
-    def add(self, text, color=ft.Colors.BLACK, size=12):
+    def add(self, text, color=ft.colors.BLACK, size=12):
         """내부 리스트뷰에 텍스트 위젯 추가 (업데이트 생략)"""
         self.list_view.controls.append(
             ft.Text(
@@ -36,7 +36,7 @@ class LogPanel(ft.Container):
             )
         )
 
-    def replace_last(self, text, color=ft.Colors.BLACK, size=12):
+    def replace_last(self, text, color=ft.colors.BLACK, size=12):
         """마지막 줄의 내용만 변경 (업데이트 생략)"""
         if self.list_view.controls:
             last_control = self.list_view.controls[-1]
@@ -46,7 +46,7 @@ class LogPanel(ft.Container):
         else:
             self.add(text, color, size)
 
-    def set_list(self, items, color=ft.Colors.BLACK, size=12):
+    def set_list(self, items, color=ft.colors.BLACK, size=12):
         """기존 내용을 모두 지우고 새로운 리스트로 교체 (업데이트 생략)"""
         self.list_view.controls.clear()
         if items:

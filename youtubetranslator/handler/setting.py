@@ -1,5 +1,5 @@
 ﻿import tkinter as tk
-from app.setting_service import SettingService
+from youtubetranslator.app.setting_service import SettingService
 
 class SettingHandler:
     def __init__(self, handler, config):

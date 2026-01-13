@@ -1,4 +1,4 @@
-﻿from handler.log import LogHandler
+﻿from .log import LogHandler
 from .setting import SettingHandler
 from .detail import Detail
 from .steps.full_process import FullProcessStep
@@ -35,7 +35,7 @@ class UIHandlers(LogInterface, SystemInterface, TranslateInterface, DownloadInte
         self.simple = Simple()
 
     def _init_download(self):
-        from logic.UrlManger import UrlManager
+        from youtubetranslator.logic.UrlManger import UrlManager
         from .download import DownloadHandler # 신규 파일 임포트        
         self.url_manager = UrlManager()
         self.download = DownloadHandler(self, self.url_manager, self.path, self.page) # 일꾼 객체 생성 및 연결

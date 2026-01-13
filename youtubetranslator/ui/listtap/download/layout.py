@@ -1,5 +1,5 @@
 ﻿import flet as ft
-import ui.factory as f 
+from youtubetranslator.ui import factory as f 
 
 def setup_download_layout(self):
     """DownloadTab의 외형을 구성하고 주요 위젯을 self에 바인딩합니다."""
@@ -15,11 +15,11 @@ def setup_download_layout(self):
         expand=True, height=40, content_padding=10,
         border_color=ft.Colors.OUTLINE_VARIANT
     )
-    self.add_url_btn = f.create_button("URL 추가", ft.Colors.BLUE_700)
+    self.add_url_btn = f.create_button("URL 추가", ft.colors.BLUE_700)
     url_input_row = ft.Row([self.url_entry, self.add_url_btn], spacing=5)
 
     self.url_list = f.create_list_field()
-    self.download_btn = f.create_button("다운로드 시작", ft.Colors.GREEN_700)
+    self.download_btn = f.create_button("다운로드 시작", ft.colors.GREEN_700)
 
     self.download_frame = f.add_input_section(
         " 1. 영상 다운로드 ", url_input_row, self.url_list, [self.download_btn]

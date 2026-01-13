@@ -1,7 +1,7 @@
 ﻿import os
 import time
 import asyncio
-from logic.translate import translate_subtitle_logic
+from youtubetranslator.logic.translate import translate_subtitle_logic
 from youtubetranslator.path import paths
 
 # --- [추가] 폴더 내 모든 파일을 삭제하는 함수 ---

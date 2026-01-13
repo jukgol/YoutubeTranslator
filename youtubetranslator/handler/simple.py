@@ -1,8 +1,8 @@
 ﻿import time
 import os
-from ui import selectors
+from youtubetranslator.ui import selectors
 from youtubetranslator.path import paths
-from ui.listtap.simple import render_queue_to_widget 
+from youtubetranslator.ui.listtap.simple import render_queue_to_widget 
 
 class Simple:
     def __init__(self):

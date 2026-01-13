@@ -8,4 +8,6 @@ from .translate import translate_test_logic
 from .combine import combine_parts_logic
 from .combine_timeline import combine_timeline_logic
 
-from handler.steps.translate_queue import process_folder_queue
+# NOTE: Avoid importing handler modules from logic package to prevent circular imports.
+# If handler code needs `process_folder_queue`, import it directly from
+# `youtubetranslator.handler.steps.translate_queue` where it's used.

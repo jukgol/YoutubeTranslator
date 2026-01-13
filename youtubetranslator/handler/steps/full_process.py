@@ -1,8 +1,8 @@
 ﻿import os
 from posixpath import basename
 from tkinter import messagebox
-from ui import selectors
-from handler.task_runner import run_async_process
+from youtubetranslator.ui import selectors
+from ..task_runner import run_async_process
 
 # 분리한 로직 임포트
 from .full_process_fucn import step_1_split, step_2_translate, step_3_combine_parts, step_4_combine_timeline

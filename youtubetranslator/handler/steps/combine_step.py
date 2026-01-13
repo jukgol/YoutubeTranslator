@@ -1,8 +1,8 @@
 ﻿# handler/steps/combine_step.py
 from tkinter import messagebox
-from ui import selectors
-from handler.task_runner import run_async_process
-from logic import combine_parts_logic,combine_timeline_logic
+from youtubetranslator.ui import selectors
+from ..task_runner import run_async_process
+from youtubetranslator.logic import combine_parts_logic, combine_timeline_logic
 
 class CombineStep:
     def __init__(self, handler, path_service):

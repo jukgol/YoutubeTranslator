@@ -1,4 +1,4 @@
-﻿from app import paths
+﻿from youtubetranslator.path import paths
 from youtubetranslator.path_service import open_folder_in_explorer
 
 def connect_download_events(self, handler):

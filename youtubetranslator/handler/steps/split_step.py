@@ -1,8 +1,8 @@
 ﻿# handler/steps/split_step.py
 from tkinter import messagebox
-from ui import selectors
-from handler.task_runner import run_async_process
-from logic import split_subtitle_logic
+from youtubetranslator.ui import selectors
+from ..task_runner import run_async_process
+from youtubetranslator.logic import split_subtitle_logic
 
 class SplitStep:
     def __init__(self, handler, path_service):

@@ -1,7 +1,7 @@
 ﻿import threading
 import yt_dlp
 import asyncio
-from logic.downloader import download_video_full_async
+from youtubetranslator.logic.downloader import download_video_full_async
 
 class DownloadHandler:
     def __init__(self, bridge, url_manager, path, page):

@@ -1,8 +1,14 @@
 ﻿import os
 import flet as ft
 
+# Compatibility: older code may reference `ft.Colors` (capital C),
+# while newer flet exposes `ft.colors` (lowercase). Provide a fallback
+# so existing code using `ft.Colors` continues to work.
+if not hasattr(ft, 'Colors') and hasattr(ft, 'colors'):
+    ft.Colors = ft.colors
+
 # --- [1. Style Constants: 디자인 통합 제어 변수] ---
-SECTION_BG_COLOR = ft.Colors.BLACK
+SECTION_BG_COLOR = ft.colors.BLACK
 SECTION_BG_OPACITY = 0.05
 SECTION_RADIUS = 10
 SECTION_PADDING = 10
@@ -23,7 +29,7 @@ def create_button(text, color, icon=None, expand=True, height=50, on_click=None)
         text=text,
         icon=icon,
         bgcolor=color,
-        color=ft.Colors.WHITE,
+        color=ft.colors.WHITE,
         height=height,        
         expand=expand,      
         on_click=on_click,
@@ -44,23 +50,23 @@ class SmartListPanel(ft.Container):
         # 부모 Container 설정 (여기서 bgcolor가 확실히 들어가야 합니다)
         super().__init__(
             content=self.list_view,
-            bgcolor=ft.Colors.WHITE,             # [복구] 배경색 명시
-            border=ft.border.all(1, ft.Colors.OUTLINE_VARIANT),
+            bgcolor=ft.colors.WHITE,             # [복구] 배경색 명시
+            border=ft.border.all(1, ft.colors.OUTLINE_VARIANT),
             border_radius=6,
             padding=5,
             expand=True,
             **kwargs
         )
 
-    def add(self, text, color=ft.Colors.BLACK, size=12):
+    def add(self, text, color=ft.colors.BLACK, size=12):
         if self.selectable:
             # 선택 모드일 때는 클릭 가능한 ListTile로 포장
             new_control = ft.ListTile(
                 title=ft.Text(value=str(text), color=color, size=size),
                 data=text,
                 on_click=self._handle_click,
-                bgcolor=ft.Colors.TRANSPARENT,
-                selected_tile_color=ft.Colors.BLUE_200,
+                bgcolor=ft.colors.TRANSPARENT,
+                selected_tile_color=ft.colors.BLUE_200,
                 visual_density=ft.VisualDensity.COMPACT,
             )
         else:
@@ -81,7 +87,7 @@ class SmartListPanel(ft.Container):
         self.selected_item = e.control.data
         self.list_view.update()
 
-    def set_list(self, items, color=ft.Colors.BLACK, size=12):
+    def set_list(self, items, color=ft.colors.BLACK, size=12):
         """기존 내용을 모두 지우고 새로운 리스트로 교체합니다. 업데이트는 마지막에 한 번만 수행합니다."""
         # 1. 화면 갱신 없이 내부 리스트만 비움
         self.list_view.controls.clear()
@@ -99,7 +105,7 @@ class SmartListPanel(ft.Container):
         self.list_view.controls.clear()
         self.list_view.update()
 
-    def replace_last(self, text, color=ft.Colors.BLACK, size=12):
+    def replace_last(self, text, color=ft.colors.BLACK, size=12):
         """마지막 줄의 내용만 변경합니다. (주로 진행률 표시 등에 사용)"""
         if self.list_view.controls:
             # 마지막 Text 위젯의 값만 변경
@@ -154,14 +160,14 @@ class SmartListPanel(ft.Container):
             self._add_tree_item(display_text, folder, is_child=False)
         
             # 각 폴더(개체) 사이의 구분선
-            self.list_view.controls.append(ft.Divider(height=1, color=ft.Colors.OUTLINE_VARIANT))
+            self.list_view.controls.append(ft.Divider(height=1, color=ft.colors.OUTLINE_VARIANT))
 
         self.list_view.update()
 
     def _add_tree_item(self, text, folder_name, is_child=False):
         """트리 항목을 생성하여 추가합니다. 클릭 시 데이터는 항상 '부모 폴더명'을 가집니다."""
         # 자식 파일인 경우 글자색을 약간 연하게, 크기를 작게 설정하여 계층감 표현
-        text_color = ft.Colors.BLACK54 if is_child else ft.Colors.BLACK
+        text_color = ft.colors.BLACK54 if is_child else ft.colors.BLACK
         text_size = 11 if is_child else 12
 
         if self.selectable:
@@ -170,8 +176,8 @@ class SmartListPanel(ft.Container):
                 title=ft.Text(value=text, color=text_color, size=text_size),
                 data=folder_name,  # [핵심] 자식을 눌러도 부모 폴더명이 반환됨
                 on_click=self._handle_click,
-                bgcolor=ft.Colors.TRANSPARENT,
-                selected_tile_color=ft.Colors.BLUE_50,
+                bgcolor=ft.colors.TRANSPARENT,
+                selected_tile_color=ft.colors.BLUE_50,
                 visual_density=ft.VisualDensity.COMPACT,
             )
         else:
@@ -192,7 +198,7 @@ def create_section_container(content, expand=True):
     """회색 배경의 내용물 박스 생성"""
     return ft.Container(
         expand=expand,
-        bgcolor=ft.Colors.with_opacity(SECTION_BG_OPACITY, SECTION_BG_COLOR), 
+        bgcolor=ft.colors.with_opacity(SECTION_BG_OPACITY, SECTION_BG_COLOR), 
         border_radius=SECTION_RADIUS,
         padding=SECTION_PADDING,
         content=content

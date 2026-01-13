@@ -1,11 +1,11 @@
 ﻿from ast import Await
 import os
-from logic import (
+from youtubetranslator.logic import (
     split_subtitle_logic, 
-    process_folder_queue, 
     combine_parts_logic, 
     combine_timeline_logic
 )
+from youtubetranslator.handler.steps.translate_queue import process_folder_queue  # import directly from handler to avoid circular import 
 
 async def step_1_split(handler, path_service, base_name, filename):
     """[Step 1] 원본 파일을 여러 파트로 분리"""

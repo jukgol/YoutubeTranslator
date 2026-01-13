@@ -1,8 +1,8 @@
 ﻿# handler/steps/translate_step.py
 from tkinter import messagebox
-from ui import selectors
-from handler.task_runner import run_async_process
-from logic import translate_test_logic
+from youtubetranslator.ui import selectors
+from ..task_runner import run_async_process
+from youtubetranslator.logic import translate_test_logic
 from .translate_queue import process_folder_queue
 
 class TranslateStep:
