@@ -1,13 +1,13 @@
 # 파이썬 캐시 폴더 (모든 하위 폴더 포함)
 **/__pycache__/
 .venv/
-config/
+/setconfig/
 
 # Visual Studio 설정 폴더 (모든 하위 폴더 포함)
 **/.vs/
 
 # 데이터 폴더
-data/
+/data/
 
 # 프로젝트 파일
 *.pyproj
