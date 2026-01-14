@@ -29,18 +29,7 @@ class ListTabContainer(ft.Column):
                 on_change=self.on_tab_change
             )
         ]
-        print(f"[ListTabContainer] controls={len(self.controls)} types={[type(c) for c in self.controls]}")
-        try:
-            tabs = self.controls[0]
-            print(f"[ListTabContainer] tabs: selected_index={tabs.selected_index} tabs_count={len(tabs.tabs)} content_types={[type(tab.content) for tab in tabs.tabs]}")
-            print(f"[ListTabContainer] tabs.expand={tabs.expand} visible={getattr(tabs, 'visible', None)} height={getattr(tabs, 'height', None)}")
-            for t in tabs.tabs:
-                try:
-                    print(f"  tab.text={t.text} content_expand={getattr(t.content, 'expand', None)} content_controls={len(getattr(t.content, 'controls', []))}")
-                except Exception:
-                    pass
-        except Exception:
-            pass
+
 
     def setup_handler(self, h):
         """
@@ -52,8 +41,9 @@ class ListTabContainer(ft.Column):
         self.simple_tab.setup_handler(h)
         self.detail_tab.setup_handler(h)
         self.config_sec.setup_handler(h)
-        
         print("🚀 [Master] 모든 UI 탭과 핸들러 배선이 완료되었습니다.")
+        
+
 
     def on_tab_change(self, e):
         """

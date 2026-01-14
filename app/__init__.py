@@ -29,7 +29,7 @@ class SubtitleSplitterApp:
         else:
             # 구버전 flet에서는 window 속성이 없으므로 최소한의 대체 동작
             # (padding과 중앙 정렬만 설정해둡니다)
-            print("[startup] Notice: page.window not present; skipping window sizing")
+            pass
 
         # 4. 여백 제거 (창 끝까지 사용)
         self.page.padding = 10
