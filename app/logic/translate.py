@@ -5,7 +5,7 @@ import shutil
 import re
 import requests  # API 쿼터 확인을 위해 추가
 import asyncio
-import google.genai as genai
+import google.generativeai as genai
 from app.path import paths
 
 def get_quota_info(api_key, model_name):    

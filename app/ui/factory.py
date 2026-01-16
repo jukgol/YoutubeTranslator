@@ -84,10 +84,6 @@ class SmartListPanel(ft.Container):
                 setattr(new_control, 'visual_density', ft.ThemeVisualDensity.COMPACT)
             except Exception:
                 pass
-            try:
-                setattr(new_control, 'selected_tile_color', ft.Colors.BLUE_200)
-            except Exception:
-                pass
         else:
             # 로그 모드일 때는 기존처럼 단순 Text
             new_control = ft.Text(value=str(text), color=color, size=size, selectable=True)
@@ -96,15 +92,21 @@ class SmartListPanel(ft.Container):
         self.list_view.update()
 
     def _handle_click(self, e):
-        # 1. 모든 항목 선택 해제
+        # 1. 모든 항목의 텍스트 색상을 기본값으로 재설정 (선택 해제)
         for control in self.list_view.controls:
-            if isinstance(control, ft.ListTile):
-                control.selected = False
+            if isinstance(control, ft.ListTile) and control.title:
+                # Assuming title is always a ft.Text control
+                if isinstance(control.title, ft.Text):
+                    control.title.color = ft.Colors.BLACK
         
-        # 2. 클릭된 항목만 강조 및 저장
-        e.control.selected = True
+        # 2. 클릭된 항목의 텍스트 색상을 변경하여 강조
+        if isinstance(e.control, ft.ListTile) and e.control.title:
+            if isinstance(e.control.title, ft.Text):
+                e.control.title.color = ft.Colors.BLUE_500 # Highlight with a selected color
+                e.control.title.update() # Update the Text control itself
+        
         self.selected_item = e.control.data
-        self.list_view.update()
+        self.list_view.update() # Update the list_view to reflect all changes
 
     def set_list(self, items, color=ft.Colors.BLACK, size=12):
         """기존 내용을 모두 지우고 새로운 리스트로 교체합니다. 업데이트는 마지막에 한 번만 수행합니다."""
@@ -200,10 +202,6 @@ class SmartListPanel(ft.Container):
             # Backwards compatibility: try to set visual_density and selected_tile_color
             try:
                 setattr(new_control, 'visual_density', ft.ThemeVisualDensity.COMPACT)
-            except Exception:
-                pass
-            try:
-                setattr(new_control, 'selected_tile_color', ft.Colors.BLUE_50)
             except Exception:
                 pass
         else:
