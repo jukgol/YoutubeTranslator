@@ -4,9 +4,9 @@ import os
 # 사용자 정의 모듈 (기존 로직은 그대로 유지)
 from .path import paths
 from .config import AppConfig
-from .logexcutor import LogExecutor
+from .log.executor import LogExecutor
 from .ui.listtap import ListTabContainer
-from .ui.log import LogSection
+from .log import LogSection
 
 class SubtitleSplitterApp:
     def __init__(self, page: ft.Page):

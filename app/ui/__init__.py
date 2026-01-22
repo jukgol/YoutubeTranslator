@@ -1,6 +1,6 @@
 ﻿import flet as ft
 from .listtap.config import ConfigSection
-from .log import LogSection
+from ..log import LogSection
 from .listtap import ListTabContainer
 
 def compose_ui(app):    

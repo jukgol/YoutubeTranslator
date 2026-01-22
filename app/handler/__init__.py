@@ -1,4 +1,4 @@
-﻿from .log import LogHandler
+﻿from app.log.handler import LogHandler
 from .setting import SettingHandler
 from .detail import Detail
 from .steps.full_process import FullProcessStep
