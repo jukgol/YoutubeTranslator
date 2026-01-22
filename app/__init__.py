@@ -4,9 +4,8 @@ import os
 # 사용자 정의 모듈 (기존 로직은 그대로 유지)
 from .path import paths
 from .config import AppConfig
-from .log.executor import LogExecutor
+import app.log as log
 from .ui.listtap import ListTabContainer
-from .log import LogSection
 
 class SubtitleSplitterApp:
     def __init__(self, page: ft.Page):
@@ -34,9 +33,8 @@ class SubtitleSplitterApp:
         # 4. 여백 제거 (창 끝까지 사용)
         self.page.padding = 10
 
-        # 3. 로그 실행기(Executor) 생성 (기존에 수정한 Flet용 LogExecutor)
-        # 이제 root 대신 page를 넘깁니다.
-        self.log_executor = LogExecutor(self.page)
+        # 3. 로그 시스템 초기화 (새로운 방식)
+        log.init_log_components(self.page) # 기존 LogExecutor 생성 및 시작 로직 대체
 
         # 4. 데이터 및 경로 관리자 생성
         self.path = paths
@@ -49,16 +47,12 @@ class SubtitleSplitterApp:
         self.handlers = UIHandlers(
             self, 
             self.path, 
-            self.configdata, 
-            self.log_executor.get_queue()
+            self.configdata
         )
         
         self._register_ui_to_handlers()
         
-    # SubtitleSplitterApp 클래스 내부 (Step 7)
-        if hasattr(self, 'log_sec') and self.log_sec.printer:
-    # 내부에서 알아서 run_task를 하므로, 여기서는 그냥 실행만 명령합니다.
-            self.log_executor.start(self.log_sec.printer)
+
 
         # 8. 초기 작업 실행        
         self.handlers.init_settings()        
@@ -68,7 +62,7 @@ class SubtitleSplitterApp:
         # 이 시점에 self.page.controls에 위젯들이 추가됩니다.
         from .ui import compose_ui
         self.list_tabs = ListTabContainer()
-        self.log_sec = LogSection()
+        self.log_sec = log.get_section_ui() # LogSection 생성을 새로운 방식으로 대체
         compose_ui(self)
 
     def _register_ui_to_handlers(self):

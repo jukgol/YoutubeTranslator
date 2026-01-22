@@ -1,32 +1,31 @@
-﻿from app.log.handler import LogHandler
+﻿
+import app.log as log
+
 from .setting import SettingHandler
 from .detail import Detail
 from .steps.full_process import FullProcessStep
 
 # 분리한 인터페이스 임포트
-from .interface.log import LogInterface
+
 from .interface.system import SystemInterface
 from .interface.translate import TranslateInterface
 from .interface.download import DownloadInterface
 from .simple import Simple
 
-class UIHandlers(LogInterface, SystemInterface, TranslateInterface, DownloadInterface):
-    def __init__(self, app, path, config, log_queue):
+class UIHandlers(SystemInterface, TranslateInterface, DownloadInterface):
+    def __init__(self, app, path, config):
         self.app = app
         self.path = path        
         self.config = config
         self.page = app.page
         # 핵심 영역별 초기화
         self._init_config(config)
-        self._init_log(log_queue)
         self._init_translate()
         self._init_download()
 
     def _init_config(self, config):
         self.setting = SettingHandler(self, config)
 
-    def _init_log(self, log_queue):
-        self.log_handler = LogHandler(log_queue)
 
     def _init_translate(self):
         #self.refresh = RefreshHandler(self)
@@ -56,11 +55,11 @@ class UIHandlers(LogInterface, SystemInterface, TranslateInterface, DownloadInte
             self.detail.initialize_tab_lists(self.app.list_tabs.detail_tab)            
             self.download.refresh_folder_lists()            
         
-        self.log("✅ 모든 탭의 데이터 초기화가 완료되었습니다.")
+        log.write("✅ 모든 탭의 데이터 초기화가 완료되었습니다.")
         
 
     def refresh_all(self):
         self.download.refresh_folder_lists()
         self.simple.refresh_all()
         self.detail.refresh_all()
-        self.log("🔄 모든 목록을 초기화했습니다.")
+        log.write("🔄 모든 목록을 초기화했습니다.")

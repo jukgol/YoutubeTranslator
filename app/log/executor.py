@@ -1,26 +1,26 @@
-﻿import queue
+# app/log/executor.py
+
+import queue
 import asyncio
 
 class LogExecutor:
+    """
+    백그라운드에서 큐를 감시하며 로그를 UI에 비동기적으로 출력하는 실행기.
+    """
     def __init__(self, page):
         self.page = page
-        self.log_queue = queue.Queue()
-        self.printer = None
+        self.log_queue = None # 큐는 start 시점에 외부에서 주입
+        self.printer = None   # 프린터도 start 시점에 외부에서 주입
         self.running = True
+        print("⚙️ [Executor] 인스턴스 초기화됨")
 
-    def get_queue(self):
-        return self.log_queue
-
-    def start(self, printer):
-        """
-        [Sync Method] 외부에서 호출하는 엔트리 포인트.
-        내부에서 스스로 비동기 태스크(루프)를 등록합니다.
-        """
+    def start(self, printer, log_queue):
+        """실제 작업을 시작하고, 필요한 외부 객체들을 주입받습니다."""
+        print("⚙️ [Executor] start() 호출됨, 프린터 및 큐 장착")
         self.printer = printer
-        
-        # 유니티의 StartCoroutine처럼, 내부에서 비동기 루프를 백그라운드로 쏘아 올립니다.
-        # 이제 외부에서 page.run_task를 호출할 필요가 없습니다.
+        self.log_queue = log_queue
         if self.page:
+            # 백그라운드에서 _monitor 코루틴 실행
             self.page.run_task(self._monitor)
 
     async def _monitor(self):
@@ -30,26 +30,28 @@ class LogExecutor:
         try:
             while self.running:
                 updated = False
-                
-                # 1. 큐에 쌓인 데이터 일괄 처리 (Batch)
+                # 1. 큐에 쌓인 데이터 일괄 처리
                 while not self.log_queue.empty():
                     try:
                         data = self.log_queue.get_nowait()
                         if self.printer:
-                            self.printer.render(data) # 리스트에 추가 (update X)
+                            self.printer.render(data)
                             updated = True
                         self.log_queue.task_done()
                     except queue.Empty:
                         break
 
-                # 2. 변경사항이 있으면 딱 한 번만 비동기 업데이트
-                if updated and self.printer:
-                    # LogPanel의 비동기 업데이트 메서드 호출
-                    self.printer.log_text.perform_update()
+                # 2. 변경사항이 있으면 UI 업데이트 (제어권 위임)
+                if updated and hasattr(self.printer, 'perform_update'):
+                    self.printer.perform_update()
 
-                # 3. 제어권 양보 (유니티의 yield return)
+                # 3. 제어권 양보
                 await asyncio.sleep(0.1)
         except asyncio.CancelledError:
-            # 태스크가 취소되면 조용히 종료합니다.
             self.running = False
             return
+
+def create_executor(*args, **kwargs) -> LogExecutor:
+    """LogExecutor 인스턴스를 생성하여 반환하는 팩토리 함수"""
+    print("▶️ [Executor] 생성 함수 호출됨")
+    return LogExecutor(*args, **kwargs)
