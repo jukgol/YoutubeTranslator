@@ -57,6 +57,5 @@ class LogHandler:
 
 def create_handler(*args, **kwargs) -> LogHandler:
     """LogHandler 인스턴스를 생성하여 반환하는 팩토리 함수"""
-    print("▶️ [Handler] 생성 함수 호출됨")
     return LogHandler(*args, **kwargs)
     

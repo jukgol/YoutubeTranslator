@@ -8,8 +8,8 @@ class _LogManager:
     보관하는 중앙 저장소.
     """
     def __init__(self):
-        print("▶️ [LogManager] 생성됨")
         self.executor = None
         self.section = None
         self.handler = None
-        self.log_queue = queue.Queue() # 큐를 매니저에서 직접 생성
+        self.log_queue = queue.Queue()
+        self.ui_ready = False # UI 준비 상태 플래그 추가

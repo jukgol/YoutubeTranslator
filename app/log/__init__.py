@@ -6,7 +6,7 @@ from .executor import create_executor
 from .section import create_section
 from .handler import create_handler
 
-print("🚀 [Log Package] 로드됨")
+
 
 # 1. 로그 매니저를 미리 생성
 _manager = _LogManager()
@@ -17,22 +17,15 @@ def init_log_components(page):
     Log 시스템의 모든 컴포넌트(핸들러, 큐, 섹션, 실행기)를 생성하고 연결합니다.
     """
     print("✅ [Log] init_log_components() 호출됨: 시스템 초기화 시작")
-    
-    print("  - 큐(Queue) 매니저에서 가져옴 완료")
-    
     # 생성 함수를 호출하여 인스턴스를 만들고 매니저에 저장
     _manager.handler = create_handler(_manager.log_queue)
-    print("  - 핸들러(Handler) 생성 완료")
     
     _manager.section = create_section()
-    print("  - UI 섹션(Section) 생성 완료")
     
     _manager.executor = create_executor(page)
-    print("  - 실행기(Executor) 생성 완료")
     
     # 3. 생성된 컴포넌트들끼리 파라미터 전달 (연결)
-    print("  - 실행기(Executor)와 UI(Section) 연결 중...")
-    _manager.executor.start(printer=_manager.section.printer, log_queue=_manager.log_queue)
+    _manager.executor.start(printer=_manager.section.printer, log_queue=_manager.log_queue, manager=_manager)
     print("✅ [Log] 모든 컴포넌트 생성 및 연결 완료!")
 
 
@@ -69,5 +62,10 @@ def clear():
         _manager.handler.clear()
     else:
         print("[경고] 로그 핸들러가 아직 초기화되지 않았습니다.")
+
+def set_ui_ready(is_ready: bool):
+    """UI가 로그 업데이트를 받을 준비가 되었음을 설정합니다."""
+    print(f"ℹ️ [Log] UI Ready 상태 설정: {is_ready}")
+    _manager.ui_ready = is_ready
 
 print("🚀 [Log Package] 모든 함수 및 인터페이스 정의 완료")

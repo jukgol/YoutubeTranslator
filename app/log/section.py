@@ -38,5 +38,4 @@ class LogSection(ft.Column):
 
 def create_section(*args, **kwargs) -> LogSection:
     """LogSection 인스턴스를 생성하여 반환하는 팩토리 함수"""
-    print("▶️ [Section] 생성 함수 호출됨")
     return LogSection(*args, **kwargs)

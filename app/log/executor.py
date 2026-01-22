@@ -12,13 +12,14 @@ class LogExecutor:
         self.log_queue = None # 큐는 start 시점에 외부에서 주입
         self.printer = None   # 프린터도 start 시점에 외부에서 주입
         self.running = True
-        print("⚙️ [Executor] 인스턴스 초기화됨")
 
-    def start(self, printer, log_queue):
+
+    def start(self, printer, log_queue, manager):
         """실제 작업을 시작하고, 필요한 외부 객체들을 주입받습니다."""
-        print("⚙️ [Executor] start() 호출됨, 프린터 및 큐 장착")
+
         self.printer = printer
         self.log_queue = log_queue
+        self.manager = manager
         if self.page:
             # 백그라운드에서 _monitor 코루틴 실행
             self.page.run_task(self._monitor)
@@ -35,6 +36,7 @@ class LogExecutor:
                     try:
                         data = self.log_queue.get_nowait()
                         if self.printer:
+
                             self.printer.render(data)
                             updated = True
                         self.log_queue.task_done()
@@ -42,8 +44,9 @@ class LogExecutor:
                         break
 
                 # 2. 변경사항이 있으면 UI 업데이트 (제어권 위임)
-                if updated and hasattr(self.printer, 'perform_update'):
-                    self.printer.perform_update()
+                # UI가 실제로 준비되었을 때만 업데이트를 수행
+                if updated and hasattr(self.printer.log_text, 'perform_update') and self.manager.ui_ready:
+                    self.printer.log_text.perform_update()
 
                 # 3. 제어권 양보
                 await asyncio.sleep(0.1)
@@ -53,5 +56,5 @@ class LogExecutor:
 
 def create_executor(*args, **kwargs) -> LogExecutor:
     """LogExecutor 인스턴스를 생성하여 반환하는 팩토리 함수"""
-    print("▶️ [Executor] 생성 함수 호출됨")
+
     return LogExecutor(*args, **kwargs)

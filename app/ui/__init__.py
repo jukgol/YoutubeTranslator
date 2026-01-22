@@ -27,3 +27,4 @@ def compose_ui(app):
     )
     # 레이아웃을 다 그린 후 최종 페이지 업데이트
     page.update()
+    log.set_ui_ready(True) # UI가 준비되었음을 알림

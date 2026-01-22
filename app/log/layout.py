@@ -66,4 +66,5 @@ class LogPanel(ft.Container):
 
     def perform_update(self):
         """외부(Executor 등)에서 명시적으로 화면을 갱신할 때 호출"""
+
         self.list_view.update()

@@ -51,9 +51,6 @@ class SubtitleSplitterApp:
         )
         
         self._register_ui_to_handlers()
-        
-
-
         # 8. 초기 작업 실행        
         self.handlers.init_settings()        
 
