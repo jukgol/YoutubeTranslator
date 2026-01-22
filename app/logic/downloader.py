@@ -2,6 +2,7 @@
 import os
 import re
 import asyncio
+import app.log as app_log
 
 # =========================================================
 # [1] 도구 함수
@@ -23,9 +24,9 @@ def add_record(title, url):
 # [2] 진행 상황 감시자 (Hook) - 로직 유지
 # =========================================================
 
-def progress_hook_wrapper(d, log_callback):
-    if not log_callback:
-        return
+def progress_hook_wrapper(d):
+    # if not log_callback: # No longer needed
+    #     return
 
     if not hasattr(progress_hook_wrapper, 'last_file'):
         progress_hook_wrapper.last_file = None
@@ -36,8 +37,8 @@ def progress_hook_wrapper(d, log_callback):
         
         if progress_hook_wrapper.last_file != current_filename:
             progress_hook_wrapper.last_file = current_filename
-            log_callback(f"📄 [파일] {current_filename}", replace=False)
-            log_callback("    ⬇ [대기] 다운로드 시작...", replace=False)
+            app_log.write(f"📄 [파일] {current_filename}", replace=False)
+            app_log.write("    ⬇ [대기] 다운로드 시작...", replace=False)
 
         p = remove_ansi(d.get('_percent_str', '0%')).replace('%', '')
         speed = remove_ansi(d.get('_speed_str', 'N/A'))
@@ -45,7 +46,7 @@ def progress_hook_wrapper(d, log_callback):
         
         msg = f"    ⬇ [진행] {p}% | 🚀 {speed} | ⏳ {eta}"
         try:
-            log_callback(msg, replace=True)
+            app_log.write(msg, replace=True)
         except:
             pass
 
@@ -68,20 +69,20 @@ def progress_hook_wrapper(d, log_callback):
             time_str = remove_ansi(time_str)
 
             final_msg = f"    ✅ [완료] 소요시간: {time_str} | 용량: {size_str}"
-            log_callback(final_msg, replace=True)
+            app_log.write(final_msg, replace=True)
         except Exception as e:
             pass
 
-def post_hook_wrapper(d, log_callback):
-    if not log_callback:
-        return
+def post_hook_wrapper(d):
+    # if not log_callback: # No longer needed
+    #     return
     
     if d['status'] == 'started':
         pp_name = d.get('postprocessor', '')
         if 'Merger' in pp_name:
-            log_callback("    🔨 [병합] 영상과 오디오를 하나로 합치는 중...", replace=True)
+            app_log.write("    🔨 [병합] 영상과 오디오를 하나로 합치는 중...", replace=True)
         elif 'Subtitle' in pp_name:
-            log_callback("    📝 [자막] 자막 데이터를 정리하는 중...", replace=True)
+            app_log.write("    📝 [자막] 자막 데이터를 정리하는 중...", replace=True)
     
     elif d['status'] == 'finished':
         pass
@@ -90,7 +91,7 @@ def post_hook_wrapper(d, log_callback):
 # [3] 설정 관리 함수 (PathManager 적용)
 # =========================================================
 
-def get_ydl_opts(path_manager, mode="full", log_callback=None):
+def get_ydl_opts(path_manager, mode="full"):
     """
     path_manager를 전달받아 경로를 동적으로 설정합니다.
     """
@@ -108,8 +109,8 @@ def get_ydl_opts(path_manager, mode="full", log_callback=None):
         'writeautomaticsub': True,
         'subtitlesformat': 'srt', 
         
-        'progress_hooks': [lambda d: progress_hook_wrapper(d, log_callback)],
-        'postprocessor_hooks': [lambda d: post_hook_wrapper(d, log_callback)],
+        'progress_hooks': [lambda d: progress_hook_wrapper(d)],
+        'postprocessor_hooks': [lambda d: post_hook_wrapper(d)],
     }
 
     if mode == "full":
@@ -135,13 +136,12 @@ def get_ydl_opts(path_manager, mode="full", log_callback=None):
 # [4] 메인 실행 함수 (PathManager 인자 추가)
 # =========================================================
 
-async def download_video_full_async(url, path_manager, log_callback=None):
+async def download_video_full_async(url, path_manager):
     progress_hook_wrapper.last_file = None
 
-    if log_callback:
-        log_callback(f"▶ [시작] 다운로드 요청: {url}", replace=False)
+    app_log.write(f"▶ [시작] 다운로드 요청: {url}", replace=False)
 
-    ydl_opts = get_ydl_opts(path_manager, mode="full", log_callback=log_callback)
+    ydl_opts = get_ydl_opts(path_manager, mode="full")
 
     try:
         video_title = None
@@ -157,21 +157,18 @@ async def download_video_full_async(url, path_manager, log_callback=None):
         video_title = info.get('title', '제목_없음')
         add_record(video_title, url)
 
-        if log_callback:            
-            log_callback("🎉 [성공] 모든 작업 완료!", replace=False)
+        app_log.write("🎉 [성공] 모든 작업 완료!", replace=False)
         
         return video_title
 
     except Exception as e:
-        if log_callback:
-            log_callback(f"❌ [오류] {str(e)}", replace=False)
+        app_log.write(f"❌ [오류] {str(e)}", replace=False)
         return None
 
-def download_subtitle_only(url, path_manager, log_callback=None):
-    if log_callback:
-        log_callback(f"▶ [시작] 자막만 추출: {url}", replace=False)
+def download_subtitle_only(url, path_manager):
+    app_log.write(f"▶ [시작] 자막만 추출: {url}", replace=False)
 
-    ydl_opts = get_ydl_opts(path_manager, mode="subtitle", log_callback=log_callback)
+    ydl_opts = get_ydl_opts(path_manager, mode="subtitle")
 
     try:
         video_title = None
@@ -179,12 +176,10 @@ def download_subtitle_only(url, path_manager, log_callback=None):
             info = ydl.extract_info(url, download=True)
             video_title = info.get('title', '제목_없음')
             
-        if log_callback:
-            log_callback("🎉 [완료] 자막 저장 끝!", replace=False)
+        app_log.write("🎉 [완료] 자막 저장 끝!", replace=False)
             
         return video_title
 
     except Exception as e:
-        if log_callback:
-            log_callback(f"❌ [오류] {e}", replace=False)
+        app_log.write(f"❌ [오류] {e}", replace=False)
         return None

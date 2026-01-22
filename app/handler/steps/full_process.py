@@ -3,6 +3,7 @@ from posixpath import basename
 from tkinter import messagebox
 from app.ui import selectors
 from ..task_runner import run_async_process
+import app.log as app_log
 
 # 분리한 로직 임포트
 from .full_process_fucn import step_1_split, step_2_translate, step_3_combine_parts, step_4_combine_timeline
@@ -16,7 +17,7 @@ class FullProcessStep:
 
     def request_stop(self):
         self.is_stopped = True
-        self.handler.log("🛑 사용자에 의해 다음 단계 진행이 차단되었습니다.")
+        app_log.write("🛑 사용자에 의해 다음 단계 진행이 차단되었습니다.")
 
     def execute(self):
         #큐에 있는 파일들을 순차적으로 실제 공정 실행
@@ -35,7 +36,7 @@ class FullProcessStep:
             return
 
         self.is_stopped = False
-        self.handler.log("🚀 큐 기반 전체 공정을 시작합니다.")
+        app_log.write("🚀 큐 기반 전체 공정을 시작합니다.")
 
         # 비동기 스레드에서 '큐 전체 순회 공정' 실행
         run_async_process(
@@ -54,15 +55,13 @@ class FullProcessStep:
             return
 
         self.is_stopped = False
-        self.handler.log("🧪 테스트 루프(2초 대기)를 시작합니다.")
+        app_log.write("🧪 테스트 루프(2초 대기)를 시작합니다.")
 
         # 비동기 스레드에서 실행
         run_async_process(
             self.handler,
             self.handler.simple.refresh_result,
-            self.handler.simple.run_test_loop,
-            self.handler.log, 
-            lambda: self.is_stopped            
+            self.handler.simple.run_test_loop
         )
 
         # 각 파일에 대한
@@ -71,7 +70,7 @@ class FullProcessStep:
         try:
             # 폴더명으로 사용할 베이스 네임 (확장자 제거)
             base_name = os.path.splitext(filename)[0]
-            self.handler.log(f"🚀 '{base_name}' 전체 공정 시작")
+            app_log.write(f"🚀 '{base_name}' 전체 공정 시작")
 
             # --- 1단계: 원본 분리 ---
             if not await step_1_split(self.handler, self.path_service, base_name, filename): return
@@ -91,10 +90,10 @@ class FullProcessStep:
 
             # --- 5단계: 최종 완료 ---
             self.handler.ui_update_simple_status(4, "done")
-            self.handler.log(f"🎉 모든 공정 완료!")            
+            app_log.write(f"🎉 모든 공정 완료!")            
 
         except Exception as e:
-            self.handler.log(f"❌ 통합 공정 중 치명적 에러: {str(e)}")
+            app_log.write(f"❌ 통합 공정 중 치명적 에러: {str(e)}")
 
             # 파일 목록
     async def _run_queue_full_sequence(self, api_key, rule, model_name):
@@ -116,10 +115,10 @@ class FullProcessStep:
             try:
                 await self._run_sequence(filename, api_key, rule, model_name)
             except Exception as e:
-                self.handler.log(f"❌ {filename} 처리 중 에러 발생: {e}")
+                app_log.write(f"❌ {filename} 처리 중 에러 발생: {e}")
                 continue # 다음 파일로 넘어감
 
         # 모든 작업 완료 후 상태 초기화
         queue_mgr.current_index = -1
         queue_mgr.refresh_queue()
-        self.handler.log("🏁 모든 큐 작업이 완료되었습니다.")
+        app_log.write("🏁 모든 큐 작업이 완료되었습니다.")

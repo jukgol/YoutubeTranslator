@@ -76,8 +76,7 @@ class DownloadHandler:
                 # 여기서 await로 '대기'하며 다운로드를 수행
                 video_title = await download_video_full_async(
                     url=item.url,
-                    path_manager=self.path,
-                    log_callback=self.ui.log
+                    path_manager=self.path
                 )
 
                 # 결과 처리 (성공/실패)

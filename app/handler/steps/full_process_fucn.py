@@ -10,7 +10,7 @@ async def step_1_split(handler, path_service, base_name, filename):
     handler.ui_update_simple_status(0, "active")
     file_path = path_service.get_origin_path(filename)
     
-    await split_subtitle_logic(file_path, handler.path.origin_dir, handler.log)
+    await split_subtitle_logic(file_path, handler.path.origin_dir)
     
     split_folder = path_service.get_split_folder_path(base_name)
     if not os.path.exists(split_folder):
@@ -27,8 +27,7 @@ async def step_2_translate(handler, split_folder, api_key, rule, model_name):
     handler.ui_update_simple_status(1, "active")
     
     result = await process_folder_queue(
-        split_folder, api_key, rule, model_name, 
-        handler.log, handler.update_timer_log
+        split_folder, api_key, rule, model_name
     )
     
     if result is not True:
@@ -46,7 +45,7 @@ async def step_3_combine_parts(handler, base_name):
     
     result = await combine_parts_logic(
         base_name, handler.path.translate_dir, 
-        handler.path.combine_dir, handler.log
+        handler.path.combine_dir
     )
     
     if result is not True:
@@ -68,7 +67,7 @@ async def step_4_combine_timeline(handler, path_service, base_name, filename):
 
     result = await combine_timeline_logic(
         combined_path, origin_srt_path, 
-        handler.path.result_final_dir, handler.log
+        handler.path.result_final_dir
     )
     
     if result is not True:

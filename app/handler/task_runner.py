@@ -1,5 +1,7 @@
 ﻿# handler/task_runner.py
 
+import app.log as app_log
+
 def run_async_process(handler, updateUI, logic_func,  *args):    
     """
     logic_func: 실행할 비동기 로직 (함수 이름)
@@ -17,12 +19,12 @@ def run_async_process(handler, updateUI, logic_func,  *args):
 
         except asyncio.CancelledError:
             # 태스크가 외부에서 취소되면 조용히 종료
-            handler.log("⚠️ 작업이 취소되었습니다.")
+            app_log.write("⚠️ 작업이 취소되었습니다.")
             return
         except Exception as e:
             # 로직 실행 중 에러 발생 시 로그 출력
             error_msg = str(e)
-            handler.log(f"❌ 작업 중 치명적 오류: {error_msg}")
+            app_log.write(f"❌ 작업 중 치명적 오류: {error_msg}")
 
     # Flet의 비동기 태스크로 래퍼를 실행
     handler.page.run_task(internal_wrapper)    

@@ -1,4 +1,6 @@
-﻿class TranslateInterface:
+﻿import app.log as app_log
+
+class TranslateInterface:
     def process_split(self):
         self.detail.handle_split()
 
@@ -23,12 +25,12 @@
     def process_add_to_queue(self, tab):
         if self.simple:
             # 탭 객체 하나만 매니저에게 토스합니다.
-            self.simple.handle_add(tab, self.log)
+            self.simple.handle_add(tab)
 
     def process_clear_queue(self, tab):
         if self.simple:
             self.simple.clear(tab)
-            self.log("🧹 작업 큐가 초기화되었습니다.")
+            app_log.write("🧹 작업 큐가 초기화되었습니다.")
 
     def process_copy_to_video(self, tab):
         """최종 결과 파일을 비디오 폴더로 복사하는 프로세스"""
@@ -36,6 +38,5 @@
         self.simple.handle_copy_file(
             tab, 
             self.path,
-            self.simple.refresh_all, 
-            self.log
+            self.simple.refresh_all
         )

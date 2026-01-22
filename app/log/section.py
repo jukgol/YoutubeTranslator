@@ -1,6 +1,7 @@
 import flet as ft
 from .layout import LogPanel
 from .printer import PrintText
+import app.log as log
 
 class LogSection(ft.Column):
     def __init__(self, *args, **kwargs):
@@ -29,14 +30,10 @@ class LogSection(ft.Column):
             self.log_panel,
         ]
         
-        self.handlers = None
 
-    def setup_handler(self, handlers):
-        self.handlers = handlers
 
     def handle_clear_logs(self, e):
-        if self.handlers:
-            self.handlers.clear_logs()
+        log.clear()
 
 
 def create_section(*args, **kwargs) -> LogSection:

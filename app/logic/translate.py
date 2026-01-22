@@ -7,11 +7,12 @@ import requests  # API 쿼터 확인을 위해 추가
 import asyncio
 import google.generativeai as genai
 from app.path import paths
+import app.log as app_log
 
 def get_quota_info(api_key, model_name):    
     return "알 수 없음", "알 수 없음" #구글에 요청하는 방법이 없다
 
-async def translate_subtitle_logic(file_path, api_key, rule, model_name, log_callback, update_timer_callback):
+async def translate_subtitle_logic(file_path, api_key, rule, model_name):
     """
     비동기 번역 프로세스를 총괄하는 메인 함수
     """
@@ -20,7 +21,7 @@ async def translate_subtitle_logic(file_path, api_key, rule, model_name, log_cal
     
     # 2. 타이머를 백그라운드 태스크로 예약 (즉시 실행 시작)
     timer_task = asyncio.create_task(
-        _run_timer_task(update_timer_callback, stop_event)
+        _run_timer_task(stop_event)
     )
     
     success = False
@@ -28,7 +29,7 @@ async def translate_subtitle_logic(file_path, api_key, rule, model_name, log_cal
         # 3. 실제 번역 로직 실행 및 결과 대기
         # 이 줄에서 번역이 끝날 때까지 머무르지만, UI는 타이머 덕분에 멈추지 않음
         success = await _translate_subtitle_core(
-            file_path, api_key, rule, model_name, log_callback
+            file_path, api_key, rule, model_name
         )
     finally:
         # 4. 번역이 성공하든 실패(에러)하든 타이머는 반드시 멈춰야 함
@@ -40,7 +41,7 @@ async def translate_subtitle_logic(file_path, api_key, rule, model_name, log_cal
     # 6. 최종 결과를 호출자에게 반환
     return success
 
-def translate_test_logic(file_path, log_callback, timer_callback):
+def translate_test_logic(file_path):
     """기존 테스트 로직 유지"""
     try:
         filename = os.path.basename(file_path)
@@ -50,18 +51,18 @@ def translate_test_logic(file_path, log_callback, timer_callback):
         target_dir.mkdir(parents=True, exist_ok=True)
         shutil.copy2(file_path, str(target_dir / filename))
         
-        log_callback(f"🧪 테스트 모드 실행 중... ({filename})")
+        app_log.write(f"🧪 테스트 모드 실행 중... ({filename})")
         for i in range(3, 0, -1):
-            timer_callback(f"{i}초 대기 중...")
+            app_log.update_timer(f"{i}초 대기 중...")
             time.sleep(1)
-        log_callback("✅ 테스트 종료")
+        app_log.write("✅ 테스트 종료")
         return True
     except Exception as e:
-        log_callback(f"❌ 테스트 오류: {str(e)}")
+        app_log.write(f"❌ 테스트 오류: {str(e)}")
         return False
 
 
-async def _translate_subtitle_core(file_path, api_key, rule, model_name, log_callback):
+async def _translate_subtitle_core(file_path, api_key, rule, model_name):
     """기존 번역 및 파일 저장 로직 유지 (비동기 버전)"""
     try:
         genai.configure(api_key=api_key)
@@ -104,7 +105,7 @@ async def _translate_subtitle_core(file_path, api_key, rule, model_name, log_cal
         prompt = f"{final_rule}\n\n---\n번역할 자막 데이터:\n{new_source}"
 
         # 3. API 호출 (비동기 await 적용)
-        log_callback(f"🚀 번역 시작 ({id_counter}개 블록): {filename}")
+        app_log.write(f"🚀 번역 시작 ({id_counter}개 블록): {filename}")
         response = await model.generate_content_async(prompt) # await 적용
         translated_raw = response.text
   
@@ -116,7 +117,7 @@ async def _translate_subtitle_core(file_path, api_key, rule, model_name, log_cal
         result_dir = paths.translate_dir / original_title
         if not result_dir.exists():
             result_dir.mkdir(parents=True, exist_ok=True)
-            log_callback(f"🧹 저장 폴더 생성: {result_dir}")
+            app_log.write(f"🧹 저장 폴더 생성: {result_dir}")
         
         output_name = filename.replace(".txt", "_KR.txt")
         output_path = result_dir / output_name
@@ -124,17 +125,17 @@ async def _translate_subtitle_core(file_path, api_key, rule, model_name, log_cal
         with open(output_path, 'w', encoding='utf-8') as f:
             f.write(translated_text)
 
-        log_callback(f"\n✅ 완료: {output_name}\n({int(time.time() - start_time)}초 소요)\n")        
+        app_log.write(f"\n✅ 완료: {output_name}\n({int(time.time() - start_time)}초 소요)\n")        
         return True
 
     except Exception as e:
-        log_callback(f"❌ 오류 발생: {str(e)}")
+        app_log.write(f"❌ 오류 발생: {str(e)}")
         return False
 
-async def _run_timer_task(update_timer_callback, stop_event):
+async def _run_timer_task(stop_event):
     """기존 타이머 로직 유지: 1초마다 경과 시간 UI 업데이트"""
     start_time = time.time()
     while not stop_event.is_set():
         elapsed = int(time.time() - start_time)
-        update_timer_callback(f"⏳ Gemini 번역 대기 중... ({elapsed}초 경과)")
+        app_log.update_timer(f"⏳ Gemini 번역 대기 중... ({elapsed}초 경과)")
         await asyncio.sleep(1) # 제어권을 양보하며 1초 대기

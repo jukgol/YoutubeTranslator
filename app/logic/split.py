@@ -1,6 +1,7 @@
 ﻿import re
 import os
 import asyncio
+import app.log as app_log
 
 def get_line_count_split_groups(detected_eps, ep_map, has_start=False):
     all_units = []
@@ -32,7 +33,7 @@ def get_line_count_split_groups(detected_eps, ep_map, has_start=False):
 
     return groups
 
-async def split_subtitle_logic(file_path, origin_dir, log_callback):
+async def split_subtitle_logic(file_path, origin_dir):
     """에피소드/라인 수 기준 분할 및 타임라인 제거 저장"""
     
     with open(file_path, 'r', encoding='utf-8') as f:
@@ -91,7 +92,7 @@ async def split_subtitle_logic(file_path, origin_dir, log_callback):
         with open(output_path, 'w', encoding='utf-8') as f:
             f.write("\n\n".join(output_data))
             
-        log_callback(f"저장 완료: {output_name} (총 {total_lines} 라인)")
+        app_log.write(f"저장 완료: {output_name} (총 {total_lines} 라인)")
 
 
 def clear_folder_contents(folder_path):

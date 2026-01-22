@@ -19,7 +19,7 @@ def compose_ui(app):
         ft.Column(
             controls=[                
                 app.list_tabs,      # 상단 탭 영역 (확장 가능)
-                app.log_sec,        # 하단 로그 영역
+                log.get_section_ui(),        # 하단 로그 영역
             ],
             expand=True,            # 전체 컬럼이 페이지 높이를 꽉 채우도록 설정
             spacing=10,             # 섹션 간 간격 (pady 대응)

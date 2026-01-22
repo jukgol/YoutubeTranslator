@@ -4,6 +4,7 @@ from app.ui import selectors
 from ..task_runner import run_async_process
 from app.logic.combine import combine_parts_logic
 from app.logic.combine_timeline import combine_timeline_logic
+import app.log as app_log
 
 class CombineStep:
     def __init__(self, handler, path_service):
@@ -14,7 +15,7 @@ class CombineStep:
         """3. 번역 파트 합치기"""
         folder_name = self.handler.translated_listbox.get_selected()
         if not folder_name: 
-            self.handler.log(f"합치기 {folder_name}가 없습니다.")
+            app_log.write(f"합치기 {folder_name}가 없습니다.")
             return
 
         run_async_process(
@@ -23,8 +24,7 @@ class CombineStep:
             combine_parts_logic,
             folder_name, 
             self.handler.path.translate_dir,
-            self.handler.path.combine_dir, 
-            self.handler.log
+            self.handler.path.combine_dir
         )
 
     def execute_timeline(self):
@@ -35,7 +35,7 @@ class CombineStep:
         combined_path = self.path_service.get_combine_file_path(filename)
         origin_path = self.path_service.get_origin_srt_for_combine(filename)
 
-        self.handler.log(filename)
+        app_log.write(filename)
 
         if not self.path_service.check_file_exists(origin_path):
             messagebox.showerror("오류", "원본 SRT를 찾을 수 없습니다.")
@@ -46,6 +46,5 @@ class CombineStep:
             self.handler.detail.refresh_result,
             combine_timeline_logic,
             combined_path, origin_path, 
-            self.handler.path.result_final_dir, 
-            self.handler.log
+            self.handler.path.result_final_dir
         )

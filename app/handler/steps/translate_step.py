@@ -32,8 +32,7 @@ class TranslateStep:
             self.handler,
             self.handler.detail.refresh_translate,            
             process_folder_queue,
-            resultfolder, api_key, rule, model_name,
-            self.handler.log, self.handler.update_timer_log
+            resultfolder, api_key, rule, model_name
         )
 
     def execute_test(self):
@@ -46,7 +45,5 @@ class TranslateStep:
             self.handler.page,
             self.handler.detail.refresh_translate,
             translate_test_logic,
-            file_path, 
-            self.handler.log, 
-            self.handler.update_timer_log
+            file_path
         )

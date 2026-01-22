@@ -1,5 +1,6 @@
 ﻿import tkinter as tk
 from app.setting_service import SettingService
+import app.log as app_log
 
 class SettingHandler:
     def __init__(self, handler, config):
@@ -34,7 +35,7 @@ class SettingHandler:
         self.service.write_api_keys(new_keys)
         
         self.load_api_list() # 목록 새로고침
-        self.handler.log(f"API Key 선택됨: {selected[:10]}...")
+        app_log.write(f"API Key 선택됨: {selected[:10]}...")
 
     def add_api_key(self, new_key):
         """새로운 키를 인자로 받아 추가 로직 수행"""
@@ -55,7 +56,7 @@ class SettingHandler:
         
         # 파일 저장
         self.service.save_config(version, rule)
-        self.handler.log("설정이 저장되었습니다.")
+        app_log.write("설정이 저장되었습니다.")
 
     def load(self):
         """파일에서 읽어온 데이터를 메모리에 채우고 UI에 배달"""

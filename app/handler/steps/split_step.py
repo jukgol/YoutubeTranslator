@@ -24,6 +24,5 @@ class SplitStep:
             self.handler.detail.refresh_split,
             split_subtitle_logic,
             file_path, 
-            self.handler.path.origin_dir, 
-            self.handler.log                        
+            self.handler.path.origin_dir                        
         )
