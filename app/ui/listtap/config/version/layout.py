@@ -2,7 +2,7 @@
 from ..helper_layout import LabeledInput
 
 class Layout(ft.Row):
-    def __init__(self, save_cmd, check_cmd):
+    def __init__(self):
         super().__init__()
         self.vertical_alignment = ft.CrossAxisAlignment.CENTER # 수직 중앙 정렬
 
@@ -10,7 +10,6 @@ class Layout(ft.Row):
         # expand=True를 주어 가로 공간을 최대한 차지하게 합니다.
         self.ver_input = LabeledInput(
             label_text="Gemini Version:", 
-            save_cmd=save_cmd
         )
         self.ver_input.expand = True 
         
@@ -20,7 +19,6 @@ class Layout(ft.Row):
         # 2. 버튼 (ElevatedButton)
         self.check_btn = ft.ElevatedButton(
             text="남은 요청 확인",
-            on_click=lambda e: check_cmd(),
             style=ft.ButtonStyle(
                 shape=ft.RoundedRectangleBorder(radius=5),
                 padding=ft.padding.all(10),
