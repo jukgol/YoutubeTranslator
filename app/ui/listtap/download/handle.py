@@ -3,18 +3,19 @@ import yt_dlp
 import asyncio
 from app.logic.downloader import download_video_full_async
 import app.log as log
+from app.logic.UrlManger import url_manager # 전역 인스턴스 임포트
+from .func import _update_list_panel
+from .layout import clear_download_url_input
 
 class DownloadHandler:
-    def __init__(self, bridge, url_manager, path, page):
+    def __init__(self, bridge, page):
         self.ui = bridge
-        self.logic = url_manager
-        self.path = path
         self.is_running = False        
         self.page = page
 
     def update_queue_ui(self):
         """1번 코드의 3줄 로그 스타일로 UI 갱신"""
-        all_items = self.logic.pending + self.logic.in_progress + self.logic.completed
+        all_items = url_manager.pending + url_manager.in_progress + url_manager.completed
         
         # UI의 리스트박스 또는 텍스트 영역 초기화 후 다시 그리기
         # (여기서는 1번 코드의 listbox_queue.insert 방식을 가정합니다)
@@ -23,15 +24,15 @@ class DownloadHandler:
             lines.extend(item.to_ui_lines())            
             
         # UI 브릿지를 통해 화면 업데이트 요청
-        self.ui.ui_update_queue_display(lines)         
+        _update_list_panel(self.ui.url_list, lines)         
 
     def handle_add_url(self, url):
         """URL 추가 + 비동기 제목 가져오기"""
-        new_item, msg = self.logic.add_url(url)
+        new_item, msg = url_manager.add_url(url)
         log.write(msg)
     
         if new_item:
-            self.ui.ui_clear_download_url_input()
+            clear_download_url_input(self.ui.url_entry)
             self.update_queue_ui()
             # Flet의 비동기 태스크로 실행
             self.page.run_task(self._fetch_title_async, new_item)
@@ -67,7 +68,7 @@ class DownloadHandler:
         """순차적 다운로드 공정"""
         try:
             while self.is_running:
-                item = self.logic.get_next()
+                item = url_manager.get_next()
                 if not item: 
                     break
 
@@ -76,16 +77,15 @@ class DownloadHandler:
 
                 # 여기서 await로 '대기'하며 다운로드를 수행
                 video_title = await download_video_full_async(
-                    url=item.url,
-                    path_manager=self.path
+                    url=item.url
                 )
 
                 # 결과 처리 (성공/실패)
                 if video_title:
                     item.title = video_title
-                    self.logic.mark_as_done(item)
+                    url_manager.mark_as_done(item)
                 else:
-                    self.logic.mark_as_failed(item)
+                    url_manager.mark_as_failed(item)
             
                 self.update_queue_ui()
                 self.refresh_folder_lists()
@@ -108,12 +108,12 @@ class DownloadHandler:
         )
 
         video_text = self._format_file_list(video_files, "🎬")
-        self.ui.ui_set_video_folder_list(video_text)
+        _update_list_panel(self.ui.video_file_list, video_text)
 
         # 2. 자막 폴더 스캔
         sub_files = get_folder_files(self.ui.path.origin_dir)
         sub_text = self._format_file_list(sub_files, "📝")
-        self.ui.ui_set_subtitle_folder_list(sub_text)
+        _update_list_panel(self.ui.subtitle_file_list, sub_text)
 
     def _format_file_list(self, file_list, icon):
         """파일 리스트를 1번 코드 느낌의 예쁜 텍스트로 가공"""

@@ -51,3 +51,6 @@ class UrlManager:
         if item in self.in_progress:
             self.in_progress.remove(item)
             item.status = "실패"
+
+# 모듈 수준에서 UrlManager의 싱글톤 인스턴스 생성
+url_manager = UrlManager()

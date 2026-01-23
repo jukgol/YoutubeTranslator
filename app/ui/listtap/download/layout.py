@@ -36,3 +36,7 @@ def setup_download_layout(self):
 
     main_row.controls.extend([self.download_frame, self.video_frame, self.subtitle_frame])
     self.controls = [main_row]
+
+def clear_download_url_input(url_entry_widget):
+    url_entry_widget.value = ""
+    url_entry_widget.update()

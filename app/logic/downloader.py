@@ -3,6 +3,7 @@ import os
 import re
 import asyncio
 import app.log as app_log
+from app.path import paths
 
 # =========================================================
 # [1] 도구 함수
@@ -91,12 +92,12 @@ def post_hook_wrapper(d):
 # [3] 설정 관리 함수 (PathManager 적용)
 # =========================================================
 
-def get_ydl_opts(path_manager, mode="full"):
+def get_ydl_opts(mode="full"):
     """
     path_manager를 전달받아 경로를 동적으로 설정합니다.
     """
     opts = {
-        'cookiefile': path_manager.cookie_file, # PathManager의 쿠키 경로 사용
+        'cookiefile': paths.cookie_file, # PathManager의 쿠키 경로 사용
         'no_color': True,
         'noprogress': True,
         'quiet': True,
@@ -119,15 +120,15 @@ def get_ydl_opts(path_manager, mode="full"):
             'merge_output_format': 'mp4',
             'outtmpl': {
                 # data -> video_dir / data/download_sub -> origin_dir
-                'default': os.path.join(path_manager.video_dir, '%(title)s.%(ext)s'),
-                'subtitle': os.path.join(path_manager.origin_dir, '%(title)s.%(ext)s')
+                'default': os.path.join(paths.video_dir, '%(title)s.%(ext)s'),
+                'subtitle': os.path.join(paths.origin_dir, '%(title)s.%(ext)s')
             },
         })
     elif mode == "subtitle":
         opts.update({
             'skip_download': True,
             # data/download_sub -> origin_dir
-            'outtmpl': os.path.join(path_manager.origin_dir, '%(title)s.%(ext)s'),
+            'outtmpl': os.path.join(paths.origin_dir, '%(title)s.%(ext)s'),
         })
 
     return opts
@@ -136,12 +137,12 @@ def get_ydl_opts(path_manager, mode="full"):
 # [4] 메인 실행 함수 (PathManager 인자 추가)
 # =========================================================
 
-async def download_video_full_async(url, path_manager):
+async def download_video_full_async(url):
     progress_hook_wrapper.last_file = None
 
     app_log.write(f"▶ [시작] 다운로드 요청: {url}", replace=False)
 
-    ydl_opts = get_ydl_opts(path_manager, mode="full")
+    ydl_opts = get_ydl_opts(mode="full")
 
     try:
         video_title = None
@@ -165,10 +166,10 @@ async def download_video_full_async(url, path_manager):
         app_log.write(f"❌ [오류] {str(e)}", replace=False)
         return None
 
-def download_subtitle_only(url, path_manager):
+def download_subtitle_only(url):
     app_log.write(f"▶ [시작] 자막만 추출: {url}", replace=False)
 
-    ydl_opts = get_ydl_opts(path_manager, mode="subtitle")
+    ydl_opts = get_ydl_opts(mode="subtitle")
 
     try:
         video_title = None
