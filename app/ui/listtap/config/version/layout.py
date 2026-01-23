@@ -1,7 +1,7 @@
 ﻿import flet as ft
-from .components import LabeledInput
+from ..helper_layout import LabeledInput
 
-class VersionArea(ft.Row):
+class Layout(ft.Row):
     def __init__(self, save_cmd, check_cmd):
         super().__init__()
         self.vertical_alignment = ft.CrossAxisAlignment.CENTER # 수직 중앙 정렬

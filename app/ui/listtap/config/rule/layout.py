@@ -1,7 +1,7 @@
 ﻿import flet as ft
-from .components import LabeledInput
+from ..helper_layout import LabeledInput
 
-class RuleArea(ft.Column):
+class Layout(ft.Column):
     def __init__(self, save_cmd):
         super().__init__()
         self.expand = True # 세로로 남은 공간을 모두 차지함

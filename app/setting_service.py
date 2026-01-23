@@ -1,9 +1,21 @@
-﻿# app/setting_service.py
+# app/setting_service.py
 import os
+from app.path import paths
 
 class SettingService:
-    def __init__(self, path_manager):
-        self.path = path_manager
+    _instance = None
+
+    def __new__(cls):
+        if cls._instance is None:
+            cls._instance = super(SettingService, cls).__new__(cls)
+            cls._instance._initialized = False
+        return cls._instance
+
+    def __init__(self):
+        if self._initialized:
+            return
+        self.path = paths
+        self._initialized = True
 
     def read_api_keys(self):
         """저장된 API 키 목록을 읽어옵니다."""
@@ -45,3 +57,17 @@ class SettingService:
             keys.remove(selected)  # 기존 위치에서 제거
             keys.insert(0, selected)  # 맨 앞으로 삽입
         return keys
+
+    def get_added_keys(self, new_key):
+        """
+        새로운 키(new_key)를 리스트의 맨 앞으로 추가한 후 전체 리스트를 반환합니다.
+        이미 키가 존재하면 맨 앞으로 이동시킵니다.
+        """
+        keys = self.read_api_keys()
+        if new_key in keys:
+            keys.remove(new_key)
+        keys.insert(0, new_key)
+        return keys
+
+# Create a module-level instance that can be imported
+setting_service = SettingService()

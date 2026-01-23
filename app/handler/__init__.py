@@ -1,7 +1,7 @@
 ﻿
 import app.log as log
 
-from .setting import SettingHandler
+# from .setting import SettingHandler
 from .detail import Detail
 from .steps.full_process import FullProcessStep
 
@@ -24,7 +24,8 @@ class UIHandlers(SystemInterface, TranslateInterface, DownloadInterface):
         self._init_download()
 
     def _init_config(self, config):
-        self.setting = SettingHandler(self, config)
+        # self.setting = SettingHandler(self, config)
+        pass
 
 
     def _init_translate(self):

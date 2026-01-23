@@ -1,5 +1,4 @@
 ﻿import flet as ft
-from .listtap.config import ConfigSection
 import app.log as log
 from .listtap import ListTabContainer
 

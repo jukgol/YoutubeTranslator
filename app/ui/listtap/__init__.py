@@ -2,7 +2,7 @@
 from .detail import DetailTab
 from .simple import SimpleTab
 from .download import DownloadTab
-from .config import ConfigSection
+from .config.component import Component as ConfigComponent
 
 class ListTabContainer(ft.Column): 
     def __init__(self):
@@ -13,7 +13,7 @@ class ListTabContainer(ft.Column):
         self.download_tab = DownloadTab()
         self.simple_tab = SimpleTab()
         self.detail_tab = DetailTab()
-        self.config_sec = ConfigSection()
+        self.config_comp = ConfigComponent()
 
         # 2. 레이아웃 배치
         self.controls = [
@@ -23,7 +23,7 @@ class ListTabContainer(ft.Column):
                     ft.Tab(text=" 영상 다운로드 ", content=self.download_tab),
                     ft.Tab(text=" 한번에 번역 ", content=self.simple_tab),
                     ft.Tab(text=" 세분화 번역 ", content=self.detail_tab),
-                    ft.Tab(text=" 설정 ", content=self.config_sec), # 텍스트 정리
+                    ft.Tab(text=" 설정 ", content=self.config_comp.ui),
                 ],
                 expand=True,
                 on_change=self.on_tab_change
@@ -40,7 +40,7 @@ class ListTabContainer(ft.Column):
         self.download_tab.setup_handler(h)
         self.simple_tab.setup_handler(h)
         self.detail_tab.setup_handler(h)
-        self.config_sec.setup_handler(h)
+        # self.config_comp.setup_handler(h) # 핸들러 설정 아직 미완성
         print("🚀 [Master] 모든 UI 탭과 핸들러 배선이 완료되었습니다.")
         
 
