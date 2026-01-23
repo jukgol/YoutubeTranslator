@@ -87,12 +87,12 @@ class Simple:
 
         # 4. 결과 처리
         if success:
-            log_callback(f"✅ 복사 완료: {filename} -> Video 폴더")
+            log.write(f"✅ 복사 완료: {filename} -> Video 폴더")
             # 복사는 원본이 남아있으므로 리스트 새로고침이 필수는 아니지만, 
             # 혹시 모를 상태 반영을 위해 그대로 두셔도 됩니다.
             # refresh_handler.refresh_all() 
         else:
-            log_callback(f"❌ 복사 실패: {message}")
+            log.write(f"❌ 복사 실패: {message}")
 
 
     def update_file_list_widget(self, widget, folder_path):
