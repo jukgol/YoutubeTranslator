@@ -12,8 +12,3 @@ class ConfigEvents:
         h.ui_clear_api_input = self.clear_api_input
         
         print("✅ ConfigSection: 핸들러 및 인터페이스 배선 완료")
-
-    def _on_config_save(self, e=None):
-        version = self.ver_entry.value.strip() if self.ver_entry.value else ""
-        rule = self.rule_text.value.strip() if self.rule_text.value else ""
-        self.handler.setting.save(version, rule)

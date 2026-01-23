@@ -2,14 +2,13 @@
 from ..helper_layout import LabeledInput
 
 class Layout(ft.Column):
-    def __init__(self, save_cmd):
+    def __init__(self):
         super().__init__()
         self.expand = True # 세로로 남은 공간을 모두 차지함
         # 1. LabeledInput 생성 (parent 인자 제거, 1:1 대응)
         self.rule_input = LabeledInput(
             label_text="번역 지침(Rule):", 
-            is_multiline=True, 
-            save_cmd=save_cmd,            
+            is_multiline=True,
         )
         
        # 핵심: 고정 높이를 지우고 expand만 남깁니다.

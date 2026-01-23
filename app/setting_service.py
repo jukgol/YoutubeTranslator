@@ -30,23 +30,29 @@ class SettingService:
         with open(self.path.api_file, "w", encoding="utf-8") as f:
             f.write("\n".join(keys))
 
-    def save_config(self, version, rule):
-        """버전 정보와 번역 규칙을 저장합니다."""
+    def save_version(self, version):
+        """버전 정보를 파일에 저장합니다."""
         with open(self.path.gemini_ver_file, "w", encoding="utf-8") as f:
             f.write(version)
+
+    def load_version(self):
+        """저장된 버전 정보를 불러옵니다. (없으면 빈값)"""
+        if not os.path.exists(self.path.gemini_ver_file):
+            return ""
+        with open(self.path.gemini_ver_file, "r", encoding="utf-8") as f:
+            return f.read().strip()
+
+    def save_rule(self, rule):
+        """번역 규칙을 파일에 저장합니다."""
         with open(self.path.rule_file, "w", encoding="utf-8") as f:
             f.write(rule)
 
-    def load_config(self):
-        """저장된 버전 정보와 규칙을 불러옵니다. (없으면 빈값)"""
-        version, rule = "", ""
-        if os.path.exists(self.path.gemini_ver_file):
-            with open(self.path.gemini_ver_file, "r", encoding="utf-8") as f:
-                version = f.read().strip()
-        if os.path.exists(self.path.rule_file):
-            with open(self.path.rule_file, "r", encoding="utf-8") as f:
-                rule = f.read().strip()
-        return version, rule
+    def load_rule(self):
+        """저장된 번역 규칙을 불러옵니다. (없으면 빈값)"""
+        if not os.path.exists(self.path.rule_file):
+            return ""
+        with open(self.path.rule_file, "r", encoding="utf-8") as f:
+            return f.read().strip()
 
     def get_reordered_keys(self, selected):
         """
