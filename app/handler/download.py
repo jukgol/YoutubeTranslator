@@ -2,6 +2,7 @@
 import yt_dlp
 import asyncio
 from app.logic.downloader import download_video_full_async
+import app.log as log
 
 class DownloadHandler:
     def __init__(self, bridge, url_manager, path, page):
@@ -27,7 +28,7 @@ class DownloadHandler:
     def handle_add_url(self, url):
         """URL 추가 + 비동기 제목 가져오기"""
         new_item, msg = self.logic.add_url(url)
-        self.ui.log(msg)
+        log.write(msg)
     
         if new_item:
             self.ui.ui_clear_download_url_input()
@@ -53,7 +54,7 @@ class DownloadHandler:
 
     def start_download(self):
         if self.is_running:
-            self.ui.log("이미 작업이 진행 중입니다.")
+            log.write("이미 작업이 진행 중입니다.")
             return
     
         self.is_running = True
@@ -91,7 +92,7 @@ class DownloadHandler:
 
         finally:
             self.is_running = False
-            self.ui.log("모든 작업을 마쳤습니다.")
+            log.write("모든 작업을 마쳤습니다.")
             self.update_queue_ui()
 
     def refresh_folder_lists(self):

@@ -11,15 +11,12 @@ def set_api_list(api_combobox, keys):
 def load_api_list(api_combobox):
     """키 목록을 읽고 UI에 반영합니다."""
     keys = setting_service.read_api_keys()
-    app_config.api_keys = keys
-    app_config.selected_api = keys[0] if keys else None
     set_api_list(api_combobox, keys)
 
 def handle_select(api_combobox, selected):
     """선택 이벤트를 처리하고 UI를 새로고침합니다."""
     if not selected or selected == "없음": 
         return
-    app_config.selected_api = selected
     new_keys = setting_service.get_reordered_keys(selected)
     setting_service.write_api_keys(new_keys)
     load_api_list(api_combobox)

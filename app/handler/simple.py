@@ -3,6 +3,7 @@ import os
 from app.ui import selectors
 from app.path import paths
 from app.ui.listtap.simple import render_queue_to_widget 
+import app.log as log
 
 class Simple:
     def __init__(self):
@@ -23,21 +24,21 @@ class Simple:
             return True
         return False
 
-    def handle_add(self, tab, log_callback):
+    def handle_add(self, tab):
         """위젯에서 항목을 추출하여 추가 프로세스 진행"""        
         filename = selectors.get_pure_filename(tab.origin_list)
         
         if not filename:
-            log_callback("⚠️ 추가할 파일을 원본 리스트에서 선택해주세요.")
+            log.write("⚠️ 추가할 파일을 원본 리스트에서 선택해주세요.")
             return
 
         if filename and filename not in self.queue:
             self.queue.append(filename)
             # 갱신할 때도 tab.queue_list를 사용하도록 전달
             self.refresh_ui(tab.queue_list) 
-            log_callback(f"➕ 추가됨: {filename}")
+            log.write(f"➕ 추가됨: {filename}")
         else:
-            log_callback(f"ℹ️ 이미 큐에 존재합니다: {filename}")
+            log.write(f"ℹ️ 이미 큐에 존재합니다: {filename}")
 
     def clear(self, tab):
         self.queue = []
@@ -45,27 +46,27 @@ class Simple:
         # tab.queue_list 위젯을 닦아냅니다.
         self.refresh_ui(tab.queue_list)
 
-    def run_test_loop(self, widget, log_callback, is_stopped_func):
+    def run_test_loop(self, widget, is_stopped_func):
         """테스트 루프 실행 (위젯을 인자로 받아 매번 갱신)"""
         self.current_index = -1
         for i in range(len(self.queue)):
             if is_stopped_func():
-                log_callback("🛑 [테스트] 루프 중단.")
+                log.write("🛑 [테스트] 루프 중단.")
                 break
             
             self.current_index = i
             self.refresh_ui(widget) # 현재 인덱스가 반영된 상태로 다시 그리기 요청
             
             filename = self.queue[i]
-            log_callback(f"🧪 [테스트] {i+1}/{len(self.queue)}: {filename} 처리 중...")
+            log.write(f"🧪 [테스트] {i+1}/{len(self.queue)}: {filename} 처리 중...")
             time.sleep(2)
             
-        log_callback("🏁 [테스트] 루프 종료.")
+        log.write("🏁 [테스트] 루프 종료.")
         self.current_index = -1
         self.refresh_ui(widget)
 
 
-    def handle_copy_file(self, tab, path, refresh_handler, log_callback):
+    def handle_copy_file(self, tab, path, refresh_handler):
         """
         4번 결과 리스트에서 선택된 파일을 Video 폴더로 실제로 복사합니다.
         """ 
@@ -73,7 +74,7 @@ class Simple:
         filename = tab.result_list.get_selected()
     
         if not filename:
-            log_callback("⚠️ 복사할 파일을 결과 리스트에서 선택해주세요.")
+            log.write("⚠️ 복사할 파일을 결과 리스트에서 선택해주세요.")
             return
 
         # 2. 경로 설정

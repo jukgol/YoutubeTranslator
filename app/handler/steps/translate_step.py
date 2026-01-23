@@ -3,19 +3,20 @@ from tkinter import messagebox
 from app.ui import selectors
 from ..task_runner import run_async_process
 from app.logic.translate import translate_test_logic
+import app.log as log
+from app.config import app_config
 from .translate_queue import process_folder_queue
 
 class TranslateStep:
     def __init__(self, handler, path_service):
         self.handler = handler
         self.path_service = path_service
-        self.config = handler.config
 
     def execute_translate(self):
         """2. Gemini 번역 실행"""
-        api_key = self.config.selected_api
-        rule = self.config.prompt_rule
-        model_name = self.config.model_version
+        api_key = app_config.selected_api
+        rule = app_config.prompt_rule
+        model_name = app_config.model_version
         foldername = self.handler.split_listbox.get_selected()
         
         if not api_key or not model_name:
@@ -26,7 +27,7 @@ class TranslateStep:
             return
 
         resultfolder = self.path_service.get_split_folder_path(foldername)
-        self.handler.log(f"--- {foldername} 번역 시작 (모델: {model_name}) ---")
+        log.write(f"--- {foldername} 번역 시작 (모델: {model_name}) ---")
         
         run_async_process(
             self.handler,

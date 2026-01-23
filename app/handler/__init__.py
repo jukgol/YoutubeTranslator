@@ -7,12 +7,12 @@ from .steps.full_process import FullProcessStep
 
 # 분리한 인터페이스 임포트
 
-from .interface.system import SystemInterface
+# from .interface.system import SystemInterface
 from .interface.translate import TranslateInterface
 from .interface.download import DownloadInterface
 from .simple import Simple
 
-class UIHandlers(SystemInterface, TranslateInterface, DownloadInterface):
+class UIHandlers(TranslateInterface, DownloadInterface):
     def __init__(self, app, path, config):
         self.app = app
         self.path = path        
@@ -45,7 +45,7 @@ class UIHandlers(SystemInterface, TranslateInterface, DownloadInterface):
         [마스터 초기화] 앱 시작 시 각 핸들러들의 초기 상태를 세팅합니다.
         """
         # 1. 설정 데이터 로드 (API 키, 버전 등)
-        self.load_config_settings()
+        # self.load_config_settings()
      
         # 2. Simple 탭(번역 큐) 초기화
         # 1번 코드의 initialize_tab_lists와 유사하게, 

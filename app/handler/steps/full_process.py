@@ -4,6 +4,7 @@ from tkinter import messagebox
 from app.ui import selectors
 from ..task_runner import run_async_process
 import app.log as app_log
+from app.config import app_config
 
 # 분리한 로직 임포트
 from .full_process_fucn import step_1_split, step_2_translate, step_3_combine_parts, step_4_combine_timeline
@@ -11,7 +12,6 @@ from .full_process_fucn import step_1_split, step_2_translate, step_3_combine_pa
 class FullProcessStep:
     def __init__(self, handler, path_service):
         self.handler = handler
-        self.config = handler.config
         self.path_service = path_service
         self.is_stopped = False
 
@@ -27,9 +27,9 @@ class FullProcessStep:
             return
 
         # 2. 필수 정보 확인 (API 키 등)
-        api_key = self.config.selected_api
-        rule = self.config.prompt_rule
-        model_name = self.config.model_version
+        api_key = app_config.selected_api
+        rule = app_config.prompt_rule
+        model_name = app_config.model_version
 
         if not api_key or not model_name:
             messagebox.showerror("오류", "API 키와 모델 버전을 확인해주세요.")

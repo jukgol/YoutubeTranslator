@@ -3,6 +3,7 @@ from tkinter import messagebox
 from app.ui import selectors
 from ..task_runner import run_async_process
 from app.logic.split import split_subtitle_logic
+import app.log as log
 
 class SplitStep:
     def __init__(self, handler, path_service):
@@ -17,7 +18,7 @@ class SplitStep:
             return
             
         file_path = self.path_service.get_origin_path(filename)
-        self.handler.log(f"--- {filename} 분리 시작 ---")
+        log.write(f"--- {filename} 분리 시작 ---")
         
         run_async_process(
             self.handler,

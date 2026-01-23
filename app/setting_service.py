@@ -1,6 +1,7 @@
 # app/setting_service.py
 import os
 from app.path import paths
+from app.config import app_config
 
 class SettingService:
     _instance = None
@@ -23,36 +24,46 @@ class SettingService:
         if not os.path.exists(path):
             return []
         with open(path, "r", encoding="utf-8") as f:
-            return [line.strip() for line in f if line.strip()]
+            keys = [line.strip() for line in f if line.strip()]
+            app_config.api_keys = keys
+            app_config.selected_api = keys[0]
+            return keys
 
     def write_api_keys(self, keys):
         """API 키 목록을 파일에 저장합니다."""
         with open(self.path.api_file, "w", encoding="utf-8") as f:
             f.write("\n".join(keys))
+        app_config.api_keys = keys
 
     def save_version(self, version):
         """버전 정보를 파일에 저장합니다."""
         with open(self.path.gemini_ver_file, "w", encoding="utf-8") as f:
             f.write(version)
+        app_config.model_version = version
 
     def load_version(self):
         """저장된 버전 정보를 불러옵니다. (없으면 빈값)"""
         if not os.path.exists(self.path.gemini_ver_file):
             return ""
         with open(self.path.gemini_ver_file, "r", encoding="utf-8") as f:
-            return f.read().strip()
+            version = f.read().strip()
+            app_config.model_version = version
+            return version
 
     def save_rule(self, rule):
         """번역 규칙을 파일에 저장합니다."""
         with open(self.path.rule_file, "w", encoding="utf-8") as f:
             f.write(rule)
+        app_config.prompt_rule = rule
 
     def load_rule(self):
         """저장된 번역 규칙을 불러옵니다. (없으면 빈값)"""
         if not os.path.exists(self.path.rule_file):
             return ""
         with open(self.path.rule_file, "r", encoding="utf-8") as f:
-            return f.read().strip()
+            rule = f.read().strip()
+            app_config.prompt_rule = rule
+            return rule
 
     def get_reordered_keys(self, selected):
         """
@@ -62,6 +73,8 @@ class SettingService:
         if selected in keys:
             keys.remove(selected)  # 기존 위치에서 제거
             keys.insert(0, selected)  # 맨 앞으로 삽입
+        app_config.api_keys = keys
+        app_config.selected_api = selected
         return keys
 
     def get_added_keys(self, new_key):
@@ -73,6 +86,7 @@ class SettingService:
         if new_key in keys:
             keys.remove(new_key)
         keys.insert(0, new_key)
+        app_config.api_keys = keys        
         return keys
 
 # Create a module-level instance that can be imported
