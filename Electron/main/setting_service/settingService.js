@@ -1,11 +1,11 @@
 // electron/main/setting_service/settingService.js
 const fs = require('fs');
-const paths = require('../path_service/pathManager.js'); // Import my ported paths
-const appConfig = require('../config/config.js');       // Import my ported appConfig
+const PathManager = require('../path_service/pathManager.js'); // Import PathManager class
+const appConfig = require('../config/config.js');               // Import my ported appConfig
 
 class SettingService {
     constructor() {
-        this.path = paths; // Use the singleton instance of PathManager
+        this.path = new PathManager(); // Instantiate PathManager here
     }
 
     // Helper to read file content
@@ -90,5 +90,4 @@ class SettingService {
     }
 }
 
-const settingService = new SettingService();
-module.exports = settingService;
+module.exports = SettingService;

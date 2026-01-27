@@ -25,6 +25,10 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (detailContent) {
             await loadComponent('components/tab_content/detail_tab_content.html', detailContent);
         }
+        const settingsContent = document.getElementById('settings-content');
+        if (settingsContent) {
+            await loadComponent('components/tab_content/settings_tab_content.html', settingsContent);
+        }
         
         // 3. After all content is loaded, initialize the UI event listeners
         initializeUI();

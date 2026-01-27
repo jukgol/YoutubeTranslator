@@ -59,5 +59,4 @@ class PathManager {
     }
 }
 
-const paths = new PathManager();
-module.exports = paths;
+module.exports = PathManager;

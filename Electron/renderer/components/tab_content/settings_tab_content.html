@@ -1,0 +1,30 @@
+<div style="width: 100%;">
+    <div class="settings-title">설정 (자동 저장됨)</div>
+    <div class="setting-section">
+        <!-- API Section -->
+        <div class="setting-row">
+            <label>Gemini API Key 선택:</label>
+            <select id="apiSelect"></select>
+            <button class="delete-btn">선택 삭제</button>
+        </div>
+         <div class="setting-row">
+            <label>새 Key 추가:</label>
+            <input type="text" id="apiNewKeyInput" placeholder="새로운 API 키를 입력하세요">
+            <button id="addApiKeyBtn">추가</button>
+        </div>
+        <hr>
+        <!-- Version Section -->
+        <div class="setting-row">
+            <label>Gemini Version:</label>
+            <input type="text" id="geminiVersionInput">
+            <button>남은 요청 확인</button>
+            <span>확인 전</span>
+        </div>
+        <hr>
+        <!-- Rule Section -->
+        <div class="setting-row" style="align-items: start;">
+            <label>번역 지침(Rule):</label>
+            <textarea id="promptRuleTextarea"></textarea>
+        </div>
+    </div>
+</div>
