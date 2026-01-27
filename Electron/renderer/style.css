@@ -1,0 +1,244 @@
+:root {
+    --primary: #2563eb;
+    --bg-color: #f8fafc;
+    --card-bg: #ffffff;
+    --text-main: #1e293b;
+    --border-color: #e2e8f0;
+    --border-radius: 12px;
+}
+body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    margin: 0;
+    background-color: var(--bg-color);
+    color: var(--text-main);
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+.title-bar {
+    -webkit-app-region: drag;
+    background-color: var(--card-bg);
+    color: var(--text-main);
+    padding: 10px;
+    text-align: center;
+    position: relative;
+    border-bottom: 1px solid var(--border-color);
+}
+#close-btn {
+    -webkit-app-region: no-drag;
+    position: absolute;
+    top: 5px;
+    right: 10px;
+    background: none;
+    border: none;
+    color: var(--text-main);
+    font-size: 20px;
+    cursor: pointer;
+}
+.app-container {
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1; /* Takes up remaining vertical space */
+    padding: 20px; /* Re-added padding */
+    overflow: hidden; /* Prevent container from growing with content */
+    gap: 7px; /* Re-added spacing between the 3 main sections (1/3 of previous 20px) */
+}
+
+/* New Layout Styles */
+#tabs-placeholder {
+    /* flex: 1; REMOVED to make it shrink-to-fit */
+    /* background-color: var(--card-bg); REMOVED */
+    /* border-radius: var(--border-radius); REMOVED */
+    /* border: 1px solid var(--border-color); REMOVED */
+    padding: 0; /* REMOVED all padding */
+    flex-shrink: 0; /* Ensure it doesn't shrink more than its content */
+}
+#tab-content-placeholder {
+    flex: 3;
+    background-color: var(--card-bg);
+    border-radius: var(--border-radius);
+    border: 1px solid var(--border-color);
+    overflow: auto; /* This is the main scrolling area */
+    min-height: 0; /* Crucial for flex scrolling */
+    padding: 20px;
+}
+#log-view-placeholder {
+    flex: 2; /* Changed from 1 to 2 */
+    display: flex; /* Make it a flex container to manage its children */
+    flex-direction: column;
+}
+
+/* Styles for components loaded into placeholders */
+.tabs {
+    display: flex;
+    padding: 0 10px; /* Removed top/bottom padding completely */
+    border-bottom: none; /* Remove border from tabs since placeholder has border */
+}
+.tab-button {
+    padding: 10px 20px;
+    border: none;
+    background-color: transparent;
+    cursor: pointer;
+    border-radius: 8px;
+    margin-right: 5px;
+}
+.tab-button.active {
+    background-color: var(--primary);
+    color: white;
+}
+.tab-content-wrapper {
+    height: 100%;
+    width: 100%;
+}
+.tab-content {
+    display: flex;
+    height: 100%;
+}
+#settings-content {
+    display: none;
+    flex-direction: column;
+}
+.log-view {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+}
+.log-view h2 {
+    margin-top: 0;
+    margin-bottom: 10px;
+    font-size: 1.2em;
+}
+#statusLog {
+    width: 100%;
+    flex-grow: 1;
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius);
+    resize: none;
+    box-sizing: border-box;
+    background-color: var(--card-bg);
+    color: var(--text-main);
+    padding: 10px;
+}
+
+/* Settings Page Styles */
+.settings-title {
+    font-weight: bold;
+    font-size: 14px;
+    margin-bottom: 15px;
+}
+.setting-section {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+.setting-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+.setting-row label {
+    width: 150px;
+    flex-shrink: 0;
+}
+.setting-row input[type="text"], .setting-row select {
+    flex-grow: 1;
+    padding: 8px;
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    height: 40px;
+    box-sizing: border-box;
+}
+.setting-row textarea {
+    flex-grow: 1;
+    padding: 8px;
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    resize: vertical;
+    min-height: 80px;
+}
+.setting-row button {
+     border-radius: 6px;
+     padding: 8px 15px;
+     background-color: var(--primary);
+     color: white;
+     border: none;
+     cursor: pointer;
+}
+ .setting-row .delete-btn {
+    background-color: #ef4444; /* Red */
+}
+hr {
+    border: none;
+    border-top: 1px solid var(--border-color);
+    margin: 20px 0;
+}
+
+/* Styles for basic_tab_content.html */
+.main-row {
+    display: flex;
+    gap: 15px; /* Spacing between sections */
+    height: 100%;
+}
+
+.section-frame {
+    flex: 1; /* Each section takes equal space */
+    min-width: 250px; /* Minimum width before wrapping */
+    display: flex;
+    flex-direction: column;
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius);
+    padding: 15px;
+    background-color: var(--card-bg);
+}
+
+.section-header {
+    font-weight: bold;
+    font-size: 1.1em;
+    margin-bottom: 10px;
+    color: var(--text-main);
+}
+
+.list-field {
+    flex-grow: 1;
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    padding: 10px;
+    min-height: 100px;
+    overflow-y: auto;
+    background-color: var(--bg-color);
+    margin-bottom: 10px;
+    white-space: pre-wrap; /* For displaying list items */
+}
+
+.button-group {
+    display: flex;
+    gap: 10px;
+    margin-top: auto; /* Push buttons to the bottom of the section */
+}
+
+.button-group button {
+    flex-grow: 1;
+    padding: 10px 15px; /* Adjust button padding for consistent size */
+    border-radius: 6px; /* Match other buttons */
+}
+
+.status-label-container {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    flex-grow: 1;
+    padding-left: 10px;
+}
+
+.status-label {
+    padding: 8px;
+    border-radius: 5px;
+    background-color: #f0f4f8; /* Light background for status item */
+    color: var(--text-main);
+    font-size: 0.9em;
+}
+
+.status-label.active {
+    font-weight: bold;
+    color: var(--primary);
+}
