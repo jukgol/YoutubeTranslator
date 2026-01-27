@@ -13,7 +13,7 @@ class DownloadTab(ft.Column):
         setup_download_layout(self)
         self.download = DownloadHandler(self, None) # page 인자 필요. DownloadTab.__init__에서 받아야 함
 
-    def setup_handler(self):
+    def setup_handler(self, handlers):
         """
         [리팩토링 통합] 흩어져 있던 브릿지와 이 곳에서 배선합니다.
         이제 부모 컨테이너는 이 함수 하나만 호출하면 됩니다.

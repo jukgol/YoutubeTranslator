@@ -14,4 +14,4 @@ def connect_download_events(self):
     # 폴더 열기
     self.open_video_folder_btn.on_click = lambda _: open_folder_in_explorer(paths.video_dir)
 
-    self.on_active = lambda _: self.download.sync_queue_ui()
+    self.on_active = lambda _: self.download.update_queue_ui()

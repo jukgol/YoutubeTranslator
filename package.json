@@ -1,0 +1,25 @@
+{
+  "name": "youtubetranslator",
+  "version": "1.0.0",
+  "description": "",
+  "main": "electron/main.js",
+  "scripts": {
+    "start": "electron .",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jukgol/YoutubeTranslator.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/jukgol/YoutubeTranslator/issues"
+  },
+  "homepage": "https://github.com/jukgol/YoutubeTranslator#readme",
+  "devDependencies": {
+    "electron": "^40.0.0"
+  }
+}

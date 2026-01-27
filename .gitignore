@@ -6,6 +6,8 @@
 # Visual Studio 설정 폴더 (모든 하위 폴더 포함)
 **/.vs/
 
+node_modules/
+
 # 데이터 폴더
 /data/
 
@@ -18,3 +20,11 @@ api.txt
 apiver.txt
 cookies.txt
 gemini_ver.txt
+
+# Electron-related ignores
+package-lock.json
+/dist/
+/out/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
