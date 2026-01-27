@@ -1,7 +1,7 @@
 :root {
-    --primary: #2563eb;
-    --bg-color: #f8fafc;
-    --card-bg: #ffffff;
+    --primary: #60A5FA;
+    --bg-color: #f0f0f0;
+    --card-bg: #E8E8E8;
     --text-main: #1e293b;
     --border-color: #e2e8f0;
     --border-radius: 12px;
@@ -154,8 +154,14 @@ body {
     border: 1px solid var(--border-color);
     border-radius: 6px;
     resize: vertical;
-    min-height: 80px;
+    height: 200px; /* Increased size */
 }
+/* General button style to remove default border */
+button {
+    border: none;
+    cursor: pointer;
+}
+
 .setting-row button {
      border-radius: 6px;
      padding: 8px 15px;
@@ -165,7 +171,7 @@ body {
      cursor: pointer;
 }
  .setting-row .delete-btn {
-    background-color: #ef4444; /* Red */
+    background-color: #FCA5A5; /* Lighter, desaturated red */
 }
 hr {
     border: none;
@@ -233,7 +239,7 @@ hr {
 .status-label {
     padding: 8px;
     border-radius: 5px;
-    background-color: #f0f4f8; /* Light background for status item */
+    background-color: #D9D9D9; /* Adjusted for new grey scheme */
     color: var(--text-main);
     font-size: 0.9em;
 }

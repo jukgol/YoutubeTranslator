@@ -22,5 +22,9 @@ contextBridge.exposeInMainWorld('electronAPI', {
   settingLoadRule: () => ipcRenderer.invoke('setting:load-rule'),
 
   // Renderer ready signal
-  rendererReadyForLogs: () => ipcRenderer.send('renderer-ready-for-logs')
+  rendererReadyForLogs: () => ipcRenderer.send('renderer-ready-for-logs'),
+
+  // Path Service functions
+  pathGetVideoFiles: () => ipcRenderer.invoke('path:get-video-files'),
+  pathGetSubtitleFiles: () => ipcRenderer.invoke('path:get-subtitle-files'),
 });

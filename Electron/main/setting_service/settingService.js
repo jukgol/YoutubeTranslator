@@ -6,6 +6,9 @@ const appConfig = require('../config/config.js');               // Import my por
 class SettingService {
     constructor() {
         this.path = new PathManager(); // Instantiate PathManager here
+        this.readApiKeys();
+        this.loadVersion();
+        this.loadRule();
     }
 
     // Helper to read file content

@@ -82,20 +82,43 @@ function initCloseButton() {
     }
 }
 
-// Helper to hide all content divs
-function hideAllContent(contentBasic, contentDownload, contentDetail, contentSettings) {
-    if (contentBasic) contentBasic.style.display = 'none';
-    if (contentDownload) contentDownload.style.display = 'none';
-    if (contentDetail) contentDetail.style.display = 'none';
-    if (contentSettings) contentSettings.style.display = 'none';
+// Helper to display files in a list-field div
+function displayFiles(elementId, files) {
+    const listElement = document.getElementById(elementId);
+    if (listElement) {
+        listElement.innerHTML = ''; // Clear current content
+        if (files && files.length > 0) {
+            files.forEach(file => {
+                const p = document.createElement('p');
+                p.textContent = file;
+                listElement.appendChild(p);
+            });
+        } else {
+            listElement.innerHTML = '<p>파일 없음</p>';
+        }
+    }
 }
 
-// Helper to deactivate all tab buttons
-function deactivateAllTabs(tabBasic, tabDownload, tabDetail, tabSettings) {
-    if (tabBasic) tabBasic.classList.remove('active');
-    if (tabDownload) tabDownload.classList.remove('active');
-    if (tabDetail) tabDetail.classList.remove('active');
-    if (tabSettings) tabSettings.classList.remove('active');
+async function loadDownloadUI() {
+    log('[UI] Attempting to load download files...');
+    console.log('[UI] Attempting to load download files...'); // Debug log to console
+    try {
+        // Fetch video files
+        const videoFiles = await window.electronAPI.pathGetVideoFiles();
+        console.log('[UI Debug] Fetched Video Files:', videoFiles);
+        displayFiles('videoFileList', videoFiles);
+
+        // Fetch subtitle files
+        const subtitleFiles = await window.electronAPI.pathGetSubtitleFiles();
+        console.log('[UI Debug] Fetched Subtitle Files:', subtitleFiles);
+        displayFiles('subtitleFileList', subtitleFiles);
+
+        log('[UI] Download files loaded successfully.');
+        console.log('[UI] Download files loaded successfully.'); // Debug log to console
+    } catch (generalError) {
+        log(`[UI Error] Error in loadDownloadUI: ${generalError.message}`);
+        console.error('[UI Error] Error in loadDownloadUI:', generalError);
+    }
 }
 
 function initTabSwitching() { // This function only sets up event listeners
@@ -109,6 +132,22 @@ function initTabSwitching() { // This function only sets up event listeners
     const contentDetail = document.getElementById('detail-content');
     const contentSettings = document.getElementById('settings-content');
 
+    // Helper to hide all content divs
+    function hideAllContent(contentBasic, contentDownload, contentDetail, contentSettings) {
+        if (contentBasic) contentBasic.style.display = 'none';
+        if (contentDownload) contentDownload.style.display = 'none';
+        if (contentDetail) contentDetail.style.display = 'none';
+        if (contentSettings) contentSettings.style.display = 'none';
+    }
+
+    // Helper to deactivate all tab buttons
+    function deactivateAllTabs(tabBasic, tabDownload, tabDetail, tabSettings) {
+        if (tabBasic) tabBasic.classList.remove('active');
+        if (tabDownload) tabDownload.classList.remove('active');
+        if (tabDetail) tabDetail.classList.remove('active');
+        if (tabSettings) tabSettings.classList.remove('active');
+    }
+
     // Event listeners for tabs
     if (tabBasic && contentBasic) {
         tabBasic.addEventListener('click', () => {
@@ -120,11 +159,12 @@ function initTabSwitching() { // This function only sets up event listeners
     }
 
     if (tabDownload && contentDownload) {
-        tabDownload.addEventListener('click', () => {
+        tabDownload.addEventListener('click', async () => {
             deactivateAllTabs(tabBasic, tabDownload, tabDetail, tabSettings);
             hideAllContent(contentBasic, contentDownload, contentDetail, contentSettings);
             tabDownload.classList.add('active');
             contentDownload.style.display = 'flex';
+            await loadDownloadUI(); // Load download UI when tab is clicked
         });
     }
 
@@ -162,7 +202,10 @@ async function setDefaultTabState() { // This should be a separate function call
     hideAllContent(contentBasic, contentDownload, contentDetail, contentSettings); // Hide all first
 
     if (tabDownload && tabDownload.classList.contains('active')) {
-        if (contentDownload) contentDownload.style.display = 'flex';
+        if (contentDownload) {
+            contentDownload.style.display = 'flex';
+            await loadDownloadUI(); // Load download UI if it's the default active tab
+        }
     } else if (tabBasic && tabBasic.classList.contains('active')) {
         if (contentBasic) contentBasic.style.display = 'flex';
     } else if (tabDetail && tabDetail.classList.contains('active')) {
@@ -178,6 +221,7 @@ async function setDefaultTabState() { // This should be a separate function call
     else if (contentDownload) { // Now download is default
          if (tabDownload) tabDownload.classList.add('active');
          contentDownload.style.display = 'flex';
+         await loadDownloadUI(); // Load download UI as fallback
     }
 }
 
@@ -274,6 +318,36 @@ async function initSettingsHandlers() {
                 }
             } else {
                 log('[UI] 삭제할 API Key가 선택되지 않았습니다.');
+            }
+        });
+    }
+
+    // Handle Gemini Version input blur
+    const geminiVersionInput = document.getElementById('geminiVersionInput');
+    if (geminiVersionInput) {
+        geminiVersionInput.addEventListener('blur', async () => {
+            const newVersion = geminiVersionInput.value.trim();
+            try {
+                await window.electronAPI.settingSaveVersion(newVersion);
+                log(`[UI] Gemini 버전이 저장되었습니다: ${newVersion}`);
+            } catch (ipcError) {
+                log(`[UI Error] Failed to save Gemini Version: ${ipcError.message}`);
+                console.error('[UI Error] Failed to save Gemini Version:', ipcError);
+            }
+        });
+    }
+
+    // Handle Prompt Rule textarea blur
+    const promptRuleTextarea = document.getElementById('promptRuleTextarea');
+    if (promptRuleTextarea) {
+        promptRuleTextarea.addEventListener('blur', async () => {
+            const newRule = promptRuleTextarea.value.trim();
+            try {
+                await window.electronAPI.settingSaveRule(newRule);
+                log(`[UI] 번역 규칙이 저장되었습니다.`);
+            } catch (ipcError) {
+                log(`[UI Error] Failed to save Translation Rule: ${ipcError.message}`);
+                console.error('[UI Error] Failed to save Translation Rule:', ipcError);
             }
         });
     }

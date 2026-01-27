@@ -3,6 +3,12 @@ const path = require('path');
 const logManager = require('./js/logManager.js');
 const PathManager = require('./path_service/pathManager.js'); // Import PathManager class
 const SettingService = require('./setting_service/settingService.js'); // Import SettingService class
+const pathService = require('./path_service/pathService.js'); // Import pathService
+
+// Import IPC handlers
+const { registerSettingHandlers } = require('./ipc/settingHandlers.js');
+const { registerPathHandlers } = require('./ipc/pathHandlers.js');
+const { registerAppHandlers } = require('./ipc/appHandlers.js');
 
 let settingServiceInstance = null; // Declare a variable to hold the instance
 let mainWindow; // Declare mainWindow as a module-level variable
@@ -22,62 +28,27 @@ function createWindow () {
 }
 
 app.whenReady().then(() => {
-  createWindow();
-  logManager.initialize(mainWindow); // Initialize logManager here with the created window
+  createWindow(); // This creates mainWindow and loads renderer/index.html
+
+  // Initialize the logManager with the created mainWindow
+  logManager.initialize(mainWindow);
 
   // Instantiate services AFTER app is ready
-  const pathsInstance = new PathManager();
+  // const pathsInstance = new PathManager(); // PathManager is instantiated within SettingService
   settingServiceInstance = new SettingService(); // SettingService's constructor now instantiates PathManager
 
   // Load initial settings into appConfig in the main process
-  settingServiceInstance.readApiKeys();
-  settingServiceInstance.loadVersion();
-  settingServiceInstance.loadRule();
   logManager.write('Backend settings initialized.');
 
   // Test log from the main process on startup
   logManager.write('Application started.');
 
-  // IPC Handlers for SettingService
-  ipcMain.handle('setting:read-api-keys', () => {
-    return settingServiceInstance.readApiKeys();
-  });
-  ipcMain.handle('setting:get-reordered-keys', (event, selected) => {
-    return settingServiceInstance.getReorderedKeys(selected);
-  });
-  ipcMain.handle('setting:get-added-keys', (event, newKey) => {
-    return settingServiceInstance.getAddedKeys(newKey);
-  });
-  ipcMain.handle('setting:write-api-keys', (event, keys) => {
-    return settingServiceInstance.writeApiKeys(keys);
-  });
-  ipcMain.handle('setting:save-version', (event, version) => {
-    return settingServiceInstance.saveVersion(version);
-  });
-  ipcMain.handle('setting:load-version', () => {
-    return settingServiceInstance.loadVersion();
-  });
-  ipcMain.handle('setting:save-rule', (event, rule) => {
-    return settingServiceInstance.saveRule(rule);
-  });
-  ipcMain.handle('setting:load-rule', () => {
-    return settingServiceInstance.loadRule();
-  });
+  // Register IPC handlers
+  registerSettingHandlers(ipcMain, settingServiceInstance);
+  registerPathHandlers(ipcMain, settingServiceInstance, pathService);
+  registerAppHandlers(ipcMain, app, logManager);
 
-  // Listener for logs coming from the renderer process
-  ipcMain.on('log-from-renderer', (event, message) => {
-    // Add a prefix to distinguish the source and send it back through the central logger
-    logManager.write(`[UI] ${message}`);
-  });
-
-  // Listener for renderer's readiness to receive logs
-  ipcMain.on('renderer-ready-for-logs', () => {
-    logManager.setRendererReady(); // Inform logManager that renderer is ready
-  });
-
-  ipcMain.on('close-app', () => {
-    app.quit();
-  });
+  // No mainWindow.once('ready-to-show') here because it will show it on load.
 
   app.on('activate', function () {
     if (BrowserWindow.getAllWindows().length === 0) createWindow();

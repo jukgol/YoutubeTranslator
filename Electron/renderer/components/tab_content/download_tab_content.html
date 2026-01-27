@@ -4,32 +4,31 @@
         <h3 class="section-header">1. 영상 다운로드</h3>
         <div class="setting-row" style="margin-bottom: 10px;">
             <input type="text" placeholder="URL을 입력하세요" style="flex-grow: 1;">
-            <button style="background-color: #1d4ed8; flex-grow: 0;">URL 추가</button>
+            <button style="background-color: #818CF8; flex-grow: 0;">URL 추가</button>
         </div>
-        <div class="list-field">
-            <!-- URL list will be shown here -->
+            <div class="list-field" id="downloadUrlList">
+                <!-- URL list will be shown here -->
+            </div>
+            <div class="button-group">
+                <button style="background-color: #4ADE80;">다운로드 시작</button>
+            </div>
         </div>
-        <div class="button-group">
-            <button style="background-color: #047857;">다운로드 시작</button>
+        <!-- 2. 영상 폴더 목록 -->
+        <div class="section-frame">
+            <h3 class="section-header">2. 영상 폴더 목록</h3>
+            <div class="list-field" id="videoFileList">
+                <!-- Video file list will be shown here -->
+            </div>
+            <div class="button-group">
+                <button style="background-color: #9CA3AF;">폴더 열기</button>
+            </div>
         </div>
-    </div>
-    <!-- 2. 영상 폴더 목록 -->
-    <div class="section-frame">
-        <h3 class="section-header">2. 영상 폴더 목록</h3>
-        <div class="list-field">
-            <!-- Video file list will be shown here -->
-        </div>
-        <div class="button-group">
-            <button style="background-color: #475569;">폴더 열기</button>
-        </div>
-    </div>
-    <!-- 3. 자막 폴더 목록 -->
-    <div class="section-frame">
-        <h3 class="section-header">3. 자막 폴더 목록</h3>
-        <div class="list-field">
-            <!-- Subtitle file list will be shown here -->
-        </div>
-        <div class="button-group">
+        <!-- 3. 자막 폴더 목록 -->
+        <div class="section-frame">
+            <h3 class="section-header">3. 자막 폴더 목록</h3>
+            <div class="list-field" id="subtitleFileList">
+                <!-- Subtitle file list will be shown here -->
+            </div>        <div class="button-group">
             <!-- No buttons here -->
         </div>
     </div>
