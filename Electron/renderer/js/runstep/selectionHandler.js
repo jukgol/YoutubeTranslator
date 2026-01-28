@@ -1,6 +1,6 @@
-// Electron/renderer/js/detail/selectionHandler.js
+// Electron/renderer/js/runstep/selectionHandler.js
 
-export let currentSelectedElement = null; // Global variable to track the currently selected element
+export let currentSelectedElements = new Map(); // Map<sectionName, HTMLElement> to track selected elements per section
 
 export function applyHighlight(element, isFolder) {
     if (element) {
@@ -60,23 +60,28 @@ export function createItemClickHandler(pathMappingRef) {
             }
         }
 
-        // Remove highlight from previously selected element, using its stored type
-        if (currentSelectedElement && currentSelectedElement !== elementToHighlight) {
-            const wasFolder = currentSelectedElement.dataset.type === 'folder'; // Use dataset from the stored element
-            removeHighlight(currentSelectedElement, wasFolder);
+        // Get the previously selected element for THIS section
+        const previousSelectedElementInSection = currentSelectedElements.get(sectionName);
+
+        // Remove highlight from previously selected element in THIS section if it's different
+        if (previousSelectedElementInSection && previousSelectedElementInSection !== elementToHighlight) {
+            const wasFolder = previousSelectedElementInSection.dataset.type === 'folder';
+            removeHighlight(previousSelectedElementInSection, wasFolder);
         }
         
         // Apply highlight to the new element
-        const isFolder = (elementToHighlight.dataset.type === 'folder'); // Use dataset from the element to highlight
+        const isFolder = (elementToHighlight.dataset.type === 'folder');
         applyHighlight(elementToHighlight, isFolder);
-        currentSelectedElement = elementToHighlight;
+        
+        // Update the map for THIS section
+        currentSelectedElements.set(sectionName, elementToHighlight);
 
         // Store context in dataset for future reference (e.g., when removing highlight)
-        currentSelectedElement.dataset.sectionName = sectionName;
-        currentSelectedElement.dataset.type = elementToHighlight.dataset.type; // Store the type of the element actually highlighted
-        currentSelectedElement.dataset.data = JSON.stringify(data); // Store actual data for selection
+        elementToHighlight.dataset.sectionName = sectionName;
+        elementToHighlight.dataset.type = elementToHighlight.dataset.type;
+        elementToHighlight.dataset.data = JSON.stringify(data);
 
         console.log(`Selected in ${sectionName}: Type=${type}, Data=`, data);
-        console.log('Currently highlighted element:', currentSelectedElement);
+        console.log('Currently highlighted element for section:', sectionName, elementToHighlight);
     };
 }

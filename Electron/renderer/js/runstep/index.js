@@ -1,4 +1,4 @@
-// Electron/renderer/js/detail/index.js
+// Electron/renderer/js/runstep/index.js
 
 import { createItemClickHandler } from './selectionHandler.js';
 import { renderFlatList, renderNestedList } from './listRenderers.js';
@@ -13,7 +13,7 @@ const pathMapping = {
 
 const handleItemClick = createItemClickHandler(pathMapping); // Create the handler with pathMapping
 
-export async function initializeDetailTab() {
+export async function initializeRunstepTab() {
     const sections = document.querySelectorAll('.section-frame');
 
     for (const section of sections) {

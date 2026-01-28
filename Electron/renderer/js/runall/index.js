@@ -1,12 +1,12 @@
-// Electron/renderer/js/basic/index.js
+// Electron/renderer/js/runall/index.js
 import { renderSimpleList } from './listRenderers.js';
 import { createItemClickHandler } from './selectionHandler.js';
 
-// 'basic' 탭의 각 섹션에 대한 설정
+// 'runall' 탭의 각 섹션에 대한 설정
 const pathMapping = {
-    '원본 데이터': { api: 'pathGetSubtitleFiles', listElementId: '#basic-content .section-frame:nth-child(1) .list-field' },
-    '작업 큐': { api: null, listElementId: '#basic-content .section-frame:nth-child(2) .list-field' },
-    '최종 결과': { api: 'pathGetResultFiles', listElementId: '#basic-content .section-frame:nth-child(4) .list-field' },
+    '원본 데이터': { api: 'pathGetSubtitleFiles', listElementId: '#runall-content .section-frame:nth-child(1) .list-field' },
+    '작업 큐': { api: null, listElementId: '#runall-content .section-frame:nth-child(2) .list-field' },
+    '최종 결과': { api: 'pathGetResultFiles', listElementId: '#runall-content .section-frame:nth-child(4) .list-field' },
 };
 
 // 버튼 이벤트 리스너를 설정하는 함수
@@ -27,7 +27,7 @@ function setupButtonListeners() {
             if (selectedItems.length > 0) {
                 console.log('Adding to queue:', selectedItems);
                 // await window.electronAPI.invoke('simple:add-to-queue', selectedItems);
-                // await initializeBasicTab(); // 목록 새로고침
+                // await initializeRunallTab(); // 목록 새로고침
             }
         };
     }
@@ -36,7 +36,7 @@ function setupButtonListeners() {
         clearQueueBtn.onclick = async () => {
             console.log('Clearing queue');
             // await window.electronAPI.invoke('simple:clear-queue');
-            // await initializeBasicTab();
+            // await initializeRunallTab();
         };
     }
 
@@ -63,9 +63,9 @@ function setupButtonListeners() {
     }
 }
 
-// Basic 탭이 활성화될 때 호출되는 주 함수
-export async function initializeBasicTab() {
-    console.log('[BasicTab] Initializing...');
+// Runall 탭이 활성화될 때 호출되는 주 함수
+export async function initializeRunallTab() {
+    console.log('[RunallTab] Initializing...');
 
     const handleItemClick = createItemClickHandler();
 
@@ -79,7 +79,7 @@ export async function initializeBasicTab() {
                     const data = await window.electronAPI[config.api]();
                     renderSimpleList(listElement, data, sectionName, handleItemClick);
                 } catch (error) {
-                    console.error(`[BasicTab] Error fetching data for ${sectionName}:`, error);
+                    console.error(`[RunallTab] Error fetching data for ${sectionName}:`, error);
                     listElement.innerHTML = `<p style="color: red;">데이터 로딩 실패</p>`;
                 }
             }
@@ -87,8 +87,8 @@ export async function initializeBasicTab() {
     }
 
     // 버튼 리스너 설정 (한 번만 실행되도록)
-    if (!window.basicTabInitialized) {
+    if (!window.runallTabInitialized) {
         setupButtonListeners();
-        window.basicTabInitialized = true;
+        window.runallTabInitialized = true;
     }
 }

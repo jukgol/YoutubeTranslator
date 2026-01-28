@@ -1,8 +1,8 @@
 import { write as log } from './logger.js';
 import { initializeSettings } from './setting/index.js'; // Import the settings module
 import { initializeDownloadTab } from './download/index.js';
-import { initializeDetailTab } from './detail/index.js';
-import { initializeBasicTab } from './basic/index.js';
+import { initializeRunstepTab } from './runstep/index.js';
+import { initializeRunallTab } from './runall/index.js';
 
 const settings = initializeSettings(); // Initialize the settings module once
 
@@ -17,9 +17,9 @@ function initCloseButton() {
 
 const tabConfig = [
     { 
-        tabId: 'tab-basic', 
-        contentId: 'basic-content', 
-        initializer: initializeBasicTab
+        tabId: 'tab-runall', 
+        contentId: 'runall-content', 
+        initializer: initializeRunallTab
     },
     { 
         tabId: 'tab-download', 
@@ -27,9 +27,9 @@ const tabConfig = [
         initializer: initializeDownloadTab 
     },
     { 
-        tabId: 'tab-detail', 
-        contentId: 'detail-content', 
-        initializer: initializeDetailTab 
+        tabId: 'tab-runstep', 
+        contentId: 'runstep-content', 
+        initializer: initializeRunstepTab 
     },
     { 
         tabId: 'tab-settings', 

@@ -1,7 +1,6 @@
 import { loadComponent } from './js/componentLoader.js';
 import { initializeUI } from './js/uiManager.js';
-import { initializeDetailTab } from './js/detail/index.js'; // Import the detail tab initializer
-import { initializeDownloadTab } from './js/download/index.js'; // Import the download tab initializer
+// Removed unused imports for detail and download initializers
 
 document.addEventListener('DOMContentLoaded', async () => {
     const tabsPlaceholder = document.getElementById('tabs-placeholder');
@@ -15,17 +14,17 @@ document.addEventListener('DOMContentLoaded', async () => {
         await loadComponent('components/log/log.html', logPlaceholder);
 
         // [기존 코드 유지] 2. After the main sections are loaded, load the content for all tabs
-        const basicContent = document.getElementById('basic-content');
-        if (basicContent) {
-            await loadComponent('components/tab_content/basic_tab_content.html', basicContent);
+        const runallContent = document.getElementById('runall-content');
+        if (runallContent) {
+            await loadComponent('components/tab_content/runall_tab_content.html', runallContent);
         }
         const downloadContent = document.getElementById('download-content');
         if (downloadContent) {
             await loadComponent('components/tab_content/download_tab_content.html', downloadContent);
         }
-        const detailContent = document.getElementById('detail-content');
-        if (detailContent) {
-            await loadComponent('components/tab_content/detail_tab_content.html', detailContent);
+        const runstepContent = document.getElementById('runstep-content');
+        if (runstepContent) {
+            await loadComponent('components/tab_content/runstep_tab_content.html', runstepContent);
         }
         const settingsContent = document.getElementById('settings-content');
         if (settingsContent) {
