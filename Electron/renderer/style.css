@@ -1,3 +1,7 @@
-@import url("css/main.css");
+@import url("css/_variables.css");
+@import url("css/_base.css");
+@import url("css/_layout.css");
+@import url("css/_settings.css");
+@import url("css/_runall.css");
 @import url("css/list-item.css");
 @import url("css/loading.css");

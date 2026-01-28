@@ -3,24 +3,23 @@ export function renderSimpleList(listContainer, data, sectionName, handleItemCli
     listContainer.innerHTML = ''; // 기존 콘텐츠 초기화
 
     if (!data || data.length === 0) {
-        const p = document.createElement('p');
-        p.textContent = '항목 없음';
-        p.style.textAlign = 'center';
-        p.style.color = '#9CA3AF';
-        listContainer.appendChild(p);
+        const li = document.createElement('li');
+        li.className = 'list-item-empty';
+        li.textContent = '항목 없음';
+        listContainer.appendChild(li);
         return;
     }
 
     data.forEach(itemText => {
-        const itemDiv = document.createElement('div');
-        itemDiv.className = 'list-item'; // 스타일링을 위한 클래스
-        itemDiv.textContent = itemText;
+        const li = document.createElement('li'); // Changed from div to li
+        li.className = 'list-item'; // 스타일링을 위한 클래스
+        li.textContent = itemText;
         
         // 아이템에 클릭 이벤트 리스너 추가
         if (handleItemClick) {
-            itemDiv.addEventListener('click', () => handleItemClick(itemDiv));
+            li.addEventListener('click', () => handleItemClick(li)); // Pass li
         }
         
-        listContainer.appendChild(itemDiv);
+        listContainer.appendChild(li);
     });
 }

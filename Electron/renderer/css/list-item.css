@@ -10,6 +10,16 @@
     --list-item-selected-text: #1e293b; /* Main text color when selected */
 }
 
+/* Styling for the actual ul container of items */
+.item-list {
+    list-style: none; /* Remove default bullet points */
+    margin: 0;        /* Remove default margin */
+    padding: 0;       /* Remove default padding */
+    flex-grow: 1;     /* Make sure it fills the parent list-field */
+    display: flex;    /* Use flexbox for consistent item stacking */
+    flex-direction: column; /* Stack items vertically */
+}
+
 /* Base style for all list items */
 .list-item {
     font-size: 0.8em;
@@ -45,4 +55,11 @@
     font-style: italic;
     color: #aaa;
     padding: 5px;
+}
+
+/* Processing state */
+.list-item.active-process {
+    background-color: #4CAF50; /* A shade of green to indicate processing */
+    color: white;
+    font-weight: bold;
 }

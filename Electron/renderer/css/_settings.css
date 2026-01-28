@@ -1,0 +1,50 @@
+#settings-content {
+    display: none;
+    flex-direction: column;
+}
+.settings-title {
+    font-weight: bold;
+    font-size: 14px;
+    margin-bottom: 15px;
+}
+.setting-section {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+.setting-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+.setting-row label {
+    width: 150px;
+    flex-shrink: 0;
+}
+.setting-row input[type="text"], .setting-row select {
+    flex-grow: 1;
+    padding: 8px;
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    height: 40px;
+    box-sizing: border-box;
+}
+.setting-row textarea {
+    flex-grow: 1;
+    padding: 8px;
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    resize: vertical;
+    height: 200px; /* Increased size */
+}
+.setting-row button {
+     border-radius: 6px;
+     padding: 8px 15px;
+     background-color: var(--primary);
+     color: white;
+     border: none;
+     cursor: pointer;
+}
+ .setting-row .delete-btn {
+    background-color: #FCA5A5; /* Lighter, desaturated red */
+}
