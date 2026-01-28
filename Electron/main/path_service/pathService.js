@@ -39,6 +39,44 @@ class SubtitlePathService {
     }
 }
 
+function getSubdirectories(folderPath) {
+    try {
+        if (!fs.existsSync(folderPath)) {
+            console.log(`[Main Debug] Subdirectories: Path does not exist: ${folderPath}`);
+            return [];
+        }
+        const allItems = fs.readdirSync(folderPath);
+        return allItems.filter(item => {
+            return fs.statSync(path.join(folderPath, item)).isDirectory();
+        }).sort();
+    } catch (error) {
+        console.error(`[Main Debug] Error getting subdirectories from ${folderPath}:`, error);
+        return [];
+    }
+}
+
+function getFilesinDirectory(directoryPath, extensions = null) {
+    try {
+        if (!fs.existsSync(directoryPath)) {
+            console.log(`[Main Debug] Files in Directory: Path does not exist: ${directoryPath}`);
+            return [];
+        }
+        const allItems = fs.readdirSync(directoryPath);
+        let files = allItems.filter(item => {
+            return fs.statSync(path.join(directoryPath, item)).isFile();
+        });
+
+        if (extensions) {
+            files = files.filter(f => extensions.some(ext => f.toLowerCase().endsWith(ext)));
+        }
+        return files.sort();
+    } catch (error) {
+        console.error(`[Main Debug] Error getting files from directory ${directoryPath}:`, error);
+        return [];
+    }
+}
+
+
 function getFolderFiles(folderPath, extensions = null, exclude = null) {
     console.log('[Main Debug] 함수 시작 - 경로:', folderPath); // 1단계
 
@@ -112,6 +150,8 @@ function openFolderInExplorer(folderPath) {
 // Export the class and utility functions
 module.exports = {
     SubtitlePathService,
+    getSubdirectories,
+    getFilesinDirectory,
     getFolderFiles,
     copyFileToFolder,
     openFolderInExplorer,

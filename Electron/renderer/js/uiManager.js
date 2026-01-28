@@ -192,8 +192,6 @@ function initTabSwitching() { // This function only sets up event listeners
 
 async function setDefaultTabState() { // This should be a separate function called at init
 
-    console.log("tabstate");
-
     const tabBasic = document.getElementById('tab-basic');
     const tabDownload = document.getElementById('tab-download');
     const tabDetail = document.getElementById('tab-detail');
@@ -361,8 +359,7 @@ async function initSettingsHandlers() {
 
 export async function initializeUI() { // Made initializeUI async
     initCloseButton();
-    initTabSwitching(); // Call initTabSwitching to set up listeners
-    console.log("intiuuu");
+    initTabSwitching(); // Call initTabSwitching to set up listeners    
     await setDefaultTabState(); // Then set the default state
     initLogListener();
     initTestButtons(); // For demonstration
