@@ -4,7 +4,7 @@
   "description": "",
   "main": "electron/main/index.js",
   "scripts": {
-    "start": "electron .",
+    "start": "chcp 65001 > nul && electron .", 
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {

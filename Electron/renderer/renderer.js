@@ -1,5 +1,6 @@
 import { loadComponent } from './js/componentLoader.js';
 import { initializeUI } from './js/uiManager.js';
+import { loadDownloadUI } from './js/uiManager.js';
 
 document.addEventListener('DOMContentLoaded', async () => {
     const tabsPlaceholder = document.getElementById('tabs-placeholder');
@@ -7,12 +8,12 @@ document.addEventListener('DOMContentLoaded', async () => {
     const logPlaceholder = document.getElementById('log-view-placeholder');
 
     if (tabsPlaceholder && contentPlaceholder && logPlaceholder) {
-        // 1. Load the three main sections
+        // [기존 코드 유지] 1. Load the three main sections
         await loadComponent('components/tabs_bar/tabs_bar.html', tabsPlaceholder);
         await loadComponent('components/tab_content/tab_content.html', contentPlaceholder);
         await loadComponent('components/log/log.html', logPlaceholder);
 
-        // 2. After the main sections are loaded, load the content for all tabs
+        // [기존 코드 유지] 2. After the main sections are loaded, load the content for all tabs
         const basicContent = document.getElementById('basic-content');
         if (basicContent) {
             await loadComponent('components/tab_content/basic_tab_content.html', basicContent);
@@ -28,9 +29,18 @@ document.addEventListener('DOMContentLoaded', async () => {
         const settingsContent = document.getElementById('settings-content');
         if (settingsContent) {
             await loadComponent('components/tab_content/settings_tab_content.html', settingsContent);
+        }       
+
+        console.log("inti");
+        await initializeUI();
+                
+        // --- 여기서부터 로딩 화면 전환 로직 ---
+        const loadingOverlay = document.getElementById('loading-overlay');
+        const appContainer = document.querySelector('.app-container');
+
+        if (loadingOverlay && appContainer) {
+            loadingOverlay.style.display = 'none';      // 로딩 레이어 숨김
+            appContainer.classList.remove('hidden');    // 메인 컨텐츠 표시
         }
-        
-        // 3. After all content is loaded, initialize the UI event listeners
-        initializeUI();
     }
 });

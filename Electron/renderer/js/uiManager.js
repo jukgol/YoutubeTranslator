@@ -99,7 +99,7 @@ function displayFiles(elementId, files) {
     }
 }
 
-async function loadDownloadUI() {
+export async function loadDownloadUI() {
     log('[UI] Attempting to load download files...');
     console.log('[UI] Attempting to load download files...'); // Debug log to console
     try {
@@ -121,6 +121,24 @@ async function loadDownloadUI() {
     }
 }
 
+// Helper to hide all content divs
+function hideAllContent(contentBasic, contentDownload, contentDetail, contentSettings) {
+    if (contentBasic) contentBasic.style.display = 'none';
+    if (contentDownload) contentDownload.style.display = 'none';
+    if (contentDetail) contentDetail.style.display = 'none';
+    if (contentSettings) contentSettings.style.display = 'none';
+}
+
+// Helper to deactivate all tab buttons
+function deactivateAllTabs(tabBasic, tabDownload, tabDetail, tabSettings) {
+    if (tabBasic) tabBasic.classList.remove('active');
+    if (tabDownload) tabDownload.classList.remove('active');
+    if (tabDetail) tabDetail.classList.remove('active');
+    if (tabSettings) tabSettings.classList.remove('active');
+}
+
+
+
 function initTabSwitching() { // This function only sets up event listeners
     const tabBasic = document.getElementById('tab-basic');
     const tabDownload = document.getElementById('tab-download');
@@ -131,23 +149,7 @@ function initTabSwitching() { // This function only sets up event listeners
     const contentDownload = document.getElementById('download-content');
     const contentDetail = document.getElementById('detail-content');
     const contentSettings = document.getElementById('settings-content');
-
-    // Helper to hide all content divs
-    function hideAllContent(contentBasic, contentDownload, contentDetail, contentSettings) {
-        if (contentBasic) contentBasic.style.display = 'none';
-        if (contentDownload) contentDownload.style.display = 'none';
-        if (contentDetail) contentDetail.style.display = 'none';
-        if (contentSettings) contentSettings.style.display = 'none';
-    }
-
-    // Helper to deactivate all tab buttons
-    function deactivateAllTabs(tabBasic, tabDownload, tabDetail, tabSettings) {
-        if (tabBasic) tabBasic.classList.remove('active');
-        if (tabDownload) tabDownload.classList.remove('active');
-        if (tabDetail) tabDetail.classList.remove('active');
-        if (tabSettings) tabSettings.classList.remove('active');
-    }
-
+    
     // Event listeners for tabs
     if (tabBasic && contentBasic) {
         tabBasic.addEventListener('click', () => {
@@ -189,6 +191,9 @@ function initTabSwitching() { // This function only sets up event listeners
 }
 
 async function setDefaultTabState() { // This should be a separate function called at init
+
+    console.log("tabstate");
+
     const tabBasic = document.getElementById('tab-basic');
     const tabDownload = document.getElementById('tab-download');
     const tabDetail = document.getElementById('tab-detail');
@@ -357,6 +362,7 @@ async function initSettingsHandlers() {
 export async function initializeUI() { // Made initializeUI async
     initCloseButton();
     initTabSwitching(); // Call initTabSwitching to set up listeners
+    console.log("intiuuu");
     await setDefaultTabState(); // Then set the default state
     initLogListener();
     initTestButtons(); // For demonstration

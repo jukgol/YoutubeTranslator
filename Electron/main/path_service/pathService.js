@@ -40,23 +40,45 @@ class SubtitlePathService {
 }
 
 function getFolderFiles(folderPath, extensions = null, exclude = null) {
-    if (!fs.existsSync(folderPath)) {
-        return [];
-    }
-    
-    let files = fs.readdirSync(folderPath).filter(f => fs.statSync(path.join(folderPath, f)).isFile());
-    
-    if (extensions) {
-        files = files.filter(f => extensions.some(ext => f.toLowerCase().endsWith(ext)));
-    }
-    
-    if (exclude) {
-        files = files.filter(f => !exclude.some(ext => f.toLowerCase().endsWith(ext)));
-    }
-        
-    return files.sort(); // Sort alphabetically
-}
+    console.log('[Main Debug] 함수 시작 - 경로:', folderPath); // 1단계
 
+    try {
+        if (!fs.existsSync(folderPath)) {
+            console.log('[Main Debug] 경로가 존재하지 않음');
+            return [];
+        }
+        
+        console.log('[Main Debug] 폴더 읽기 시도...'); // 2단계
+        const allItems = fs.readdirSync(folderPath);
+        
+        let files = allItems.filter(f => {
+            try {
+                // 여기서 권한 문제나 path 모듈 미선언 에러가 자주 발생합니다.
+                return fs.statSync(path.join(folderPath, f)).isFile();
+            } catch (e) {
+                console.log(`[Main Debug] 파일 확인 중 에러 (${f}):`, e.message);
+                return false;
+            }
+        });
+        
+        console.log('[Main Debug] 파일 필터링 완료:', files.length, '개'); // 3단계
+        
+        if (extensions) {
+            files = files.filter(f => extensions.some(ext => f.toLowerCase().endsWith(ext)));
+        }
+        
+        if (exclude) {
+            files = files.filter(f => !exclude.some(ext => f.toLowerCase().endsWith(ext)));
+        }
+            
+        console.log('[Main Debug] 최종 리턴 직전'); // 4단계
+        return files.sort(); 
+        
+    } catch (globalError) {
+        console.error('[Main Debug] 치명적 에러 발생:', globalError); // 전체 에러 포착
+        return []; 
+    }
+}
 function copyFileToFolder(sourceFilePath, targetFolderPath) {
     try {
         if (!fs.existsSync(sourceFilePath) || !fs.statSync(sourceFilePath).isFile()) {

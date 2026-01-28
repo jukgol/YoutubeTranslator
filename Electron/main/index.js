@@ -15,8 +15,8 @@ let mainWindow; // Declare mainWindow as a module-level variable
 
 function createWindow () {
   mainWindow = new BrowserWindow({ // Assign to the module-level mainWindow
-    width: 800,
-    height: 600,
+    width: 1200,
+    height: 800,
     frame: false,
     webPreferences: {
       preload: path.join(__dirname, '../preload/index.js')
@@ -27,8 +27,7 @@ function createWindow () {
   // mainWindow.webContents.openDevTools(); // ADDED FOR DEBUGGING (REMOVED)
 }
 
-app.whenReady().then(() => {
-  createWindow(); // This creates mainWindow and loads renderer/index.html
+app.whenReady().then(() => { 
 
   // Initialize the logManager with the created mainWindow
   logManager.initialize(mainWindow);
@@ -48,7 +47,7 @@ app.whenReady().then(() => {
   registerPathHandlers(ipcMain, settingServiceInstance, pathService);
   registerAppHandlers(ipcMain, app, logManager);
 
-  // No mainWindow.once('ready-to-show') here because it will show it on load.
+  createWindow(); // This creates mainWindow and loads renderer/index.html
 
   app.on('activate', function () {
     if (BrowserWindow.getAllWindows().length === 0) createWindow();
