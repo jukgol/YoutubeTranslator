@@ -1,34 +1,25 @@
 const { contextBridge, ipcRenderer } = require('electron');
 
-contextBridge.exposeInMainWorld('electronAPI', {
-  // System functions
-  closeApp: () => ipcRenderer.send('close-app'),
+try {
+  const loggingAPI = require('./api/logging'); // .js 추가
+  const pathsAPI = require('./api/paths');     // .js 추가
+  const settingsAPI = require('./api/settings'); // .js 추가
+  const systemAPI = require('./api/system');     // .js 추가
 
-  // Logging functions
-  // Send a log message from renderer to main
-  log: (message) => ipcRenderer.send('log-from-renderer', message),
+  const logging = loggingAPI(ipcRenderer);
+  const paths = pathsAPI(ipcRenderer);
+  const settings = settingsAPI(ipcRenderer);
+  const system = systemAPI(ipcRenderer);
+
+  contextBridge.exposeInMainWorld('electronAPI', {
+    ...logging,
+    ...paths,
+    ...settings,
+    ...system
+  });
   
-  // Listen for log messages from main
-  onLogMessage: (callback) => ipcRenderer.on('log-message', (_event, value) => callback(value)),
-
-  // Setting Service functions
-  settingReadApiKeys: () => ipcRenderer.invoke('setting:read-api-keys'),
-  settingGetReorderedKeys: (selected) => ipcRenderer.invoke('setting:get-reordered-keys', selected),
-  settingGetAddedKeys: (newKey) => ipcRenderer.invoke('setting:get-added-keys', newKey),
-  settingWriteApiKeys: (keys) => ipcRenderer.invoke('setting:write-api-keys', keys),
-  settingSaveVersion: (version) => ipcRenderer.invoke('setting:save-version', version),
-  settingLoadVersion: () => ipcRenderer.invoke('setting:load-version'),
-  settingSaveRule: (rule) => ipcRenderer.invoke('setting:save-rule', rule),
-  settingLoadRule: () => ipcRenderer.invoke('setting:load-rule'),
-
-  // Renderer ready signal
-  rendererReadyForLogs: () => ipcRenderer.send('renderer-ready-for-logs'),
-
-  // Path Service functions
-  pathGetVideoFiles: () => ipcRenderer.invoke('path:get-video-files'),
-  pathGetSubtitleFiles: () => ipcRenderer.invoke('path:get-subtitle-files'),
-  pathGetSplitFiles: () => ipcRenderer.invoke('path:get-split-files'),
-  pathGetTranslatedFiles: () => ipcRenderer.invoke('path:get-translated-files'),
-  pathGetCombineFiles: () => ipcRenderer.invoke('path:get-combine-files'),
-  pathGetResultFiles: () => ipcRenderer.invoke('path:get-result-files'),
-});
+  console.log("Electron API 등록 완료");
+} catch (e) {
+  // 여기서 'module not found'가 뜨면 실제 파일 이름/경로 오타입니다.
+  console.error("Preload 로드 에러:", e);
+}

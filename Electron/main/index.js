@@ -17,9 +17,10 @@ function createWindow () {
   mainWindow = new BrowserWindow({ // Assign to the module-level mainWindow
     width: 1200,
     height: 800,
-    frame: false,
+    frame: false,    
     webPreferences: {
-      preload: path.join(__dirname, '../preload/index.js')
+      preload: path.join(__dirname, '../preload/index.js'),
+      sandbox: false
     }
   });
 
@@ -29,14 +30,9 @@ function createWindow () {
 
 app.whenReady().then(() => { 
 
-  // Instantiate services AFTER app is ready
-  // const pathsInstance = new PathManager(); // PathManager is instantiated within SettingService
+  // Instantiate services AFTER app is ready  
   settingServiceInstance = new SettingService(); // SettingService's constructor now instantiates PathManager
 
-  // Load initial settings into appConfig in the main process
-  logManager.write('Backend settings initialized.');
-
-  // Test log from the main process on startup
   logManager.write('Application started.');
 
   // Register IPC handlers
@@ -45,7 +41,6 @@ app.whenReady().then(() => {
   registerAppHandlers(ipcMain, app, logManager);
 
   createWindow(); // This creates mainWindow and loads renderer/index.html
-
   // Initialize the logManager with the created mainWindow after it's available
   logManager.initialize(mainWindow);
 
