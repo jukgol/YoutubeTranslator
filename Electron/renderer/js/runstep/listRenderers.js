@@ -41,6 +41,7 @@ export function renderNestedList(listFieldElement, data, sectionName, handleItem
 
     folderNames.forEach(folder => {
         const folderLi = document.createElement('li');
+        folderLi.className = 'list-item'; // ADDED: Apply list-item class to folder LI
         folderLi.dataset.type = 'folder'; // Set dataset type
         folderLi.dataset.sectionName = sectionName; // Set dataset sectionName
         folderLi.dataset.data = JSON.stringify(folder); // Store actual data
@@ -57,7 +58,6 @@ export function renderNestedList(listFieldElement, data, sectionName, handleItem
         const folderSpan = document.createElement('span');
         folderSpan.textContent = `📁 ${folder}`; // Keep icon for clarity
         folderSpan.className = 'list-item-folder'; // Apply CSS class
-        folderSpan.style.fontWeight = 'bold'; // Keep inline for boldness (if needed)
         folderLi.appendChild(folderSpan);
 
         const files = data[folder] || [];

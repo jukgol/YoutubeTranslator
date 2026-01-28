@@ -42,8 +42,7 @@
 }
 
 /* Style for folder items in nested lists */
-.list-item-folder {
-    font-size: 0.8em;
+.list-item-folder {    
     padding: 5px;
     color: var(--text-main);
     cursor: pointer;
