@@ -14,11 +14,7 @@ export function renderFlatList(listFieldElement, files, sectionName, handleItemC
     files.forEach(file => {
         const li = document.createElement('li');
         li.textContent = file;
-        li.style.whiteSpace = 'pre-wrap';
-        li.style.color = '#333';
-        li.style.fontSize = '0.8em';
-        li.style.cursor = 'pointer';
-        li.style.marginBottom = '4px'; // Increased spacing
+        li.className = 'list-item'; // Apply CSS class
         li.dataset.type = 'file'; // Set dataset type
         li.dataset.sectionName = sectionName; // Set dataset sectionName
         li.dataset.data = JSON.stringify(file); // Store actual data

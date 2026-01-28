@@ -4,22 +4,14 @@ export let currentSelectedElement = null; // Global variable to track the curren
 
 export function applyHighlight(element, isFolder) {
     if (element) {
-        // Light blue highlight for the element itself
-        element.style.backgroundColor = '#E0F2F7'; // A light, stylish blue
-        element.style.color = '#000'; // Darker text for contrast
-        element.style.borderRadius = '3px';
-        element.style.paddingLeft = '5px'; // Small padding for visual comfort
+        element.classList.add('selected');
 
         if (isFolder) {
-            // Highlight children elements (files)
             const fileUl = element.querySelector('ul');
             if (fileUl) {
                 Array.from(fileUl.children).forEach(childLi => {
-                    // Only apply if it's a file item (not 'No files' message)
-                    if (childLi.dataset.type === 'file') { // Check if it's a file item
-                        childLi.style.backgroundColor = '#CFE9F2'; // A bit darker blue for nested files
-                        childLi.style.color = '#333';
-                        childLi.style.borderRadius = '3px';
+                    if (childLi.dataset.type === 'file') {
+                        childLi.classList.add('selected');
                     }
                 });
             }
@@ -29,22 +21,14 @@ export function applyHighlight(element, isFolder) {
 
 export function removeHighlight(element, isFolder) {
     if (element) {
-        // Reset styles for the element itself
-        element.style.backgroundColor = '';
-        element.style.color = '';
-        element.style.borderRadius = '';
-        element.style.paddingLeft = '';
+        element.classList.remove('selected');
 
         if (isFolder) {
-            // Reset styles for children elements (files)
             const fileUl = element.querySelector('ul');
             if (fileUl) {
                 Array.from(fileUl.children).forEach(childLi => {
-                    // Only apply if it's a file item (not 'No files' message)
-                    if (childLi.dataset.type === 'file') { // Check if it's a file item
-                        childLi.style.backgroundColor = '';
-                        childLi.style.color = '#555'; // Default color for nested files
-                        childLi.style.borderRadius = '';
+                    if (childLi.dataset.type === 'file') {
+                        childLi.classList.remove('selected');
                     }
                 });
             }

@@ -4,19 +4,13 @@ export let currentSelectedElement = null; // Global variable to track the curren
 
 export function applyHighlight(element) { // No isFolder needed for flat list
     if (element) {
-        element.style.backgroundColor = '#E0F2F7'; // Light blue
-        element.style.color = '#000'; // Dark text
-        element.style.borderRadius = '3px';
-        element.style.paddingLeft = '5px';
+        element.classList.add('selected');
     }
 }
 
 export function removeHighlight(element) { // No isFolder needed for flat list
     if (element) {
-        element.style.backgroundColor = '';
-        element.style.color = '';
-        element.style.borderRadius = '';
-        element.style.paddingLeft = '';
+        element.classList.remove('selected');
     }
 }
 

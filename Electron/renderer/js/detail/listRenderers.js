@@ -14,11 +14,7 @@ export function renderFlatList(listFieldElement, files, sectionName, handleItemC
     files.forEach(file => {
         const li = document.createElement('li');
         li.textContent = file;
-        li.style.whiteSpace = 'pre-wrap';
-        li.style.color = '#333'; // Add basic color
-        li.style.fontSize = '0.8em'; // Reduced font size
-        li.style.cursor = 'pointer'; // Make it look clickable
-        li.style.marginBottom = '4px'; // Increased spacing
+        li.className = 'list-item'; // Apply CSS class
         li.dataset.type = 'file'; // Set dataset type
         li.dataset.sectionName = sectionName; // Set dataset sectionName
         li.dataset.data = JSON.stringify(file); // Store actual data
@@ -45,8 +41,6 @@ export function renderNestedList(listFieldElement, data, sectionName, handleItem
 
     folderNames.forEach(folder => {
         const folderLi = document.createElement('li');
-        folderLi.style.marginBottom = '5px'; // Spacing between folders
-        folderLi.style.cursor = 'pointer'; // Make it look clickable
         folderLi.dataset.type = 'folder'; // Set dataset type
         folderLi.dataset.sectionName = sectionName; // Set dataset sectionName
         folderLi.dataset.data = JSON.stringify(folder); // Store actual data
@@ -62,8 +56,8 @@ export function renderNestedList(listFieldElement, data, sectionName, handleItem
         
         const folderSpan = document.createElement('span');
         folderSpan.textContent = `📁 ${folder}`; // Keep icon for clarity
-        folderSpan.style.fontWeight = 'bold';
-        folderSpan.style.fontSize = '0.8em'; // Reduced font size for folder name
+        folderSpan.className = 'list-item-folder'; // Apply CSS class
+        folderSpan.style.fontWeight = 'bold'; // Keep inline for boldness (if needed)
         folderLi.appendChild(folderSpan);
 
         const files = data[folder] || [];
@@ -82,11 +76,7 @@ export function renderNestedList(listFieldElement, data, sectionName, handleItem
                     displayFile = `└─ ${file}`;
                 }
                 li.textContent = displayFile;
-                li.style.whiteSpace = 'pre-wrap'; // Ensure pre-formatted text
-                li.style.fontSize = '0.75em'; // Reduced font size for files
-                li.style.color = '#555'; // Medium gray
-                li.style.cursor = 'pointer'; // Make it look clickable
-                li.style.marginBottom = '2px'; // Added spacing
+                li.className = 'list-item'; // Apply CSS class
                 li.dataset.type = 'file'; // Set dataset type
                 li.dataset.sectionName = sectionName; // Set dataset sectionName
                 li.dataset.data = JSON.stringify(file); // Store actual data
@@ -98,9 +88,7 @@ export function renderNestedList(listFieldElement, data, sectionName, handleItem
              const noFileLi = document.createElement('li');
              noFileLi.textContent = '└─ No files';
              noFileLi.style.paddingLeft = '20px'; // Basic indentation
-             noFileLi.style.fontStyle = 'italic';
-             noFileLi.style.color = '#aaa';
-             noFileLi.style.fontSize = '0.75em'; // Reduced font size for "No files"
+             noFileLi.className = 'list-item-empty'; // Apply CSS class
              noFileLi.dataset.type = 'no-files'; // Set dataset type for clarity
              folderLi.appendChild(noFileLi);
         }

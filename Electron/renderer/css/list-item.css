@@ -1,0 +1,48 @@
+/* =============================================== */
+/* List Item Styles (All Tabs)                     */
+/* =============================================== */
+
+:root {
+    /* Style Definitions for List Items */
+    --list-item-hover-bg: #E0F2F7;      /* Subtle light blue from original download tab */
+    --list-item-hover-text: #1e293b;   /* Main text color on hover */
+    --list-item-selected-bg: #E0F2F7;   /* Subtle light blue from original download tab */
+    --list-item-selected-text: #1e293b; /* Main text color when selected */
+}
+
+/* Base style for all list items */
+.list-item {
+    font-size: 0.8em;
+    padding: 5px;
+    cursor: pointer;
+    border-bottom: 1px solid var(--border-color);
+}
+
+/* Hover state */
+.list-item:hover {
+    background-color: var(--list-item-hover-bg);
+    color: var(--list-item-hover-text);
+}
+
+/* Selected state */
+.list-item.selected {
+    background-color: var(--list-item-selected-bg);
+    color: var(--list-item-selected-text);
+    font-weight: bold;
+}
+
+/* Style for folder items in nested lists */
+.list-item-folder {
+    font-size: 0.8em;
+    padding: 5px;
+    color: var(--text-main);
+    cursor: pointer;
+}
+
+/* Style for 'No files' messages in nested lists */
+.list-item-empty {
+    font-size: 0.8em;
+    font-style: italic;
+    color: #aaa;
+    padding: 5px;
+}

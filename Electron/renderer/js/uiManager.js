@@ -2,6 +2,7 @@ import { write as log } from './logger.js';
 import { initializeSettings } from './setting/index.js'; // Import the settings module
 import { initializeDownloadTab } from './download/index.js';
 import { initializeDetailTab } from './detail/index.js';
+import { initializeBasicTab } from './basic/index.js';
 
 const settings = initializeSettings(); // Initialize the settings module once
 
@@ -14,72 +15,54 @@ function initCloseButton() {
     }
 }
 
-// Helper to hide all content divs
-function hideAllContent(contentBasic, contentDownload, contentDetail, contentSettings) {
-    if (contentBasic) contentBasic.style.display = 'none';
-    if (contentDownload) contentDownload.style.display = 'none';
-    if (contentDetail) contentDetail.style.display = 'none';
-    if (contentSettings) contentSettings.style.display = 'none';
-}
-
-// Helper to deactivate all tab buttons
-function deactivateAllTabs(tabBasic, tabDownload, tabDetail, tabSettings) {
-    if (tabBasic) tabBasic.classList.remove('active');
-    if (tabDownload) tabDownload.classList.remove('active');
-    if (tabDetail) tabDetail.classList.remove('active');
-    if (tabSettings) tabSettings.classList.remove('active');
-}
-
-function initTabSwitching() { // This function only sets up event listeners
-    const tabBasic = document.getElementById('tab-basic');
-    const tabDownload = document.getElementById('tab-download');
-    const tabDetail = document.getElementById('tab-detail');
-    const tabSettings = document.getElementById('tab-settings');
-
-    const contentBasic = document.getElementById('basic-content');
-    const contentDownload = document.getElementById('download-content');
-    const contentDetail = document.getElementById('detail-content');
-    const contentSettings = document.getElementById('settings-content');
-    
-    // Event listeners for tabs
-    if (tabBasic && contentBasic) {
-        tabBasic.addEventListener('click', () => {
-            deactivateAllTabs(tabBasic, tabDownload, tabDetail, tabSettings);
-            hideAllContent(contentBasic, contentDownload, contentDetail, contentSettings);
-            tabBasic.classList.add('active');
-            contentBasic.style.display = 'flex';
-        });
+const tabConfig = [
+    { 
+        tabId: 'tab-basic', 
+        contentId: 'basic-content', 
+        initializer: initializeBasicTab
+    },
+    { 
+        tabId: 'tab-download', 
+        contentId: 'download-content', 
+        initializer: initializeDownloadTab 
+    },
+    { 
+        tabId: 'tab-detail', 
+        contentId: 'detail-content', 
+        initializer: initializeDetailTab 
+    },
+    { 
+        tabId: 'tab-settings', 
+        contentId: 'settings-content', 
+        initializer: () => settings.loadSettingsUI()
     }
+];
 
-    if (tabDownload && contentDownload) {
-        tabDownload.addEventListener('click', () => {
-            deactivateAllTabs(tabBasic, tabDownload, tabDetail, tabSettings);
-            hideAllContent(contentBasic, contentDownload, contentDetail, contentSettings);
-            tabDownload.classList.add('active');
-            contentDownload.style.display = 'flex';
-            initializeDownloadTab(); // Call the specialized function
-        });
-    }
+function initTabSwitching() {
+    const allTabs = tabConfig.map(config => document.getElementById(config.tabId));
+    const allContents = tabConfig.map(config => document.getElementById(config.contentId));
 
-    if (tabDetail && contentDetail) {
-        tabDetail.addEventListener('click', () => {
-            deactivateAllTabs(tabBasic, tabDownload, tabDetail, tabSettings);
-            hideAllContent(contentBasic, contentDownload, contentDetail, contentSettings);
-            tabDetail.classList.add('active');
-            contentDetail.style.display = 'flex';
-            initializeDetailTab(); // Call the specialized function
-        });
-    }
+    tabConfig.forEach((config, index) => {
+        const tab = allTabs[index];
+        const content = allContents[index];
 
-    if (tabSettings && contentSettings) {
-        tabSettings.addEventListener('click', async () => { // Made async here
-            deactivateAllTabs(tabBasic, tabDownload, tabDetail, tabSettings);
-            hideAllContent(contentBasic, contentDownload, contentDetail, contentSettings);
-            tabSettings.classList.add('active');
-            contentSettings.style.display = 'flex';
-            await settings.loadSettingsUI(); // Load settings when tab is clicked
-        });
-    }
+        if (tab && content) {
+            tab.addEventListener('click', async () => {
+                // Deactivate all tabs and hide all content
+                allTabs.forEach(t => t?.classList.remove('active'));
+                allContents.forEach(c => { if(c) c.style.display = 'none'; });
+
+                // Activate the clicked tab and show its content
+                tab.classList.add('active');
+                content.style.display = 'flex';
+
+                // If an initializer function is defined for this tab, call it
+                if (config.initializer) {
+                    await config.initializer();
+                }
+            });
+        }
+    });
 }
 
 function initLogListener() {
