@@ -1,3 +1,5 @@
+const { urlManager } = require('../../main/download/urlManager');
+
 // Electron/main/ipc/appHandlers.js
 
 module.exports = {
@@ -15,6 +17,11 @@ module.exports = {
 
     ipcMain.on('close-app', () => {
       app.quit();
+    });
+
+    ipcMain.handle('system:start-test-counter', async () => {
+      urlManager.startTestCounter();
+      return true; // Or some other success indicator
     });
   }
 };

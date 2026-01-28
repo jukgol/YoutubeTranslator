@@ -13,6 +13,14 @@ const handleItemClick = createItemClickHandler(); // Create the handler without 
 export async function initializeDownloadTab() {
     const sections = document.querySelectorAll('#download-content .section-frame'); // Target sections within download-content
 
+    const addUrlButton = document.getElementById('add-url-button');
+    if (addUrlButton) {
+        addUrlButton.addEventListener('click', async () => {
+            console.log('URL 추가 버튼 클릭됨');
+            await window.electronAPI.startTestCounter();
+        });
+    }
+
     for (const section of sections) {
         const header = section.querySelector('.section-header');
         const listField = section.querySelector('.list-field');
