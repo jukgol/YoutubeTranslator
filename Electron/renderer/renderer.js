@@ -1,6 +1,7 @@
 import { loadComponent } from './js/componentLoader.js';
 import { initializeUI } from './js/uiManager.js';
-import { initializeDetailTab } from './js/detailTabManager.js'; // Import the detail tab initializer
+import { initializeDetailTab } from './js/detail/index.js'; // Import the detail tab initializer
+import { initializeDownloadTab } from './js/download/index.js'; // Import the download tab initializer
 
 document.addEventListener('DOMContentLoaded', async () => {
     const tabsPlaceholder = document.getElementById('tabs-placeholder');
@@ -34,6 +35,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         console.log("inti");
         await initializeUI();
         await initializeDetailTab(); // Initialize the detail tab content
+        await initializeDownloadTab(); // Initialize the download tab content
 
         // --- 여기서부터 로딩 화면 전환 로직 ---
         const loadingOverlay = document.getElementById('loading-overlay');

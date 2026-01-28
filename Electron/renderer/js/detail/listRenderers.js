@@ -1,42 +1,6 @@
-// Electron/renderer/js/detailTabManager.js
+// Electron/renderer/js/detail/listRenderers.js
 
-const pathMapping = {
-    '원본': { api: 'pathGetSubtitleFiles', extensions: ['.srt', '.vtt'], type: 'flat' },
-    '스플릿': { api: 'pathGetSplitFiles', type: 'nested' },
-    '번역': { api: 'pathGetTranslatedFiles', type: 'nested' },
-    '합치기': { api: 'pathGetCombineFiles', type: 'flat' }, // Changed to flat
-    '결과': { api: 'pathGetResultFiles', type: 'flat' },    // Changed to flat
-};
-
-export async function initializeDetailTab() {
-    console.log('Initializing Detail Tab...');
-    const sections = document.querySelectorAll('.section-frame');
-
-    for (const section of sections) {
-        const header = section.querySelector('.section-header');
-        const listField = section.querySelector('.list-field');
-        const sectionName = header.textContent.replace(/^\d+\.\s*/, '').trim(); // "1. 원본" -> "원본"
-
-        if (pathMapping[sectionName]) {
-            const { api, type } = pathMapping[sectionName];
-            try {
-                let data;
-                if (type === 'flat') {
-                    data = await window.electronAPI[api]();
-                    renderFlatList(listField, data);
-                } else if (type === 'nested') {
-                    data = await window.electronAPI[api]();
-                    renderNestedList(listField, data);
-                }
-            } catch (error) {
-                console.error(`Error fetching data for ${sectionName}:`, error);
-                listField.innerHTML = `<div style="color: red; font-weight: bold; padding: 10px; text-align: center;">Error loading data: ${error.message}</div>`;
-            }
-        }
-    }
-}
-
-function renderFlatList(listFieldElement, files) {
+export function renderFlatList(listFieldElement, files, sectionName, handleItemClick) { // Added handleItemClick
     listFieldElement.innerHTML = ''; // Clear existing content
     if (files.length === 0) {
         listFieldElement.innerHTML = '<div style="color: #888; padding: 10px; text-align: center; font-style: italic;">No files found.</div>';
@@ -52,13 +16,19 @@ function renderFlatList(listFieldElement, files) {
         li.textContent = file;
         li.style.whiteSpace = 'pre-wrap';
         li.style.color = '#333'; // Add basic color
-        li.style.fontSize = '0.95em'; // Add basic font size
+        li.style.fontSize = '0.8em'; // Reduced font size
+        li.style.cursor = 'pointer'; // Make it look clickable
+        li.style.marginBottom = '4px'; // Increased spacing
+        li.dataset.type = 'file'; // Set dataset type
+        li.dataset.sectionName = sectionName; // Set dataset sectionName
+        li.dataset.data = JSON.stringify(file); // Store actual data
+        li.onclick = () => handleItemClick(li, 'file', sectionName, file); // Attach click handler
         ul.appendChild(li);
     });
     listFieldElement.appendChild(ul);
 }
 
-function renderNestedList(listFieldElement, data) {
+export function renderNestedList(listFieldElement, data, sectionName, handleItemClick) { // Added handleItemClick
     listFieldElement.innerHTML = ''; // Clear existing content
 
     const folderNames = Object.keys(data).sort(); // Sort folders alphabetically
@@ -75,11 +45,25 @@ function renderNestedList(listFieldElement, data) {
 
     folderNames.forEach(folder => {
         const folderLi = document.createElement('li');
-        folderLi.style.marginBottom = '5px';
+        folderLi.style.marginBottom = '5px'; // Spacing between folders
+        folderLi.style.cursor = 'pointer'; // Make it look clickable
+        folderLi.dataset.type = 'folder'; // Set dataset type
+        folderLi.dataset.sectionName = sectionName; // Set dataset sectionName
+        folderLi.dataset.data = JSON.stringify(folder); // Store actual data
+        folderLi.onclick = (event) => {
+            // If the actual target clicked is the span within the folderLi, pass the folderLi for highlighting
+            if (event.target.tagName === 'SPAN' && event.target.closest('li[data-type="folder"]') === folderLi) {
+                 handleItemClick(folderLi, 'folder', sectionName, folder);
+            } else {
+                 // If clicked on fileUl within folderLi, we still want folderLi to be the elementToHighlight
+                 handleItemClick(event.target, 'file', sectionName, folder);
+            }
+        };
         
         const folderSpan = document.createElement('span');
         folderSpan.textContent = `📁 ${folder}`; // Keep icon for clarity
         folderSpan.style.fontWeight = 'bold';
+        folderSpan.style.fontSize = '0.8em'; // Reduced font size for folder name
         folderLi.appendChild(folderSpan);
 
         const files = data[folder] || [];
@@ -99,8 +83,14 @@ function renderNestedList(listFieldElement, data) {
                 }
                 li.textContent = displayFile;
                 li.style.whiteSpace = 'pre-wrap'; // Ensure pre-formatted text
-                li.style.fontSize = '0.9em'; // Slightly smaller font
+                li.style.fontSize = '0.75em'; // Reduced font size for files
                 li.style.color = '#555'; // Medium gray
+                li.style.cursor = 'pointer'; // Make it look clickable
+                li.style.marginBottom = '2px'; // Added spacing
+                li.dataset.type = 'file'; // Set dataset type
+                li.dataset.sectionName = sectionName; // Set dataset sectionName
+                li.dataset.data = JSON.stringify(file); // Store actual data
+                li.onclick = (event) => { event.stopPropagation(); handleItemClick(li, 'file', sectionName, file); }; 
                 fileUl.appendChild(li);
             });
             folderLi.appendChild(fileUl);
@@ -110,6 +100,8 @@ function renderNestedList(listFieldElement, data) {
              noFileLi.style.paddingLeft = '20px'; // Basic indentation
              noFileLi.style.fontStyle = 'italic';
              noFileLi.style.color = '#aaa';
+             noFileLi.style.fontSize = '0.75em'; // Reduced font size for "No files"
+             noFileLi.dataset.type = 'no-files'; // Set dataset type for clarity
              folderLi.appendChild(noFileLi);
         }
         ul.appendChild(folderLi);

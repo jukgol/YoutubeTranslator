@@ -1,77 +1,7 @@
 import { write as log } from './logger.js';
+import { initializeSettings } from './setting/index.js'; // Import the settings module
 
-async function loadSettingsUI() {
-    // log('[UI] Attempting to load settings...'); // REMOVED log
-    console.log('[UI] Attempting to load settings...'); // Debug log to console
-    try {
-        // API Key section
-        const apiSelect = document.getElementById('apiSelect'); // Use ID
-        const apiNewKeyInput = document.getElementById('apiNewKeyInput'); // Use ID
-        
-        let apiKeys = [];
-        try {
-            apiKeys = await window.electronAPI.settingReadApiKeys();
-            console.log('[UI Debug] Fetched API Keys:', apiKeys);
-        } catch (ipcError) {
-            log(`[UI Error] Failed to read API keys: ${ipcError.message}`);
-            console.error('[UI Error] Failed to read API keys:', ipcError);
-        }
-
-        if (apiSelect) {
-            apiSelect.innerHTML = ''; // Clear existing options
-            if (apiKeys.length > 0) {
-                apiKeys.forEach(key => {
-                    const option = document.createElement('option');
-                    option.value = key;
-                    option.textContent = key; // Display full key or a truncated version
-                    apiSelect.appendChild(option);
-                });
-                // Assuming the first key is the selected one as per Python logic
-                apiSelect.value = apiKeys[0]; 
-            } else {
-                const option = document.createElement('option');
-                option.value = 'none';
-                option.textContent = '없음';
-                apiSelect.appendChild(option);
-                apiSelect.value = '없음';
-            }
-        }
-
-        // Version section
-        let modelVersion = '';
-        try {
-            modelVersion = await window.electronAPI.settingLoadVersion();
-            console.log('[UI Debug] Fetched Model Version:', modelVersion);
-        } catch (ipcError) {
-            log(`[UI Error] Failed to load version: ${ipcError.message}`);
-            console.error('[UI Error] Failed to load version:', ipcError);
-        }
-        const geminiVersionInput = document.getElementById('geminiVersionInput'); // Use ID
-        if (geminiVersionInput) {
-            geminiVersionInput.value = modelVersion;
-        }
-
-        // Rule section
-        let promptRule = '';
-        try {
-            promptRule = await window.electronAPI.settingLoadRule();
-            console.log('[UI Debug] Fetched Prompt Rule:', promptRule);
-        } catch (ipcError) {
-            log(`[UI Error] Failed to load rule: ${ipcError.message}`);
-            console.error('[UI Error] Failed to load rule:', ipcError);
-        }
-        const promptRuleTextarea = document.getElementById('promptRuleTextarea'); // Use ID
-        if (promptRuleTextarea) {
-            promptRuleTextarea.value = promptRule;
-        }
-        // log('[UI] Settings loaded successfully.'); // REMOVED log
-        console.log('[UI] Settings loaded successfully.'); // Debug log to console
-    } catch (generalError) {
-        log(`[UI Error] Error in loadSettingsUI: ${generalError.message}`);
-        console.error('[UI Error] Error in loadSettingsUI:', generalError);
-    }
-}
-
+const settings = initializeSettings(); // Initialize the settings module once
 
 function initCloseButton() {
     const closeBtn = document.getElementById('close-btn');
@@ -185,7 +115,7 @@ function initTabSwitching() { // This function only sets up event listeners
             hideAllContent(contentBasic, contentDownload, contentDetail, contentSettings);
             tabSettings.classList.add('active');
             contentSettings.style.display = 'flex';
-            await loadSettingsUI(); // Load settings when tab is clicked
+            await settings.loadSettingsUI(); // Load settings when tab is clicked
         });
     }
 }
@@ -217,7 +147,7 @@ async function setDefaultTabState() { // This should be a separate function call
         if (contentSettings) {
             contentSettings.style.display = 'flex';
             // Only load settings UI if it's the default active tab
-            await loadSettingsUI(); // Added await
+            await settings.loadSettingsUI(); // Added await
         }
     }
     // Fallback to basic if no active tab found
@@ -249,112 +179,7 @@ function initTestButtons() {
     }
 }
 
-async function initSettingsHandlers() {
-    const addApiKeyBtn = document.getElementById('addApiKeyBtn');
-    const apiNewKeyInput = document.getElementById('apiNewKeyInput');
-    const apiSelect = document.getElementById('apiSelect');
-    const deleteApiKeyBtn = document.querySelector('#settings-content .delete-btn'); // Assuming this is the delete button
 
-    // Handle Add API Key button click
-    if (addApiKeyBtn && apiNewKeyInput) {
-        addApiKeyBtn.addEventListener('click', async () => {
-            const newKey = apiNewKeyInput.value.trim();
-            if (newKey) {
-                try {
-                    // Python logic was get_added_keys then write_api_keys
-                    const currentKeys = await window.electronAPI.settingReadApiKeys();
-                    let updatedKeys = [...currentKeys];
-                    if (updatedKeys.includes(newKey)) {
-                        updatedKeys = updatedKeys.filter(key => key !== newKey);
-                    }
-                    updatedKeys.unshift(newKey); // Add to front
-                    
-                    await window.electronAPI.settingWriteApiKeys(updatedKeys);
-                    apiNewKeyInput.value = ''; // Clear input field
-                    await loadSettingsUI(); // Refresh UI to show new key selected
-                    log(`[UI] API Key 추가됨: ${newKey.substring(0, 10)}...`);
-                } catch (ipcError) {
-                    log(`[UI Error] Failed to add API Key: ${ipcError.message}`);
-                    console.error('[UI Error] Failed to add API Key:', ipcError);
-                }
-            } else {
-                log('[UI] API Key 입력란이 비어있습니다.');
-            }
-        });
-    }
-
-    // Handle API Key Select change
-    if (apiSelect) {
-        apiSelect.addEventListener('change', async () => {
-            const selectedKey = apiSelect.value;
-            if (selectedKey && selectedKey !== '없음') {
-                try {
-                    // Python logic was get_reordered_keys then write_api_keys
-                    const updatedKeys = await window.electronAPI.settingGetReorderedKeys(selectedKey);
-                    await window.electronAPI.settingWriteApiKeys(updatedKeys);
-                    await loadSettingsUI(); // Refresh UI to ensure selected is first
-                    log(`[UI] API Key 선택됨: ${selectedKey.substring(0, 10)}...`);
-                } catch (ipcError) {
-                    log(`[UI Error] Failed to select API Key: ${ipcError.message}`);
-                    console.error('[UI Error] Failed to select API Key:', ipcError);
-                }
-            } else {
-                log('[UI] API Key가 선택되지 않았습니다.');
-            }
-        });
-    }
-
-    // Handle Delete API Key button click
-    if (deleteApiKeyBtn && apiSelect) {
-        deleteApiKeyBtn.addEventListener('click', async () => {
-            const selectedKey = apiSelect.value;
-            if (selectedKey && selectedKey !== '없음') {
-                try {
-                    const currentKeys = await window.electronAPI.settingReadApiKeys();
-                    const updatedKeys = currentKeys.filter(key => key !== selectedKey);
-                    await window.electronAPI.settingWriteApiKeys(updatedKeys);
-                    await loadSettingsUI(); // Refresh UI
-                    log(`[UI] API Key 삭제됨: ${selectedKey.substring(0, 10)}...`);
-                } catch (ipcError) {
-                    log(`[UI Error] Failed to delete API Key: ${ipcError.message}`);
-                    console.error('[UI Error] Failed to delete API Key:', ipcError);
-                }
-            } else {
-                log('[UI] 삭제할 API Key가 선택되지 않았습니다.');
-            }
-        });
-    }
-
-    // Handle Gemini Version input blur
-    const geminiVersionInput = document.getElementById('geminiVersionInput');
-    if (geminiVersionInput) {
-        geminiVersionInput.addEventListener('blur', async () => {
-            const newVersion = geminiVersionInput.value.trim();
-            try {
-                await window.electronAPI.settingSaveVersion(newVersion);
-                log(`[UI] Gemini 버전이 저장되었습니다: ${newVersion}`);
-            } catch (ipcError) {
-                log(`[UI Error] Failed to save Gemini Version: ${ipcError.message}`);
-                console.error('[UI Error] Failed to save Gemini Version:', ipcError);
-            }
-        });
-    }
-
-    // Handle Prompt Rule textarea blur
-    const promptRuleTextarea = document.getElementById('promptRuleTextarea');
-    if (promptRuleTextarea) {
-        promptRuleTextarea.addEventListener('blur', async () => {
-            const newRule = promptRuleTextarea.value.trim();
-            try {
-                await window.electronAPI.settingSaveRule(newRule);
-                log(`[UI] 번역 규칙이 저장되었습니다.`);
-            } catch (ipcError) {
-                log(`[UI Error] Failed to save Translation Rule: ${ipcError.message}`);
-                console.error('[UI Error] Failed to save Translation Rule:', ipcError);
-            }
-        });
-    }
-}
 
 
 export async function initializeUI() { // Made initializeUI async
@@ -363,7 +188,7 @@ export async function initializeUI() { // Made initializeUI async
     await setDefaultTabState(); // Then set the default state
     initLogListener();
     initTestButtons(); // For demonstration
-    initSettingsHandlers(); // Initialize settings-specific handlers
+    settings.initSettingsHandlers(); // Initialize settings-specific handlers
     
     // Signal to main process that renderer is ready for logs
     if (window.electronAPI && typeof window.electronAPI.rendererReadyForLogs === 'function') {
