@@ -1,0 +1,23 @@
+/* =============================================== */
+/* Loading Screen Styles                           */
+/* =============================================== */
+
+/* 로딩 화면 스타일: 같은 창 안에서 꽉 차게 보이도록 설정 */
+#loading-overlay {
+    position: fixed;
+    top: 30px; /* 타이틀 바 높이만큼 제외 (원할 경우 0으로 변경) */
+    left: 0;
+    width: 100%;
+    height: calc(100% - 30px);
+    background-color: #ffffff; /* 앱 배경색과 맞추면 좋습니다 */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+}
+
+/* 로딩 중일 때 컨텐츠 숨기기 */
+.app-container.hidden {
+    display: none;
+}
