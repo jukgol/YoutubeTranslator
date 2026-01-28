@@ -68,8 +68,28 @@ function initTabSwitching() {
 function initLogListener() {
     const logView = document.getElementById('statusLog');
     if (logView && window.electronAPI && typeof window.electronAPI.onLogMessage === 'function') {
-        window.electronAPI.onLogMessage((message) => {
-            logView.value += message + '\n';
+        window.electronAPI.onLogMessage((logEntry) => { // logEntry is now { message: string, replace: boolean }
+            const { message, replace } = logEntry;
+            if (replace) {
+                // Remove the last line if it exists
+                const lines = logView.value.split('\n');
+                if (lines.length > 0 && lines[lines.length - 1] === '') { // Remove empty last line if present
+                    lines.pop(); 
+                }
+                if (lines.length > 0) {
+                    lines.pop(); // Remove the actual last line to be replaced
+                }
+                logView.value = lines.join('\n');
+                if (logView.value.length > 0) {
+                    logView.value += '\n'; // Add newline if there are existing lines
+                }
+                logView.value += message; // Add the new message
+            } else {
+                if (logView.value.length > 0) {
+                    logView.value += '\n'; // Add newline if not empty
+                }
+                logView.value += message; // Append new message
+            }
             logView.scrollTop = logView.scrollHeight; // Auto-scroll to bottom
         });
     }

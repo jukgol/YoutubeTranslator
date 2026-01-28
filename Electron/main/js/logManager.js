@@ -1,7 +1,7 @@
 // electron/main/js/logManager.js
 
 let mainWindow = null;
-let logBuffer = [];
+let logBuffer = []; // Stores objects { message: string, replace: boolean }
 let rendererReady = false;
 
 // Initializer to give the logger a reference to the main window
@@ -28,26 +28,28 @@ function flushBuffer() {
     if (mainWindow && !mainWindow.isDestroyed()) {
         const logsToSend = [...logBuffer]; // Copy buffer
         logBuffer = []; // Clear buffer immediately
-        logsToSend.forEach(message => {
-            mainWindow.webContents.send('log-message', message);
+        logsToSend.forEach(logEntry => { // logEntry is now an object { message: string, replace: boolean }
+            mainWindow.webContents.send('log-message', logEntry);
         });
     }
 }
 
 // Function to write a log message to the renderer process
-function write(message) {
+function write(message, replace = false) {
     const timestamp = new Date().toLocaleTimeString();
     const formattedMessage = `[${timestamp}] ${message}`;
 
     // Always log to main console for safety
     console.log(`[Main] ${formattedMessage}`);
 
+    const logEntry = { message: formattedMessage, replace: replace };
+
     if (mainWindow && !mainWindow.isDestroyed() && rendererReady) {
         // If window is ready and renderer has signaled readiness, send directly
-        mainWindow.webContents.send('log-message', formattedMessage);
+        mainWindow.webContents.send('log-message', logEntry);
     } else {
         // Otherwise, buffer the message
-        logBuffer.push(formattedMessage);
+        logBuffer.push(logEntry);
     }
 }
 
