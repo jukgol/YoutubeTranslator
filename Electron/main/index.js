@@ -29,9 +29,6 @@ function createWindow () {
 
 app.whenReady().then(() => { 
 
-  // Initialize the logManager with the created mainWindow
-  logManager.initialize(mainWindow);
-
   // Instantiate services AFTER app is ready
   // const pathsInstance = new PathManager(); // PathManager is instantiated within SettingService
   settingServiceInstance = new SettingService(); // SettingService's constructor now instantiates PathManager
@@ -48,6 +45,9 @@ app.whenReady().then(() => {
   registerAppHandlers(ipcMain, app, logManager);
 
   createWindow(); // This creates mainWindow and loads renderer/index.html
+
+  // Initialize the logManager with the created mainWindow after it's available
+  logManager.initialize(mainWindow);
 
   app.on('activate', function () {
     if (BrowserWindow.getAllWindows().length === 0) createWindow();

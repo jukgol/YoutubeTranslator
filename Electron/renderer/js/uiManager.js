@@ -30,21 +30,14 @@ function displayFiles(elementId, files) {
 }
 
 export async function loadDownloadUI() {
-    log('[UI] Attempting to load download files...');
-    console.log('[UI] Attempting to load download files...'); // Debug log to console
     try {
         // Fetch video files
         const videoFiles = await window.electronAPI.pathGetVideoFiles();
-        console.log('[UI Debug] Fetched Video Files:', videoFiles);
         displayFiles('videoFileList', videoFiles);
 
         // Fetch subtitle files
         const subtitleFiles = await window.electronAPI.pathGetSubtitleFiles();
-        console.log('[UI Debug] Fetched Subtitle Files:', subtitleFiles);
         displayFiles('subtitleFileList', subtitleFiles);
-
-        log('[UI] Download files loaded successfully.');
-        console.log('[UI] Download files loaded successfully.'); // Debug log to console
     } catch (generalError) {
         log(`[UI Error] Error in loadDownloadUI: ${generalError.message}`);
         console.error('[UI Error] Error in loadDownloadUI:', generalError);
@@ -66,8 +59,6 @@ function deactivateAllTabs(tabBasic, tabDownload, tabDetail, tabSettings) {
     if (tabDetail) tabDetail.classList.remove('active');
     if (tabSettings) tabSettings.classList.remove('active');
 }
-
-
 
 function initTabSwitching() { // This function only sets up event listeners
     const tabBasic = document.getElementById('tab-basic');
@@ -121,7 +112,6 @@ function initTabSwitching() { // This function only sets up event listeners
 }
 
 async function setDefaultTabState() { // This should be a separate function called at init
-
     const tabBasic = document.getElementById('tab-basic');
     const tabDownload = document.getElementById('tab-download');
     const tabDetail = document.getElementById('tab-detail');
@@ -158,7 +148,6 @@ async function setDefaultTabState() { // This should be a separate function call
     }
 }
 
-
 function initLogListener() {
     const logView = document.getElementById('statusLog');
     if (logView && window.electronAPI && typeof window.electronAPI.onLogMessage === 'function') {
@@ -178,9 +167,6 @@ function initTestButtons() {
         });
     }
 }
-
-
-
 
 export async function initializeUI() { // Made initializeUI async
     initCloseButton();
