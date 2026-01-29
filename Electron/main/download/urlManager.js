@@ -1,5 +1,6 @@
-const log = require('../js/logManager'); // Import logManager
-const ytdl = require('ytdl-core'); // Import ytdl-core
+const log = require('../js/logManager');
+const ytdl = require('ytdl-core');
+const { _fetchTitleAsync } = require('./downloadHelper'); // _fetchTitleAsync 가져오기
 
 class DownloadItem {
     constructor(id, url) {
@@ -59,13 +60,10 @@ class UrlManager {
     }
 
     async fetchUrlTitle(url) {
-        try {
-            const info = await ytdl.getInfo(url);
-            return info.videoDetails.title;
-        } catch (error) {
-            log.write(`URL (${url}) 제목 가져오기 실패: ${error.message}`);
-            return null;
-        }
+        // _fetchTitleAsync에 전달하기 위해 임시 DownloadItem 생성
+        const tempItem = new DownloadItem(null, url); // ID는 null로 임시 처리
+        await _fetchTitleAsync(url, tempItem); // _fetchTitleAsync 호출
+        return tempItem.title; // 업데이트된 타이틀 반환
     }
 
     getNext() {
@@ -93,33 +91,41 @@ class UrlManager {
             item.status = "실패";
         }
     }
-
-    // New test function: starts a counter that logs to console
-    startTestCounter(limit = 10) {
-        if (this.counterInterval) {
-            log.write("테스트 카운터가 이미 실행 중입니다.");
-            return;
-        }
-
-        log.write("테스트 카운터 시작...");
-        this.currentCount = 0;
-        this.counterInterval = setInterval(() => {
-            this.currentCount++;
-            if (this.currentCount <= limit) {
-                log.write(`[테스트 카운터] 현재 숫자: ${this.currentCount}`, true); // Use replace: true
-            } else {
-                clearInterval(this.counterInterval);
-                this.counterInterval = null;
-                log.write("테스트 카운터 종료.");
-            }
-        }, 1000);
-    }
 }
 
 // 모듈 수준에서 UrlManager의 싱글톤 인스턴스 생성
 const urlManager = new UrlManager();
 
+// registerUrlManagerHandlers 함수 추가
+// registerUrlManagerHandlers 함수 추가
+// export const registerUrlManagerHandlers = (ipcMain) => {
+//     ipcMain.handle('system:start-test-counter', async () => {
+//       urlManager.startTestCounter();
+//       return true;
+//     });
+
+//     ipcMain.handle('urlManager:add-url', async (event, url) => {
+//         const item = urlManager.addUrl(url);
+//         return item;
+//     });
+
+//     ipcMain.handle('urlManager:remove-url', async (event, url) => {
+//         const removed = urlManager.removeUrl(url);
+//         return removed;
+//     });
+
+//     ipcMain.handle('urlManager:fetch-url-title', async (event, url) => {
+//         const title = await urlManager.fetchUrlTitle(url);
+//         return title;
+//     });
+
+//     ipcMain.handle('urlManager:get-next', async () => {
+//         const item = urlManager.getNext();
+//         return item;
+//     });
+// };
+
 module.exports = {
     DownloadItem,
-    urlManager
+    urlManager,
 };
