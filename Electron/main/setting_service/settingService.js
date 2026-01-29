@@ -93,4 +93,4 @@ class SettingService {
     }
 }
 
-module.exports = SettingService;
+module.exports = new SettingService();

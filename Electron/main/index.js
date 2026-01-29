@@ -2,7 +2,7 @@ const { app, BrowserWindow, ipcMain } = require('electron');
 const path = require('path');
 const logManager = require('./js/logManager.js');
 const PathManager = require('./path_service/pathManager.js'); // Import PathManager class
-const SettingService = require('./setting_service/settingService.js'); // Import SettingService class
+const settingServiceInstance = require('./setting_service/settingService.js'); // Import SettingService class
 const pathService = require('./path_service/pathService.js'); // Import pathService
 
 // Import IPC handlers
@@ -12,7 +12,6 @@ const { registerAppHandlers } = require('./ipc/appHandlers.js');
 const { registerUrlHandlers } = require('./ipc/urlHandlers.js');
 const { urlManager } = require('./download/urlManager.js'); // 새로 추가: urlManager 인스턴스 가져오기
 
-let settingServiceInstance = null; // Declare a variable to hold the instance
 let mainWindow; // Declare mainWindow as a module-level variable
 
 function createWindow () {
@@ -33,7 +32,7 @@ function createWindow () {
 app.whenReady().then(async () => { 
 
   // Instantiate services AFTER app is ready  
-  settingServiceInstance = new SettingService(); // SettingService's constructor now instantiates PathManager
+  // settingServiceInstance = new SettingService(); // SettingService's constructor now instantiates PathManager - This is now a singleton
 
   await urlManager.initialize(); // yt-dlp 다운로드 및 초기화
   logManager.write('Application started.');

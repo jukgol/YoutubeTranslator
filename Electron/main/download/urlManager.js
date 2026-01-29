@@ -2,6 +2,8 @@ const log = require('../js/logManager'); // 경로 수정
 const YTDlpWrap = require('yt-dlp-wrap').default; // Use yt-dlp-wrap
 const path = require('path');
 const fs = require('fs');
+const settingService = require('../setting_service/settingService.js');
+const { _runDownloadProcess } = require('../download/downloadHelper.js');
 
 class DownloadItem {
     constructor(id, url) {
@@ -160,10 +162,18 @@ class UrlManager {
     }
 
     markAsFailed(item) {
-        const index = this.inProgress.indexOf(item);
+        const index = this.inProgress.findIndex(p => p.id === item.id);
         if (index > -1) {
             this.inProgress.splice(index, 1);
-            item.status = "실패";
+        }
+        item.status = "실패";
+        this.failed.push(item); // Add to failed list
+        if (this._mainWindow) {
+            this._mainWindow.webContents.send('urlManager:item-updated', {
+                id: item.id,
+                title: item.title,
+                status: item.status
+            });
         }
     }
 
@@ -215,9 +225,7 @@ class UrlManager {
             // 4. If ready, proceed with the download process.
             item.status = "다운로드 중";
             this.inProgress.push(item);
-            log.write(`[${item.id}] 다운로드 시작...`);
-    
-            // Notify UI
+            // Notify UI that we are starting
             if (this._mainWindow) {
                 this._mainWindow.webContents.send('urlManager:item-updated', {
                     id: item.id,
@@ -225,30 +233,15 @@ class UrlManager {
                     status: item.status
                 });
             }
-    
-            // Wait 10 seconds
-            for (let i = 10; i > 0; i--) {
-                log.write(`[${item.id}] 다운로드 중... ${i}초 남음`, true);
-                await new Promise(resolve => setTimeout(resolve, 1000));
+            
+            try {
+                const appPaths = { video_dir: settingService.path.videoDir };
+                await _runDownloadProcess(appPaths, item.id, item.url, item.title);
+                this.markAsDone(item); // On success, mark as done
+            } catch (error) {
+                this.markAsFailed(item); // On failure, mark as failed
             }
-    
-            const progressIndex = this.inProgress.findIndex(p => p.id === item.id);
-            if (progressIndex > -1) {
-                this.inProgress.splice(progressIndex, 1);
-            }
-    
-            item.status = "완료";
-            this.completed.push(item);
-            log.write(`[${item.id}] 다운로드 완료.`);
-    
-            // Notify UI
-            if (this._mainWindow) {
-                this._mainWindow.webContents.send('urlManager:item-updated', {
-                    id: item.id,
-                    title: item.title,
-                    status: item.status
-                });
-            }
+
         } // End of while loop
     
         log.write("모든 다운로드 작업이 완료되었습니다.");
