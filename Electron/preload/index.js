@@ -1,21 +1,24 @@
 const { contextBridge, ipcRenderer } = require('electron');
 
 try {
-  const loggingAPI = require('./api/logging'); // .js 추가
-  const pathsAPI = require('./api/paths');     // .js 추가
-  const settingsAPI = require('./api/settings'); // .js 추가
-  const systemAPI = require('./api/system');     // .js 추가
+  const loggingAPI = require('./api/logging');
+  const pathsAPI = require('./api/paths');
+  const settingsAPI = require('./api/settings');
+  const systemAPI = require('./api/system');
+  const urlManagerAPI = require('./api/urlManager'); // Add this line
 
   const logging = loggingAPI(ipcRenderer);
   const paths = pathsAPI(ipcRenderer);
   const settings = settingsAPI(ipcRenderer);
   const system = systemAPI(ipcRenderer);
+  const urlManager = urlManagerAPI(ipcRenderer); // Add this line
 
   contextBridge.exposeInMainWorld('electronAPI', {
     ...logging,
     ...paths,
     ...settings,
-    ...system
+    ...system,
+    ...urlManager // Add this line
   });
   
   console.log("Electron API 등록 완료");

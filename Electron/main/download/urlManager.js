@@ -1,4 +1,5 @@
 const log = require('../js/logManager'); // Import logManager
+const ytdl = require('ytdl-core'); // Import ytdl-core
 
 class DownloadItem {
     constructor(url) {
@@ -30,18 +31,38 @@ class UrlManager {
     addUrl(url) {
         url = url.trim();
         if (!url) {
-            return [null, "URL이 비어 있습니다."];
+            log.write("URL이 비어 있습니다.");
+            return null;
         }
 
         // 중복 체크
         const allItems = [...this.pending, ...this.inProgress, ...this.completed];
         if (allItems.some(item => item.url === url)) {
-            return [null, "이미 목록에 존재하는 URL입니다."];
+            log.write("이미 목록에 존재하는 URL입니다.");
+            return null;
         }
 
         const newItem = new DownloadItem(url);
         this.pending.push(newItem);
-        return [newItem, "대기열에 추가되었습니다."];
+        log.write("대기열에 추가되었습니다.");
+        return newItem;
+    }
+
+    removeUrl(urlToRemove) {
+        urlToRemove = urlToRemove.split('?')[0]; // Ensure parameter-less URL for comparison
+        const initialLength = this.pending.length;
+        this.pending = this.pending.filter(item => item.url !== urlToRemove);
+        return this.pending.length < initialLength; // Return true if an item was removed
+    }
+
+    async fetchUrlTitle(url) {
+        try {
+            const info = await ytdl.getInfo(url);
+            return info.videoDetails.title;
+        } catch (error) {
+            log.write(`URL (${url}) 제목 가져오기 실패: ${error.message}`);
+            return null;
+        }
     }
 
     getNext() {

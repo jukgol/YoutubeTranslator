@@ -23,5 +23,26 @@ module.exports = {
       urlManager.startTestCounter();
       return true; // Or some other success indicator
     });
+
+    // urlManager Handlers
+    ipcMain.handle('urlManager:add-url', async (event, url) => {
+        const item = urlManager.addUrl(url);
+        return item;
+    });
+
+    ipcMain.handle('urlManager:remove-url', async (event, url) => {
+        const removed = urlManager.removeUrl(url);
+        return removed;
+    });
+
+    ipcMain.handle('urlManager:fetch-url-title', async (event, url) => {
+        const title = await urlManager.fetchUrlTitle(url);
+        return title;
+    });
+
+    ipcMain.handle('urlManager:get-next', async () => {
+        const item = urlManager.getNext();
+        return item;
+    });
   }
 };
