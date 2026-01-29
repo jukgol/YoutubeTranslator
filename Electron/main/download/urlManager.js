@@ -28,6 +28,7 @@ class UrlManager {
         this.pending = [];
         this.inProgress = [];
         this.completed = [];
+        this.failed = []; // 실패 목록 추가
         this.counterInterval = null; // To store the interval ID
         this.currentCount = 0;
         this.nextId = 0; // nextId 속성 추가
@@ -70,7 +71,7 @@ class UrlManager {
         }
 
         // 중복 체크
-        const allItems = [...this.pending, ...this.inProgress, ...this.completed];
+        const allItems = [...this.pending, ...this.inProgress, ...this.completed, ...this.failed];
         if (allItems.some(item => item.url === url)) {
             log.write("이미 목록에 존재하는 URL입니다.");
             return null;
@@ -185,6 +186,72 @@ class UrlManager {
                 log.write("테스트 카운터 종료.");
             }
         }, 1000);
+    }
+
+    async startDownload() {
+        // 1. Move all previously failed items back to the pending queue to be re-evaluated.
+        if (this.failed.length > 0) {
+            log.write(`${this.failed.length}개의 실패 항목을 다시 확인합니다...`);
+            this.pending.push(...this.failed);
+            this.failed = [];
+        }
+    
+        if (this.pending.length === 0) {
+            log.write("처리할 항목이 대기열에 없습니다.");
+            return;
+        }
+
+        // 2. Process the pending queue until it's empty.
+        while (this.pending.length > 0) {
+            const item = this.pending.shift();
+    
+            // 3. Check if the item is ready for download.
+            if (item.status !== '제목 확인 완료') {
+                log.write(`[${item.id}] 항목이 다운로드 준비 상태가 아니므로 실패 목록으로 이동합니다. (상태: ${item.status})`);
+                this.failed.push(item);
+                continue; // Move to the next item in the pending queue.
+            }
+    
+            // 4. If ready, proceed with the download process.
+            item.status = "다운로드 중";
+            this.inProgress.push(item);
+            log.write(`[${item.id}] 다운로드 시작...`);
+    
+            // Notify UI
+            if (this._mainWindow) {
+                this._mainWindow.webContents.send('urlManager:item-updated', {
+                    id: item.id,
+                    title: item.title,
+                    status: item.status
+                });
+            }
+    
+            // Wait 10 seconds
+            for (let i = 10; i > 0; i--) {
+                log.write(`[${item.id}] 다운로드 중... ${i}초 남음`, true);
+                await new Promise(resolve => setTimeout(resolve, 1000));
+            }
+    
+            const progressIndex = this.inProgress.findIndex(p => p.id === item.id);
+            if (progressIndex > -1) {
+                this.inProgress.splice(progressIndex, 1);
+            }
+    
+            item.status = "완료";
+            this.completed.push(item);
+            log.write(`[${item.id}] 다운로드 완료.`);
+    
+            // Notify UI
+            if (this._mainWindow) {
+                this._mainWindow.webContents.send('urlManager:item-updated', {
+                    id: item.id,
+                    title: item.title,
+                    status: item.status
+                });
+            }
+        } // End of while loop
+    
+        log.write("모든 다운로드 작업이 완료되었습니다.");
     }
 
     getCompleted() {

@@ -10,7 +10,6 @@ node_modules/
 
 # 데이터 폴더
 /data/
-**/bin/
 
 # 프로젝트 파일
 *.pyproj
@@ -26,6 +25,7 @@ gemini_ver.txt
 package-lock.json
 /dist/
 /out/
+**/bin/
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*

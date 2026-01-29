@@ -5,5 +5,6 @@ module.exports = (ipcRenderer) => ({
     removeUrl: (url) => ipcRenderer.invoke('urlManager:remove-url', url),
     fetchUrlTitle: (url) => ipcRenderer.invoke('urlManager:fetch-url-title', url),
     getNext: () => ipcRenderer.invoke('urlManager:get-next'),
+    startDownload: () => ipcRenderer.invoke('url:start-download'),
     onUpdateItem: (callback) => ipcRenderer.on('urlManager:item-updated', (_event, itemData) => callback(itemData)), // 추가
 });

@@ -9,6 +9,7 @@ export class DownloadSection {
         this.sectionElement = sectionElement;
         this.completeSection = completeSection; // Store the instance
         this.addUrlButton = sectionElement.querySelector('#add-url-button');
+        this.startDownloadButton = sectionElement.querySelector('#start-download-button');
         this.urlInput = sectionElement.querySelector('#url-input');
         this.downloadUrlList = sectionElement.querySelector('#downloadUrlList');
         this.handleItemClick = createItemClickHandler();
@@ -29,8 +30,11 @@ export class DownloadSection {
                 if (this.completeSection) {
                     this.completeSection.addItem(itemData);
                 }
+            } else if (status === '다운로드 중') {
+                listItem.style.backgroundColor = '#A7F3D0'; // Light green
+                listItem.textContent = `ID: ${id}, 제목: ${title}, 상태: ${status}`;
             } else {
-                // Just update the text
+                // Just update the text for other statuses
                 listItem.textContent = `ID: ${id}, 제목: ${title}, 상태: ${status}`;
             }
             console.log(`[UI 업데이트] ID: ${id}, 제목: ${title}, 상태: ${status}`);
@@ -55,6 +59,20 @@ export class DownloadSection {
                 } else {
                     console.log('URL이 비어 있습니다.');
                 }
+            });
+        }
+        
+        if (this.startDownloadButton) {
+            this.startDownloadButton.addEventListener('click', async () => {
+                console.log('다운로드 시작 버튼 클릭됨');
+                this.startDownloadButton.disabled = true;
+                this.startDownloadButton.textContent = '다운로드 중...';
+
+                await window.electronAPI.urlManager.startDownload();
+
+                this.startDownloadButton.disabled = false;
+                this.startDownloadButton.textContent = '다운로드 시작';
+                console.log('모든 다운로드 작업 완료됨');
             });
         }
     }

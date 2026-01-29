@@ -1,6 +1,7 @@
 // Electron/main/ipc/urlHandlers.js
 
-const { urlManager } = require('../download/urlManager'); // urlManager 인스턴스 가져오기 (다시 추가)
+const { urlManager } = require('../download/urlManager');
+const log = require('../js/logManager');
 
 module.exports = {
   registerUrlHandlers: (ipcMain) => { // urlManager 인자 제거
@@ -32,6 +33,12 @@ module.exports = {
     ipcMain.handle('urlManager:clear-completed', async () => {
         const success = urlManager.clearCompleted();
         return success;
+    });
+
+    ipcMain.handle('url:start-download', async () => {
+      log.write('[IPC] Received url:start-download call.');
+      await urlManager.startDownload();
+      return true; // Signal completion
     });
   }
 };
