@@ -1,4 +1,4 @@
-// electron/main/config/config.js
+// Electron/main/appEnv/configData.js - Moved from config/config.js
 
 // This object will be a singleton due to Node.js module caching
 const appConfig = {

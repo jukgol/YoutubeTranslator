@@ -4,8 +4,9 @@ const fs = require('fs');
 const { shell } = require('electron'); // For opening files/folders
 
 class PathFunc {
-    constructor(pathManager) {
-        this.path = pathManager; // pathManager instance (from pathManager.js)
+    constructor(appEnvInstance) {
+        this.appEnv = appEnvInstance; // Store the appEnv instance
+        this.path = this.appEnv.pathData; // Access pathData from the appEnv instance
     }
 
     getOriginPath(filename) {

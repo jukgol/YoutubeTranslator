@@ -1,11 +1,10 @@
-// electron/main/setting_service/settingService.js
+// Electron/main/appEnv/configFunc.js - Moved from setting_service/settingService.js
 const fs = require('fs');
-const appEnv = require('../appEnv/appEnv'); // Import the AppEnv singleton
-const appConfig = require('../config/config.js');               // Import my ported appConfig
 
-class SettingService {
-    constructor() {
-        this.path = appEnv.pathData; // Use the pathData from the AppEnv singleton
+class ConfigFunc { // Renamed from SettingService
+    constructor(appEnvInstance) { // Accept appEnv instance        
+        this.path = appEnvInstance.pathData; // Access pathData from the appEnv instance
+        this.configData = appEnvInstance.configData; // Direct access to configData
         this.readApiKeys();
         this.loadVersion();
         this.loadRule();
@@ -27,42 +26,42 @@ class SettingService {
     readApiKeys() {
         const filePath = this.path.apiFile;
         if (!fs.existsSync(filePath)) {
-            appConfig.apiKeys = [];
-            appConfig.selectedApi = "";
+            this.configData.apiKeys = [];
+            this.configData.selectedApi = "";
             return [];
         }
         const content = this._readFile(filePath);
         const keys = content.split('\n').map(line => line.trim()).filter(line => line.length > 0);
-        appConfig.apiKeys = keys;
-        appConfig.selectedApi = keys.length > 0 ? keys[0] : "";
+        this.configData.apiKeys = keys;
+        this.configData.selectedApi = keys.length > 0 ? keys[0] : "";
         return keys;
     }
 
     writeApiKeys(keys) {
         const content = keys.join('\n');
         this._writeFile(this.path.apiFile, content);
-        appConfig.apiKeys = keys;
+        this.configData.apiKeys = keys;
     }
 
     saveVersion(version) {
         this._writeFile(this.path.geminiVerFile, version);
-        appConfig.modelVersion = version;
+        this.configData.modelVersion = version;
     }
 
     loadVersion() {
         const version = this._readFile(this.path.geminiVerFile);
-        appConfig.modelVersion = version;
+        this.configData.modelVersion = version;
         return version;
     }
 
     saveRule(rule) {
         this._writeFile(this.path.ruleFile, rule);
-        appConfig.promptRule = rule;
+        this.configData.promptRule = rule;
     }
 
     loadRule() {
         const rule = this._readFile(this.path.ruleFile);
-        appConfig.promptRule = rule;
+        this.configData.promptRule = rule;
         return rule;
     }
 
@@ -73,8 +72,8 @@ class SettingService {
             keys.unshift(selected); // Add to front
         }
         this.writeApiKeys(keys); // Save changes
-        appConfig.apiKeys = keys;
-        appConfig.selectedApi = selected;
+        this.configData.apiKeys = keys;
+        this.configData.selectedApi = selected;
         return keys;
     }
 
@@ -87,10 +86,10 @@ class SettingService {
             keys.unshift(newKey); // Move to front
         }
         this.writeApiKeys(keys); // Save changes
-        appConfig.apiKeys = keys;
-        appConfig.selectedApi = newKey;
+        this.configData.apiKeys = keys;
+        this.configData.selectedApi = newKey;
         return keys;
     }
 }
 
-module.exports = new SettingService();
+module.exports = ConfigFunc; // Export an instance

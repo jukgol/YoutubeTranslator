@@ -1,7 +1,7 @@
 const log = require('../js/logManager'); // 경로 수정
 const path = require('path');
 const fs = require('fs');
-const settingService = require('../setting_service/settingService.js');
+const appEnv = require('../appEnv/appEnv'); // Import the AppEnv singleton
 const { _runDownloadProcess } = require('../download/downloadHelper.js');
 
 class DownloadItem {
@@ -210,7 +210,7 @@ class UrlManager {
             }
             
             try {
-                const appPaths = { video_dir: settingService.path.videoDir };
+                const appPaths = { video_dir: appEnv.pathData.videoDir };
                 await _runDownloadProcess(appPaths, item.id, item.url, item.title);
                 this.markAsDone(item); // On success, mark as done
             } catch (error) {
