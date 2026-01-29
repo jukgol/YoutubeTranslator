@@ -29,6 +29,11 @@ class UrlManager {
         this.counterInterval = null; // To store the interval ID
         this.currentCount = 0;
         this.nextId = 0; // nextId 속성 추가
+        this._mainWindow = null; // _mainWindow 속성 추가
+    }
+
+    setMainWindow(mainWindow) { // setMainWindow 메서드 추가
+        this._mainWindow = mainWindow;
     }
 
     addUrl(url) {
@@ -61,7 +66,23 @@ class UrlManager {
     async fetchUrlTitle(url) {
         try {
             const info = await ytdl.getInfo(url);
-            return info.videoDetails.title;
+            const title = info.videoDetails.title; // 제목 가져옴
+
+            // 이미 존재하는 아이템이라면 업데이트 (없으면 나중에 추가될 아이템)
+            const existingItem = [...this.pending, ...this.inProgress, ...this.completed]
+                                .find(item => item.url === url);
+            if (existingItem) {
+                existingItem.title = title;
+                // 렌더러로 업데이트 메시지 보냄
+                if (this._mainWindow) {
+                    this._mainWindow.webContents.send('urlManager:item-updated', { 
+                        id: existingItem.id, 
+                        title: existingItem.title, 
+                        status: existingItem.status 
+                    });
+                }
+            }
+            return title;
         } catch (error) {
             log.write(`URL (${url}) 제목 가져오기 실패: ${error.message}`);
             return null;
