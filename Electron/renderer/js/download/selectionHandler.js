@@ -1,40 +1,39 @@
 // Electron/renderer/js/download/selectionHandler.js
 
-export let currentSelectedElement = null; // Global variable to track the currently selected element
+// Global variable removed
 
-export function applyHighlight(element) { // No isFolder needed for flat list
+export function applyHighlight(element) {
     if (element) {
         element.classList.add('selected');
     }
 }
 
-export function removeHighlight(element) { // No isFolder needed for flat list
+export function removeHighlight(element) {
     if (element) {
         element.classList.remove('selected');
     }
 }
 
-// createItemClickHandler is simplified as there's no nested logic in download tab
 export function createItemClickHandler() {
+    let selectedElementInThisHandler = null; // 각 createItemClickHandler 인스턴스마다 고유한 변수
+
     return function handleItemClick(clickedElement, type, sectionName, data) {
-        // For flat lists, always highlight the clicked file itself
         let elementToHighlight = clickedElement;
 
-        // Remove highlight from previously selected element
-        if (currentSelectedElement && currentSelectedElement !== elementToHighlight) {
-            removeHighlight(currentSelectedElement);
+        // 이전에 선택된 요소가 있고, 그것이 현재 클릭된 요소와 다르다면
+        if (selectedElementInThisHandler && selectedElementInThisHandler !== elementToHighlight) {
+            removeHighlight(selectedElementInThisHandler); // 이전 선택 요소의 하이라이트 제거
         }
         
-        // Apply highlight to the new element
-        applyHighlight(elementToHighlight);
-        currentSelectedElement = elementToHighlight;
+        applyHighlight(elementToHighlight); // 현재 클릭된 요소 하이라이트 적용
+        selectedElementInThisHandler = elementToHighlight; // 현재 클릭된 요소를 새 선택 요소로 저장
 
-        // Store context in dataset for future reference (e.g., when removing highlight)
-        currentSelectedElement.dataset.sectionName = sectionName;
-        currentSelectedElement.dataset.type = type;
-        currentSelectedElement.dataset.data = JSON.stringify(data);
+        // Store context in dataset for future reference
+        elementToHighlight.dataset.sectionName = sectionName;
+        elementToHighlight.dataset.type = type;
+        elementToHighlight.dataset.data = JSON.stringify(data);
 
         console.log(`Selected in ${sectionName}: Type=${type}, Data=`, data);
-        console.log('Currently highlighted element:', currentSelectedElement);
+        console.log('Currently highlighted element in this section:', selectedElementInThisHandler); // 로깅도 수정
     };
 }

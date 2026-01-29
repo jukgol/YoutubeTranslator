@@ -2,7 +2,8 @@ const log = require('../js/logManager'); // Import logManager
 const ytdl = require('ytdl-core'); // Import ytdl-core
 
 class DownloadItem {
-    constructor(url) {
+    constructor(id, url) {
+        this.id = id;
         this.url = url.split('?')[0]; // 파라미터 제거
         this.title = "🔍 제목 확인 중...";
         this.status = "대기"; // 대기, 다운로드 중, 완료, 실패
@@ -13,9 +14,10 @@ class DownloadItem {
         const symbol = symbols[this.status] || "•";
         
         const separator = `${'='.repeat(12)} [ ${symbol} ${this.status} ] ${'='.repeat(12)}`;
+        const lineId = ` ID: ${this.id}`; // ID 추가
         const lineTitle = ` 제목: ${this.title}`;
         const lineUrl = ` URL: ${this.url}`;
-        return [separator, lineTitle, lineUrl];
+        return [separator, lineId, lineTitle, lineUrl];
     }
 }
 
@@ -26,6 +28,7 @@ class UrlManager {
         this.completed = [];
         this.counterInterval = null; // To store the interval ID
         this.currentCount = 0;
+        this.nextId = 0; // nextId 속성 추가
     }
 
     addUrl(url) {
@@ -42,7 +45,7 @@ class UrlManager {
             return null;
         }
 
-        const newItem = new DownloadItem(url);
+        const newItem = new DownloadItem(this.nextId++, url); // ID 부여 및 증가
         this.pending.push(newItem);
         log.write("대기열에 추가되었습니다.");
         return newItem;
