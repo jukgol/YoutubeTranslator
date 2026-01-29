@@ -1,11 +1,11 @@
 // electron/main/setting_service/settingService.js
 const fs = require('fs');
-const PathManager = require('../path_service/pathManager.js'); // Import PathManager class
+const appEnv = require('../appEnv/appEnv'); // Import the AppEnv singleton
 const appConfig = require('../config/config.js');               // Import my ported appConfig
 
 class SettingService {
     constructor() {
-        this.path = new PathManager(); // Instantiate PathManager here
+        this.path = appEnv.pathData; // Use the pathData from the AppEnv singleton
         this.readApiKeys();
         this.loadVersion();
         this.loadRule();

@@ -1,5 +1,4 @@
 const log = require('../js/logManager'); // 경로 수정
-const YTDlpWrap = require('yt-dlp-wrap').default; // Use yt-dlp-wrap
 const path = require('path');
 const fs = require('fs');
 const settingService = require('../setting_service/settingService.js');
@@ -34,32 +33,8 @@ class UrlManager {
         this.counterInterval = null; // To store the interval ID
         this.currentCount = 0;
         this.nextId = 0; // nextId 속성 추가
-        this._mainWindow = null; // _mainWindow 속성 추가
-        this.ytDlpWrap = null; // Initialize ytDlpWrap to null
-    }
-
-    async initialize() {
-        if (!this.ytDlpWrap) { // Only download if not already initialized
-            try {
-                log.write("Checking for yt-dlp binary...");
-                const binDir = path.join(__dirname, '..', '..', 'bin'); // Electron/bin
-                const ytDlpPath = path.join(binDir, 'yt-dlp.exe');
-
-                // Ensure the bin directory exists
-                if (!fs.existsSync(binDir)) {
-                    fs.mkdirSync(binDir, { recursive: true });
-                }
-
-                await YTDlpWrap.downloadFromGithub(ytDlpPath); // Specify target path
-                log.write(`yt-dlp binary downloaded to: ${ytDlpPath}`);
-                this.ytDlpWrap = new YTDlpWrap(ytDlpPath); // Instantiate with the downloaded path
-            } catch (error) {
-                log.write(`Failed to prepare yt-dlp binary: ${error.message}`);
-                // Handle the error, maybe disable functionality or show a message to the user
-                throw error; // Re-throw to propagate the error
-            }
-        }
-    }
+        this._mainWindow = null; // _mainWindow 속성 추가        
+    }   
 
     setMainWindow(mainWindow) { // setMainWindow 메서드 추가
         this._mainWindow = mainWindow;

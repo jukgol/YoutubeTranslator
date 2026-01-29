@@ -1,8 +1,8 @@
 const { app, BrowserWindow, ipcMain } = require('electron');
 const path = require('path');
 const logManager = require('./js/logManager.js');
+const appEnv = require('./appEnv/appEnv'); // Import the AppEnv singleton
 const settingServiceInstance = require('./setting_service/settingService.js'); // Import SettingService class
-const pathService = require('./path_service/pathService.js'); // Import pathService
 
 // Import IPC handlers
 const { registerSettingHandlers } = require('./ipc/settingHandlers.js');
@@ -34,7 +34,7 @@ app.whenReady().then(async () => {
 
   // Register IPC handlers
   registerSettingHandlers(ipcMain, settingServiceInstance);
-  registerPathHandlers(ipcMain, settingServiceInstance, pathService);
+  registerPathHandlers(ipcMain, settingServiceInstance, appEnv.pathFuncUtils);
   registerAppHandlers(ipcMain, app, logManager);
   registerUrlHandlers(ipcMain); // 수정: urlManager 인자 제거
 

@@ -1,18 +1,13 @@
-// electron/main/path_service/pathManager.js
 const path = require('path');
 const fs = require('fs');
-const { app } = require('electron'); // Electron's app module provides app.getPath('userData') etc.
+const { app } = require('electron'); // Import Electron's app module
 
-class PathManager {
+class PathData {
     constructor() {
         // Determine base directory
-        // In Electron, app.isPackaged checks if the app is running in a packaged form.
-        // app.getPath('exe') gives the path to the executable.
-        // app.getAppPath() gives the path to the app's source code (or asar archive).
-        // For development, we want the project root.
         this.base_dir = app.isPackaged 
             ? path.dirname(app.getPath('exe')) // For packaged app
-            : path.resolve(__dirname, '../../..'); // For development, assumes pathManager.js is in project_root/electron/main/path_service
+            : path.resolve(__dirname, '../../..'); // Corrected path: Electron/main/appEnv -> project_root (F:\ProjectGit\YoutubeTranslator)
 
         // --- [1. 폴더 경로 정의] ---
         const dataDir = path.join(this.base_dir, "data");
@@ -59,4 +54,4 @@ class PathManager {
     }
 }
 
-module.exports = PathManager;
+module.exports = PathData; // Export the class itself

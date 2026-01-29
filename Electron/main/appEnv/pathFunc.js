@@ -1,9 +1,9 @@
-// electron/main/path_service/pathService.js
+// Electron/main/appEnv/pathFunc.js - Moved from path_service/pathService.js
 const path = require('path');
 const fs = require('fs');
 const { shell } = require('electron'); // For opening files/folders
 
-class SubtitlePathService {
+class PathFunc {
     constructor(pathManager) {
         this.path = pathManager; // pathManager instance (from pathManager.js)
     }
@@ -140,11 +140,9 @@ function openFolderInExplorer(folderPath) {
 }
 
 // Export the class and utility functions
-module.exports = {
-    SubtitlePathService,
-    getSubdirectories,
-    getFilesinDirectory,
-    getFolderFiles,
-    copyFileToFolder,
-    openFolderInExplorer,
-};
+module.exports = PathFunc;
+module.exports.getSubdirectories = getSubdirectories;
+module.exports.getFilesinDirectory = getFilesinDirectory;
+module.exports.getFolderFiles = getFolderFiles;
+module.exports.copyFileToFolder = copyFileToFolder;
+module.exports.openFolderInExplorer = openFolderInExplorer;
