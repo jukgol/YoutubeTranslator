@@ -16,7 +16,8 @@ module.exports = {
     });
 
     ipcMain.on('close-app', () => {
-      app.quit();
+      console.log('--- Electron: app.exit(0) is being called ---');
+      app.exit(0);
     });
 
     ipcMain.handle('system:start-test-counter', async () => {
