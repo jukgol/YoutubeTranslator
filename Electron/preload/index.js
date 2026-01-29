@@ -14,11 +14,11 @@ try {
   const urlManager = urlManagerAPI(ipcRenderer); // Add this line
 
   contextBridge.exposeInMainWorld('electronAPI', {
-    ...logging,
-    ...paths,
-    ...settings,
-    ...system,
-    ...urlManager // Add this line
+    logging: logging,
+    paths: paths,
+    settings: settings,
+    system: system,
+    urlManager: urlManager
   });
   
   console.log("Electron API 등록 완료");

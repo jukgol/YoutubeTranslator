@@ -10,7 +10,7 @@ function initCloseButton() {
     const closeBtn = document.getElementById('close-btn');
     if(closeBtn) {
         closeBtn.addEventListener('click', () => {
-            window.electronAPI.closeApp();
+            window.electronAPI.system.closeApp();
         });
     }
 }
@@ -67,8 +67,8 @@ function initTabSwitching() {
 
 function initLogListener() {
     const logView = document.getElementById('statusLog');
-    if (logView && window.electronAPI && typeof window.electronAPI.onLogMessage === 'function') {
-        window.electronAPI.onLogMessage((logEntry) => { // logEntry is now { message: string, replace: boolean }
+    if (logView && window.electronAPI && typeof window.electronAPI.logging.onLogMessage === 'function') {
+        window.electronAPI.logging.onLogMessage((logEntry) => { // logEntry is now { message: string, replace: boolean }
             const { message, replace } = logEntry;
             if (replace) {
                 // Remove the last line if it exists
@@ -113,8 +113,8 @@ export async function initializeUI() { // Made initializeUI async
     settings.initSettingsHandlers(); // Initialize settings-specific handlers
     
     // Signal to main process that renderer is ready for logs
-    if (window.electronAPI && typeof window.electronAPI.rendererReadyForLogs === 'function') {
-        window.electronAPI.rendererReadyForLogs();
+    if (window.electronAPI && typeof window.electronAPI.logging.rendererReadyForLogs === 'function') {
+        window.electronAPI.logging.rendererReadyForLogs();
     }
 
     // Programmatically click the default tab to ensure consistent loading

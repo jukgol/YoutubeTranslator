@@ -1,9 +1,9 @@
 // Electron/main/ipc/urlHandlers.js
 
-// const { urlManager } = require('../download/urlManager'); // urlManager 인스턴스 가져오기
+const { urlManager } = require('../download/urlManager'); // urlManager 인스턴스 가져오기 (다시 추가)
 
 module.exports = {
-  registerUrlHandlers: (ipcMain, urlManager) => { // module.exports 객체의 속성으로 변경
+  registerUrlHandlers: (ipcMain) => { // urlManager 인자 제거
     ipcMain.handle('system:start-test-counter', async () => {
       urlManager.startTestCounter();
       return true;

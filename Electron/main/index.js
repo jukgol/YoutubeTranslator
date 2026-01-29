@@ -10,7 +10,7 @@ const { registerSettingHandlers } = require('./ipc/settingHandlers.js');
 const { registerPathHandlers } = require('./ipc/pathHandlers.js');
 const { registerAppHandlers } = require('./ipc/appHandlers.js');
 const { registerUrlHandlers } = require('./ipc/urlHandlers.js');
-const { urlManager } = require('./download/urlManager.js'); // 새로 추가: urlManager 인스턴스 가져오기
+// const { urlManager } = require('./download/urlManager.js'); // 제거: urlManager 인스턴스 가져오기
 
 let settingServiceInstance = null; // Declare a variable to hold the instance
 let mainWindow; // Declare mainWindow as a module-level variable
@@ -41,7 +41,7 @@ app.whenReady().then(() => {
   registerSettingHandlers(ipcMain, settingServiceInstance);
   registerPathHandlers(ipcMain, settingServiceInstance, pathService);
   registerAppHandlers(ipcMain, app, logManager);
-  registerUrlHandlers(ipcMain, urlManager); // 수정: urlManager 인자 전달
+  registerUrlHandlers(ipcMain); // 수정: urlManager 인자 제거
 
   createWindow(); // This creates mainWindow and loads renderer/index.html
   // Initialize the logManager with the created mainWindow after it's available

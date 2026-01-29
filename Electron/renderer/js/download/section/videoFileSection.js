@@ -18,7 +18,7 @@ export class VideoFileSection {
             try {
                 // IPC를 통해 메인 프로세스에서 영상 파일 목록을 가져옵니다.
                 // downloadPathMapping['영상 폴더 목록'].api 에 해당하는 IPC 호출을 가정합니다.
-                const data = await window.electronAPI.pathGetVideoFiles(); 
+                const data = await window.electronAPI.paths.getVideoFiles(); // 변경
                 renderFlatList(this.listField, data, '영상 폴더 목록', this.handleItemClick);
             } catch (error) {
                 console.error(`Error fetching video files:`, error);

@@ -10,7 +10,7 @@ export async function loadSettingsUI() {
         
         let apiKeys = [];
         try {
-            apiKeys = await window.electronAPI.settingReadApiKeys();
+            apiKeys = await window.electronAPI.settings.readApiKeys();
             console.log('[UI Debug] Fetched API Keys:', apiKeys);
         } catch (ipcError) {
             log(`[UI Error] Failed to read API keys: ${ipcError.message}`);
@@ -40,7 +40,7 @@ export async function loadSettingsUI() {
         // Version section
         let modelVersion = '';
         try {
-            modelVersion = await window.electronAPI.settingLoadVersion();
+            modelVersion = await window.electronAPI.settings.loadVersion();
             console.log('[UI Debug] Fetched Model Version:', modelVersion);
         } catch (ipcError) {
             log(`[UI Error] Failed to load version: ${ipcError.message}`);
@@ -54,7 +54,7 @@ export async function loadSettingsUI() {
         // Rule section
         let promptRule = '';
         try {
-            promptRule = await window.electronAPI.settingLoadRule();
+            promptRule = await window.electronAPI.settings.loadRule();
             console.log('[UI Debug] Fetched Prompt Rule:', promptRule);
         } catch (ipcError) {
             log(`[UI Error] Failed to load rule: ${ipcError.message}`);

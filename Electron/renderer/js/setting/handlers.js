@@ -15,14 +15,14 @@ export async function initSettingsHandlers() {
             if (newKey) {
                 try {
                     // Python logic was get_added_keys then write_api_keys
-                    const currentKeys = await window.electronAPI.settingReadApiKeys();
+                    const currentKeys = await window.electronAPI.settings.readApiKeys();
                     let updatedKeys = [...currentKeys];
                     if (updatedKeys.includes(newKey)) {
                         updatedKeys = updatedKeys.filter(key => key !== newKey);
                     }
                     updatedKeys.unshift(newKey); // Add to front
                     
-                    await window.electronAPI.settingWriteApiKeys(updatedKeys);
+                    await window.electronAPI.settings.writeApiKeys(updatedKeys);
                     apiNewKeyInput.value = ''; // Clear input field
                     await loadSettingsUI(); // Refresh UI to show new key selected
                     log(`[UI] API Key 추가됨: ${newKey.substring(0, 10)}...`);
@@ -43,8 +43,8 @@ export async function initSettingsHandlers() {
             if (selectedKey && selectedKey !== '없음') {
                 try {
                     // Python logic was get_reordered_keys then write_api_keys
-                    const updatedKeys = await window.electronAPI.settingGetReorderedKeys(selectedKey);
-                    await window.electronAPI.settingWriteApiKeys(updatedKeys);
+                    const updatedKeys = await window.electronAPI.settings.getReorderedKeys(selectedKey);
+                    await window.electronAPI.settings.writeApiKeys(updatedKeys);
                     await loadSettingsUI(); // Refresh UI to ensure selected is first
                     log(`[UI] API Key 선택됨: ${selectedKey.substring(0, 10)}...`);
                 } catch (ipcError) {
@@ -63,9 +63,9 @@ export async function initSettingsHandlers() {
             const selectedKey = apiSelect.value;
             if (selectedKey && selectedKey !== '없음') {
                 try {
-                    const currentKeys = await window.electronAPI.settingReadApiKeys();
+                    const currentKeys = await window.electronAPI.settings.readApiKeys();
                     const updatedKeys = currentKeys.filter(key => key !== selectedKey);
-                    await window.electronAPI.settingWriteApiKeys(updatedKeys);
+                    await window.electronAPI.settings.writeApiKeys(updatedKeys);
                     await loadSettingsUI(); // Refresh UI
                     log(`[UI] API Key 삭제됨: ${selectedKey.substring(0, 10)}...`);
                 } catch (ipcError) {
@@ -84,7 +84,7 @@ export async function initSettingsHandlers() {
         geminiVersionInput.addEventListener('blur', async () => {
             const newVersion = geminiVersionInput.value.trim();
             try {
-                await window.electronAPI.settingSaveVersion(newVersion);
+                await window.electronAPI.settings.saveVersion(newVersion);
                 log(`[UI] Gemini 버전이 저장되었습니다: ${newVersion}`);
             } catch (ipcError) {
                 log(`[UI Error] Failed to save Gemini Version: ${ipcError.message}`);
@@ -99,7 +99,7 @@ export async function initSettingsHandlers() {
         promptRuleTextarea.addEventListener('blur', async () => {
             const newRule = promptRuleTextarea.value.trim();
             try {
-                await window.electronAPI.settingSaveRule(newRule);
+                await window.electronAPI.settings.saveRule(newRule);
                 log(`[UI] 번역 규칙이 저장되었습니다.`);
             } catch (ipcError) {
                 log(`[UI Error] Failed to save Translation Rule: ${ipcError.message}`);

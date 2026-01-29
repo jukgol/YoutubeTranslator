@@ -4,11 +4,11 @@ import { createItemClickHandler } from './selectionHandler.js';
 import { renderFlatList, renderNestedList } from './listRenderers.js';
 
 const pathMapping = {
-    '원본': { api: 'pathGetSubtitleFiles', extensions: ['.srt', '.vtt'], type: 'flat' },
-    '스플릿': { api: 'pathGetSplitFiles', type: 'nested' },
-    '번역': { api: 'pathGetTranslatedFiles', type: 'nested' },
-    '합치기': { api: 'pathGetCombineFiles', type: 'flat' }, // Changed to flat
-    '결과': { api: 'pathGetResultFiles', type: 'flat' },    // Changed to flat
+    '원본': { api: 'getSubtitleFiles', extensions: ['.srt', '.vtt'], type: 'flat' }, // 변경
+    '스플릿': { api: 'getSplitFiles', type: 'nested' }, // 변경
+    '번역': { api: 'getTranslatedFiles', type: 'nested' }, // 변경
+    '합치기': { api: 'getCombineFiles', type: 'flat' }, // 변경
+    '결과': { api: 'getResultFiles', type: 'flat' },    // 변경
 };
 
 const handleItemClick = createItemClickHandler(pathMapping); // Create the handler with pathMapping
@@ -26,10 +26,10 @@ export async function initializeRunstepTab() {
             try {
                 let data;
                 if (type === 'flat') {
-                    data = await window.electronAPI[api]();
+                    data = await window.electronAPI.paths[api](); // 변경
                     renderFlatList(listField, data, sectionName, handleItemClick); // Pass handleItemClick
                 } else if (type === 'nested') {
-                    data = await window.electronAPI[api]();
+                    data = await window.electronAPI.paths[api](); // 변경
                     renderNestedList(listField, data, sectionName, handleItemClick); // Pass handleItemClick
                 }
             } catch (error) {

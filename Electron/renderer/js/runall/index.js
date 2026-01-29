@@ -23,8 +23,8 @@ const handleRunallSelection = (clickedElement, sectionName, data) => {
 
 // 설정 객체
 const pathMapping = {
-    '원본 데이터': { api: 'pathGetSubtitleFiles', selector: '#runall-content .section-frame:nth-child(1) .list-field' },
-    '최종 결과': { api: 'pathGetResultFiles', selector: '#runall-content .section-frame:nth-child(4) .list-field' },
+    '원본 데이터': { api: 'getSubtitleFiles', selector: '#runall-content .section-frame:nth-child(1) .list-field' }, // 변경
+    '최종 결과': { api: 'getResultFiles', selector: '#runall-content .section-frame:nth-child(4) .list-field' },    // 변경
     '작업 큐': { api: null, selector: '#runall-content .section-frame:nth-child(2) .list-field' }
 };
 
@@ -39,7 +39,7 @@ export async function initializeRunallTab() {
             if (!listElement) continue;
 
             // 데이터 로드
-            const data = await window.electronAPI[config.api]();
+            const data = await window.electronAPI.paths[config.api]();
 
             // 리스트 렌더링 (핸들러에 섹션 이름을 박아서 전달)
             renderSimpleList(listElement, data, name, (clickedEl) => {
