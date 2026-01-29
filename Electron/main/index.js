@@ -30,11 +30,12 @@ function createWindow () {
   // mainWindow.webContents.openDevTools(); // ADDED FOR DEBUGGING (REMOVED)
 }
 
-app.whenReady().then(() => { 
+app.whenReady().then(async () => { 
 
   // Instantiate services AFTER app is ready  
   settingServiceInstance = new SettingService(); // SettingService's constructor now instantiates PathManager
 
+  await urlManager.initialize(); // yt-dlp 다운로드 및 초기화
   logManager.write('Application started.');
 
   // Register IPC handlers

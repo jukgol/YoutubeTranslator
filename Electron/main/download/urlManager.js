@@ -1,16 +1,18 @@
 const log = require('../js/logManager'); // 경로 수정
-const ytdl = require('ytdl-core');
+const YTDlpWrap = require('yt-dlp-wrap').default; // Use yt-dlp-wrap
+const path = require('path');
+const fs = require('fs');
 
 class DownloadItem {
     constructor(id, url) {
         this.id = id;
         this.url = url.split('?')[0]; // 파라미터 제거
         this.title = "🔍 제목 확인 중...";
-        this.status = "대기"; // 대기, 다운로드 중, 완료, 실패
+        this.status = "대기"; // 대기, 제목 확인 완료, 다운로드 중, 완료, 실패
     }
 
     toUiLines() {
-        const symbols = { "대기": "⏳", "다운로드 중": "📥", "완료": "✅", "실패": "❌" };
+        const symbols = { "대기": "⏳", "제목 확인 완료": "📝", "다운로드 중": "📥", "완료": "✅", "실패": "❌" };
         const symbol = symbols[this.status] || "•";
         
         const separator = `${'='.repeat(12)} [ ${symbol} ${this.status} ] ${'='.repeat(12)}`;
@@ -30,6 +32,30 @@ class UrlManager {
         this.currentCount = 0;
         this.nextId = 0; // nextId 속성 추가
         this._mainWindow = null; // _mainWindow 속성 추가
+        this.ytDlpWrap = null; // Initialize ytDlpWrap to null
+    }
+
+    async initialize() {
+        if (!this.ytDlpWrap) { // Only download if not already initialized
+            try {
+                log.write("Checking for yt-dlp binary...");
+                const binDir = path.join(__dirname, '..', '..', 'bin'); // Electron/bin
+                const ytDlpPath = path.join(binDir, 'yt-dlp.exe');
+
+                // Ensure the bin directory exists
+                if (!fs.existsSync(binDir)) {
+                    fs.mkdirSync(binDir, { recursive: true });
+                }
+
+                await YTDlpWrap.downloadFromGithub(ytDlpPath); // Specify target path
+                log.write(`yt-dlp binary downloaded to: ${ytDlpPath}`);
+                this.ytDlpWrap = new YTDlpWrap(ytDlpPath); // Instantiate with the downloaded path
+            } catch (error) {
+                log.write(`Failed to prepare yt-dlp binary: ${error.message}`);
+                // Handle the error, maybe disable functionality or show a message to the user
+                throw error; // Re-throw to propagate the error
+            }
+        }
     }
 
     setMainWindow(mainWindow) { // setMainWindow 메서드 추가
@@ -53,6 +79,7 @@ class UrlManager {
         const newItem = new DownloadItem(this.nextId++, url); // ID 부여 및 증가
         this.pending.push(newItem);
         log.write("대기열에 추가되었습니다.");
+        this.fetchUrlTitle(newItem.url); // 제목 가져오기 시작
         return newItem;
     }
 
@@ -64,16 +91,20 @@ class UrlManager {
     }
 
     async fetchUrlTitle(url) {
+        if (!this.ytDlpWrap) {
+            log.write("YTDlpWrap is not initialized. Cannot fetch title.");
+            return null;
+        }
         try {
-            const info = await ytdl.getInfo(url);
-            const title = info.videoDetails.title; // 제목 가져옴
+            const info = await this.ytDlpWrap.getVideoInfo(url);
+            const title = info.title;
+            log.write(`URL (${url}) 제목 가져오기 성공: ${title}`);
 
-            // 이미 존재하는 아이템이라면 업데이트 (없으면 나중에 추가될 아이템)
             const existingItem = [...this.pending, ...this.inProgress, ...this.completed]
                                 .find(item => item.url === url);
             if (existingItem) {
                 existingItem.title = title;
-                // 렌더러로 업데이트 메시지 보냄
+                existingItem.status = "제목 확인 완료";
                 if (this._mainWindow) {
                     this._mainWindow.webContents.send('urlManager:item-updated', { 
                         id: existingItem.id, 
@@ -85,6 +116,19 @@ class UrlManager {
             return title;
         } catch (error) {
             log.write(`URL (${url}) 제목 가져오기 실패: ${error.message}`);
+            // Find the item to update its status to '실패'
+            const existingItem = [...this.pending, ...this.inProgress, ...this.completed]
+                                .find(item => item.url === url);
+            if (existingItem) {
+                existingItem.status = "실패";
+                if (this._mainWindow) {
+                    this._mainWindow.webContents.send('urlManager:item-updated', { 
+                        id: existingItem.id, 
+                        title: existingItem.title, 
+                        status: existingItem.status 
+                    });
+                }
+            }
             return null;
         }
     }
@@ -104,6 +148,13 @@ class UrlManager {
             this.inProgress.splice(index, 1);
             item.status = "완료";
             this.completed.push(item);
+            if (this._mainWindow) {
+                this._mainWindow.webContents.send('urlManager:item-updated', {
+                    id: item.id,
+                    title: item.title,
+                    status: item.status
+                });
+            }
         }
     }
 
@@ -134,6 +185,15 @@ class UrlManager {
                 log.write("테스트 카운터 종료.");
             }
         }, 1000);
+    }
+
+    getCompleted() {
+        return this.completed;
+    }
+
+    clearCompleted() {
+        this.completed = [];
+        return true;
     }
 }
 

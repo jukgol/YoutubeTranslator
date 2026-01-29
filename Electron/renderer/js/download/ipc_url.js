@@ -19,3 +19,8 @@ export const nextUrl = async () => {
     const item = await window.electronAPI.urlManager.getNext(); // 변경
     return item;
 };
+
+export const clearCompleted = async () => {
+    const success = await window.electronAPI.urlManager.clearCompleted();
+    return success;
+};

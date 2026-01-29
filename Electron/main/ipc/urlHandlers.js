@@ -28,5 +28,10 @@ module.exports = {
         const item = urlManager.getNext();
         return item;
     });
+
+    ipcMain.handle('urlManager:clear-completed', async () => {
+        const success = urlManager.clearCompleted();
+        return success;
+    });
   }
 };

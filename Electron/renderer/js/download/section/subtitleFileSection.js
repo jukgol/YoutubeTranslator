@@ -19,7 +19,7 @@ export class SubtitleFileSection {
                 // IPC를 통해 메인 프로세스에서 자막 파일 목록을 가져옵니다.
                 // downloadPathMapping['자막 폴더 목록'].api 에 해당하는 IPC 호출을 가정합니다.
                 const data = await window.electronAPI.paths.getSubtitleFiles(); // 변경 // 변경
-                renderFlatList(this.listField, data, '자막 폴더 목록', this.handleItemClick);
+                renderFlatList(this.listField, data, '자막 폴더', this.handleItemClick);
             } catch (error) {
                 console.error(`Error fetching subtitle files:`, error);
                 this.listField.innerHTML = `<div style="color: red; font-weight: bold; padding: 10px; text-align: center;">Error loading subtitle files: ${error.message}</div>`;

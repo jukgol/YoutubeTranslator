@@ -5,8 +5,9 @@ import { addFlatListItem } from '../listRenderers.js'; // 경로 수정
 import { createItemClickHandler } from '../selectionHandler.js'; // 경로 수정
 
 export class DownloadSection {
-    constructor(sectionElement) {
+    constructor(sectionElement, completeSection) {
         this.sectionElement = sectionElement;
+        this.completeSection = completeSection; // Store the instance
         this.addUrlButton = sectionElement.querySelector('#add-url-button');
         this.urlInput = sectionElement.querySelector('#url-input');
         this.downloadUrlList = sectionElement.querySelector('#downloadUrlList');
@@ -14,20 +15,24 @@ export class DownloadSection {
         this.setupEventListeners();
         this.initialRender();
         this.setupIPCListeners(); // IPC 리스너 설정 추가
-
     }
 
     // 아이템 업데이트를 UI에 반영하는 헬퍼 메서드
     updateItemDisplay(itemData) {
         const { id, title, status } = itemData;
         const listItem = this.downloadUrlList.querySelector(`li[data-id="${id}"]`);
+
         if (listItem) {
-            // 현재 li.textContent = file; 형태로 파일 이름만 들어가 있습니다.
-            // id와 status를 표시하는 방식으로 변경해야 합니다.
-            // 여기서는 임시로 title만 업데이트하거나, 새로운 포맷으로 전체 텍스트를 변경합니다.
-            listItem.textContent = `ID: ${id}, 제목: ${title}, 상태: ${status}`;
-            // 필요하다면 status에 따라 클래스를 추가하여 색상 변경 등도 가능합니다.
-            // 예: listItem.dataset.status = status;
+            if (status === '완료') {
+                // Move to completed section
+                listItem.remove();
+                if (this.completeSection) {
+                    this.completeSection.addItem(itemData);
+                }
+            } else {
+                // Just update the text
+                listItem.textContent = `ID: ${id}, 제목: ${title}, 상태: ${status}`;
+            }
             console.log(`[UI 업데이트] ID: ${id}, 제목: ${title}, 상태: ${status}`);
         }
     }
@@ -43,7 +48,7 @@ export class DownloadSection {
                     if (newItem) {
                         console.log('URL 추가 완료:', newItem);
                         // downloadItems 배열 없이 바로 DOM에 추가
-                        addFlatListItem(this.downloadUrlList, newItem.title, '영상 다운로드', this.handleItemClick);
+                        addFlatListItem(this.downloadUrlList, newItem, '영상 다운로드', this.handleItemClick);
                     }
                     this.urlInput.value = '';
                     this.addUrlButton.disabled = false;

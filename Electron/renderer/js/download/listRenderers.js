@@ -37,9 +37,12 @@ export function renderFlatList(listFieldElement, files, sectionName, handleItemC
                 listFieldElement.appendChild(ul);
             }
         
+            const { id, title, status } = itemData;
+        
             const li = document.createElement('li');
-            li.textContent = itemData; // 단일 아이템 텍스트 설정
+            li.textContent = `ID: ${id}, 제목: ${title}, 상태: ${status}`; // 초기 텍스트 설정
             li.className = 'list-item'; // Apply CSS class
+            li.dataset.id = id; // data-id 속성 설정
             li.dataset.type = 'file'; // Set dataset type
             li.dataset.sectionName = sectionName; // Set dataset sectionName
             li.dataset.data = JSON.stringify(itemData); // Store actual data
