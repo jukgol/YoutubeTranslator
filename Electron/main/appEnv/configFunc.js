@@ -8,6 +8,7 @@ class ConfigFunc { // Renamed from SettingService
         this.readApiKeys();
         this.loadVersion();
         this.loadRule();
+        this.readCookies(); // Load cookies on initialization
     }
 
     // Helper to read file content
@@ -21,6 +22,22 @@ class ConfigFunc { // Renamed from SettingService
     // Helper to write file content
     _writeFile(filePath, content) {
         fs.writeFileSync(filePath, content, "utf-8");
+    }
+
+    readCookies() {
+        if (this.configData.cookies) {
+            return this.configData.cookies;
+        }
+        const filePath = this.path.cookieFile;
+        const cookies = this._readFile(filePath);
+        this.configData.cookies = cookies;
+        return cookies;
+    }
+
+    writeCookies(cookies) {
+        const filePath = this.path.cookieFile;
+        this._writeFile(filePath, cookies);
+        this.configData.cookies = cookies;
     }
 
     readApiKeys() {
