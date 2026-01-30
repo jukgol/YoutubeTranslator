@@ -34,25 +34,26 @@ function flushBuffer() {
     }
 }
 
-// Function to write a log message to the renderer process
 function write(message, replace = false) {
     const timestamp = new Date().toLocaleTimeString();
     const formattedMessage = `[${timestamp}] ${message}`;
 
-    // Always log to main console for safety
-    console.log(`[Main] ${formattedMessage}`);
+    if (replace) {
+        // replace가 true일 때만 줄바꿈 없이 커서를 맨 앞으로 보내고 기존 내용을 지움
+        process.stdout.write(`\r[Main] ${formattedMessage}\x1b[K`);
+    } else {
+        // 기존처럼 그대로 출력 (console.log는 자동으로 줄바꿈이 됨)
+        console.log(`[Main] ${formattedMessage}`);
+    }
 
     const logEntry = { message: formattedMessage, replace: replace };
 
     if (mainWindow && !mainWindow.isDestroyed() && rendererReady) {
-        // If window is ready and renderer has signaled readiness, send directly
         mainWindow.webContents.send('log-message', logEntry);
     } else {
-        // Otherwise, buffer the message
         logBuffer.push(logEntry);
     }
 }
-
 module.exports = {
     initialize,
     write,

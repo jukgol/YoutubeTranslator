@@ -1,15 +1,13 @@
-const log = require('../js/logManager'); // 경로 수정
-const path = require('path');
-const fs = require('fs');
-const appEnv = require('../appEnv/appEnv'); // Import the AppEnv singleton
-const { _runDownloadProcess } = require('../download/downloadHelper.js');
+const log = require('../js/logManager');
+// downloadHelper에서 두 함수를 모두 가져옴
+const { _runDownloadProcess, _fetchTitleAsync } = require('../download/downloadHelper.js');
 
 class DownloadItem {
     constructor(id, url) {
         this.id = id;
-        this.url = url.split('?')[0]; // 파라미터 제거
+        this.url = url.split('?')[0];
         this.title = "🔍 제목 확인 중...";
-        this.status = "대기"; // 대기, 제목 확인 완료, 다운로드 중, 완료, 실패
+        this.status = "대기";
     }
 
     toUiLines() {
@@ -17,7 +15,7 @@ class DownloadItem {
         const symbol = symbols[this.status] || "•";
         
         const separator = `${'='.repeat(12)} [ ${symbol} ${this.status} ] ${'='.repeat(12)}`;
-        const lineId = ` ID: ${this.id}`; // ID 추가
+        const lineId = ` ID: ${this.id}`;
         const lineTitle = ` 제목: ${this.title}`;
         const lineUrl = ` URL: ${this.url}`;
         return [separator, lineId, lineTitle, lineUrl];
@@ -29,14 +27,14 @@ class UrlManager {
         this.pending = [];
         this.inProgress = [];
         this.completed = [];
-        this.failed = []; // 실패 목록 추가
-        this.counterInterval = null; // To store the interval ID
+        this.failed = [];
+        this.counterInterval = null;
         this.currentCount = 0;
-        this.nextId = 0; // nextId 속성 추가
-        this._mainWindow = null; // _mainWindow 속성 추가        
+        this.nextId = 0;
+        this._mainWindow = null;
     }   
 
-    setMainWindow(mainWindow) { // setMainWindow 메서드 추가
+    setMainWindow(mainWindow) {
         this._mainWindow = mainWindow;
     }
 
@@ -47,75 +45,61 @@ class UrlManager {
             return null;
         }
 
-        // 중복 체크
         const allItems = [...this.pending, ...this.inProgress, ...this.completed, ...this.failed];
         if (allItems.some(item => item.url === url)) {
             log.write("이미 목록에 존재하는 URL입니다.");
             return null;
         }
 
-        const newItem = new DownloadItem(this.nextId++, url); // ID 부여 및 증가
+        const newItem = new DownloadItem(this.nextId++, url);
         this.pending.push(newItem);
         log.write("대기열에 추가되었습니다.");
-        this.fetchUrlTitle(newItem.url); // 제목 가져오기 시작
+        
+        // 내부 로직을 지우고 downloadHelper의 함수를 호출
+        this.fetchUrlTitle(newItem); 
         return newItem;
     }
 
     removeUrl(urlToRemove) {
-        urlToRemove = urlToRemove.split('?')[0]; // Ensure parameter-less URL for comparison
+        urlToRemove = urlToRemove.split('?')[0];
         const initialLength = this.pending.length;
         this.pending = this.pending.filter(item => item.url !== urlToRemove);
-        return this.pending.length < initialLength; // Return true if an item was removed
+        return this.pending.length < initialLength;
     }
 
-    async fetchUrlTitle(url) {
-        if (!this.ytDlpWrap) {
-            log.write("YTDlpWrap is not initialized. Cannot fetch title.");
-            return null;
-        }
+    // downloadHelper의 _fetchTitleAsync를 호출하도록 수정
+    async fetchUrlTitle(item) {
         try {
-            const info = await this.ytDlpWrap.getVideoInfo(url);
-            const title = info.title;
-            log.write(`URL (${url}) 제목 가져오기 성공: ${title}`);
+            await _fetchTitleAsync(item.url, item);
+            
+            if (item.title !== "유효하지 않은 URL 또는 접근 제한" && item.title !== "제목을 찾을 수 없음") {
+                item.status = "제목 확인 완료";
+            } else {
+                item.status = "실패";
+            }
 
-            const existingItem = [...this.pending, ...this.inProgress, ...this.completed]
-                                .find(item => item.url === url);
-            if (existingItem) {
-                existingItem.title = title;
-                existingItem.status = "제목 확인 완료";
-                if (this._mainWindow) {
-                    this._mainWindow.webContents.send('urlManager:item-updated', { 
-                        id: existingItem.id, 
-                        title: existingItem.title, 
-                        status: existingItem.status 
-                    });
-                }
+            if (this._mainWindow) {
+                this._mainWindow.webContents.send('urlManager:item-updated', { 
+                    id: item.id, 
+                    title: item.title, 
+                    status: item.status 
+                });
             }
-            return title;
         } catch (error) {
-            log.write(`URL (${url}) 제목 가져오기 실패: ${error.message}`);
-            // Find the item to update its status to '실패'
-            const existingItem = [...this.pending, ...this.inProgress, ...this.completed]
-                                .find(item => item.url === url);
-            if (existingItem) {
-                existingItem.status = "실패";
-                if (this._mainWindow) {
-                    this._mainWindow.webContents.send('urlManager:item-updated', { 
-                        id: existingItem.id, 
-                        title: existingItem.title, 
-                        status: existingItem.status 
-                    });
-                }
+            item.status = "실패";
+            if (this._mainWindow) {
+                this._mainWindow.webContents.send('urlManager:item-updated', { 
+                    id: item.id, 
+                    title: item.title, 
+                    status: item.status 
+                });
             }
-            return null;
         }
     }
 
     getNext() {
-        if (this.pending.length === 0) {
-            return null;
-        }
-        const item = this.pending.shift(); // Removes the first element and returns it
+        if (this.pending.length === 0) return null;
+        const item = this.pending.shift();
         this.inProgress.push(item);
         return item;
     }
@@ -142,7 +126,7 @@ class UrlManager {
             this.inProgress.splice(index, 1);
         }
         item.status = "실패";
-        this.failed.push(item); // Add to failed list
+        this.failed.push(item);
         if (this._mainWindow) {
             this._mainWindow.webContents.send('urlManager:item-updated', {
                 id: item.id,
@@ -152,19 +136,17 @@ class UrlManager {
         }
     }
 
-    // New test function: starts a counter that logs to console
     startTestCounter(limit = 10) {
         if (this.counterInterval) {
             log.write("테스트 카운터가 이미 실행 중입니다.");
             return;
         }
-
         log.write("테스트 카운터 시작...");
         this.currentCount = 0;
         this.counterInterval = setInterval(() => {
             this.currentCount++;
             if (this.currentCount <= limit) {
-                log.write(`[테스트 카운터] 현재 숫자: ${this.currentCount}`, true); // Use replace: true
+                log.write(`[테스트 카운터] 현재 숫자: ${this.currentCount}`, true);
             } else {
                 clearInterval(this.counterInterval);
                 this.counterInterval = null;
@@ -174,7 +156,6 @@ class UrlManager {
     }
 
     async startDownload() {
-        // 1. Move all previously failed items back to the pending queue to be re-evaluated.
         if (this.failed.length > 0) {
             log.write(`${this.failed.length}개의 실패 항목을 다시 확인합니다...`);
             this.pending.push(...this.failed);
@@ -186,21 +167,17 @@ class UrlManager {
             return;
         }
 
-        // 2. Process the pending queue until it's empty.
         while (this.pending.length > 0) {
             const item = this.pending.shift();
     
-            // 3. Check if the item is ready for download.
             if (item.status !== '제목 확인 완료') {
                 log.write(`[${item.id}] 항목이 다운로드 준비 상태가 아니므로 실패 목록으로 이동합니다. (상태: ${item.status})`);
                 this.failed.push(item);
-                continue; // Move to the next item in the pending queue.
+                continue;
             }
     
-            // 4. If ready, proceed with the download process.
             item.status = "다운로드 중";
             this.inProgress.push(item);
-            // Notify UI that we are starting
             if (this._mainWindow) {
                 this._mainWindow.webContents.send('urlManager:item-updated', {
                     id: item.id,
@@ -210,34 +187,21 @@ class UrlManager {
             }
             
             try {
-                const appPaths = { video_dir: appEnv.pathData.videoDir };
-                await _runDownloadProcess(appPaths, item.id, item.url, item.title);
-                this.markAsDone(item); // On success, mark as done
+                await _runDownloadProcess(item.url, item.title);
+                this.markAsDone(item);
             } catch (error) {
-                this.markAsFailed(item); // On failure, mark as failed
+                this.markAsFailed(item);
             }
-
-        } // End of while loop
-    
+        }
         log.write("모든 다운로드 작업이 완료되었습니다.");
     }
 
-    getCompleted() {
-        return this.completed;
-    }
-
+    getCompleted() { return this.completed; }
     clearCompleted() {
         this.completed = [];
         return true;
     }
 }
 
-// 모듈 수준에서 UrlManager의 싱글톤 인스턴스 생성
 const urlManager = new UrlManager();
-
-// registerUrlManagerHandlers 함수는 제거되었습니다.
-
-module.exports = {
-    DownloadItem,
-    urlManager,
-};
+module.exports = { DownloadItem, urlManager };
