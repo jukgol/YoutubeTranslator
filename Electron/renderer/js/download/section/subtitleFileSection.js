@@ -2,6 +2,7 @@
 
 import { renderFlatList } from '../listRenderers.js'; // 경로 수정
 import { createItemClickHandler } from '../selectionHandler.js'; // 경로 수정
+import { setupOpenSubtitleFolderButton } from './subtitleFileButtonHandlers.js'; // Import the new button handlers
 
 export class SubtitleFileSection {
     constructor(sectionElement) {
@@ -11,6 +12,7 @@ export class SubtitleFileSection {
         this.handleItemClick = createItemClickHandler(); // 이 섹션에 특화된 handleItemClick
 
         this.initialRender();
+        setupOpenSubtitleFolderButton(this.sectionElement); // Setup button for this section
     }
 
     async initialRender() {

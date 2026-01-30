@@ -1,6 +1,8 @@
-import { renderSimpleList } from './listRenderers.js'; 
+import { renderSimpleList } from './listRenderers.js';
 import { setupQueueButtons } from './setupQueueButtons.js';
 import { setupResultButtons } from './setupResultButtons.js';
+import { setupOpenOriginalDataFolderButton } from './section/originalDataButtonHandlers.js'; // Import new handler
+import { setupOpenFinalResultFolderButton } from './section/finalResultButtonHandlers.js'; // Import new handler
 
 // 섹션별 선택 상태 저장용 금고 (독립 선택 보장)
 const runallSelectedMap = new Map();
@@ -51,6 +53,18 @@ export async function initializeRunallTab() {
         if (!window.runallTabInitialized) {
             setupQueueButtons(pathMapping, runallSelectedMap);
             setupResultButtons(pathMapping, runallSelectedMap);
+            
+            // Get section elements for new buttons
+            const originalDataSectionElement = document.querySelector('#runall-content .section-frame:nth-child(1)');
+            const finalResultSectionElement = document.querySelector('#runall-content .section-frame:nth-child(4)');
+
+            if (originalDataSectionElement) {
+                setupOpenOriginalDataFolderButton(originalDataSectionElement);
+            }
+            if (finalResultSectionElement) {
+                setupOpenFinalResultFolderButton(finalResultSectionElement);
+            }
+
             window.runallTabInitialized = true;
         }
     } catch (error) {

@@ -2,6 +2,7 @@
 
 import { renderFlatList } from '../listRenderers.js'; // 경로 수정
 import { createItemClickHandler } from '../selectionHandler.js'; // 경로 수정
+import { setupOpenVideoFolderButton } from './videoFileButtonHandlers.js'; // Import the new button handlers
 
 export class VideoFileSection {
     constructor(sectionElement) {
@@ -11,6 +12,7 @@ export class VideoFileSection {
         this.handleItemClick = createItemClickHandler(); // 이 섹션에 특화된 handleItemClick
 
         this.initialRender();
+        setupOpenVideoFolderButton(this.sectionElement); // Setup button for this section
     }
 
     async initialRender() {

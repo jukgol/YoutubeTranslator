@@ -1,4 +1,5 @@
 const path = require('path');
+const { shell } = require('electron'); // Import shell from electron
 const appEnv = require('../appEnv/appEnv'); // Import the AppEnv singleton
 
 module.exports = {
@@ -38,6 +39,40 @@ module.exports = {
       const resultFinalDir = settingServiceInstance.path.resultFinalDir;
       const files = await appEnv.pathFuncUtils.getFolderFiles(resultFinalDir, ['.srt']); // Changed to .srt
       return files;
+    });
+    // New IPC handler to get the app's video directory
+    ipcMain.handle('path:get-app-video-directory', () => {
+      return appEnv.pathData.videoDir;
+    });
+    // New IPC handler to get the app's origin directory
+    ipcMain.handle('path:get-app-origin-directory', () => {
+      return appEnv.pathData.originDir;
+    });
+    // New IPC handler to get the app's split directory
+    ipcMain.handle('path:get-app-split-directory', () => {
+      return appEnv.pathData.splitDir;
+    });
+    // New IPC handler to get the app's translate directory
+    ipcMain.handle('path:get-app-translate-directory', () => {
+      return appEnv.pathData.translateDir;
+    });
+    // New IPC handler to get the app's combine directory
+    ipcMain.handle('path:get-app-combine-directory', () => {
+      return appEnv.pathData.combineDir;
+    });
+    // New IPC handler to get the app's result directory
+    ipcMain.handle('path:get-app-result-directory', () => {
+      return appEnv.pathData.resultFinalDir;
+    });
+    // New IPC handler to open a path using shell.openPath
+    ipcMain.handle('path:open-path', async (event, filePath) => {
+      try {
+        await shell.openPath(filePath);
+        return { success: true };
+      } catch (error) {
+        console.error('Failed to open path:', filePath, error);
+        return { success: false, error: error.message };
+      }
     });
   }
 };

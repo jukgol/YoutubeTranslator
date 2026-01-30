@@ -31,6 +31,13 @@ body {
 button {
     border: none;
     cursor: pointer;
+    transition: filter 0.2s ease; /* Add for smooth transition */
+}
+button:hover {
+    filter: brightness(0.9); /* Slightly darker on hover */
+}
+button:active {
+    filter: brightness(0.8); /* Even darker on click */
 }
 hr {
     border: none;
