@@ -8,6 +8,7 @@ try {
   const systemAPI = require('./api/system');
   const urlManagerAPI = require('./api/urlManager'); // Add this line
   const processAPI = require('./api/process');
+  const fsAPI = require('./api/fs'); // Add this line
 
   const logging = loggingAPI(ipcRenderer);
   const paths = pathsAPI(ipcRenderer);
@@ -15,6 +16,7 @@ try {
   const system = systemAPI(ipcRenderer);
   const urlManager = urlManagerAPI(ipcRenderer); // Add this line
   const process = processAPI(ipcRenderer);
+  const fs = fsAPI(ipcRenderer); // Add this line
 
   contextBridge.exposeInMainWorld('electronAPI', {
     logging: logging,
@@ -23,8 +25,10 @@ try {
     system: system,
     urlManager: urlManager,
     process: process,
+    fs: fs, // Add this line
     path: { // Expose path functions needed in renderer
-      basename: path.basename
+      basename: path.basename,
+      join: path.join // Add path.join here
     }
   });
   

@@ -26,9 +26,44 @@ export class ResultSection {
     #bindEvents() {
         setupOpenFolderButton(this.#openFolderButton, 'getAppResultDirectory');
 
-        this.#processButton.addEventListener('click', () => {
-            console.log('Final confirmation process started.');
-            // 기능 연결은 추후에 진행
+        // Change button text to "파일 복사"
+        this.#processButton.textContent = '파일 복사';
+
+        this.#processButton.addEventListener('click', async () => {
+            log('파일 복사 버튼 클릭됨.');
+            const selectedLi = currentSelectedElements.get(this.#sectionName);
+
+            if (!selectedLi) {
+                log('복사할 파일을 먼저 선택하세요.');
+                return;
+            }
+
+            const filename = selectedLi.textContent; // Filename from text content
+            if (!filename) {
+                log('선택된 파일의 이름을 찾을 수 없습니다.');
+                return;
+            }
+
+            try {
+                // Get source (result) directory
+                const sourceDir = await window.electronAPI.paths.getAppResultDirectory();
+                const sourcePath = await window.electronAPI.path.join(sourceDir, filename);
+
+                // Get destination (video) directory
+                const destDir = await window.electronAPI.paths.getAppVideoDirectory(); // Assuming this API exists
+                const destPath = await window.electronAPI.path.join(destDir, filename);
+
+                log(`파일 복사 시작: ${sourcePath} -> ${destPath}`);
+                const copyResult = await window.electronAPI.fs.copyFile(sourcePath, destPath); // Assuming this API exists
+
+                if (copyResult.success) {
+                    log(`✅ 파일 복사 성공: ${filename}`);
+                } else {
+                    log(`❌ 파일 복사 실패: ${copyResult.message}`);
+                }
+            } catch (error) {
+                log(`[Error] 파일 복사 중 예외 발생: ${error.message}`);
+            }
         });
 
         this.#listField.addEventListener('click', (event) => {
