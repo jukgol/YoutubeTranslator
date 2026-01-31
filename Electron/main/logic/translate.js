@@ -50,7 +50,7 @@ async function translateSubtitleLogic(filePath) {
 
     if (!apiKey || !rule || !modelName) {
         log.write('❌ 오류: API 키, 번역 규칙, 또는 모델 이름이 설정되지 않았습니다.');
-        return false;
+        return { success: false, translatedFolder: null };
     }
     
     let timerId = null;
@@ -131,7 +131,7 @@ async function translateSubtitleLogic(filePath) {
 
         const elapsedTime = Math.round((Date.now() - startTime) / 1000);
         log.write(`\n✅ 완료: ${outputName}\n(${elapsedTime}초 소요)\n`);        
-        return true;
+        return { success: true, translatedFolder: resultDir };
 
     } catch (e) {
         if (timerId) clearInterval(timerId); // Ensure timer is cleared on error
@@ -139,7 +139,7 @@ async function translateSubtitleLogic(filePath) {
         if (e.message.includes('response.prompt_feedback')) {
             log.write(`-> Gemini API 피드백: ${e.message}`);
         }
-        return false;
+        return { success: false, translatedFolder: null };
     }
 }
 

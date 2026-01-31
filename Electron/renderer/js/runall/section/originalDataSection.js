@@ -62,4 +62,9 @@ export class OriginalDataSection {
             this.#listField.innerHTML = `<div class="error-message">원본 데이터 로딩 중 오류 발생</div>`;
         }
     }
+
+    // New public method to get the selected file element
+    getSelectedFileElement() {
+        return currentSelectedElements.get(this.#sectionName);
+    }
 }

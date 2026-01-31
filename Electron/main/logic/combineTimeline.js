@@ -37,7 +37,7 @@ async function checkMissingIndices(filePath, label) {
         
         if (missing.length > 0) {
             log.write(`❌ ${label} 내에 빠진 번호가 있습니다: ${missing.join(', ')}`);
-            return false;
+            return { success: false, finalSrtFile: null };
         }
         log.write(`✅ ${label} 파일의 인덱스 검사 완료: 누락된 번호 없음.`);
         return true;
@@ -110,7 +110,7 @@ async function combineTimelineLogic(combinedTextPath, originSrtPath) { // result
         
         if (!checkA || !checkB) {
             log.write("⚠️ 인덱스 번호가 일치하지 않아 작업을 중단합니다. 파일을 수정해 주세요.");
-            return false;
+            return { success: false, finalSrtFile: null };
         }
         // ----------------------------------------------
 
@@ -148,7 +148,7 @@ async function combineTimelineLogic(combinedTextPath, originSrtPath) { // result
 
         if (timestamps.length !== translatedLines.length) {
             log.write("❌ [불일치 상세 정보] 타임라인과 번역문 개수가 일치하지 않습니다.");
-            return false;
+            return { success: false, finalSrtFile: null };
         }
         // 4. SRT 조립
         const finalSrt = [];
@@ -169,11 +169,11 @@ async function combineTimelineLogic(combinedTextPath, originSrtPath) { // result
         await fs.writeFile(outputPath, finalSrt.join('\n'), 'utf-8');
 
         log.write(`✅ 최종 자막 생성 완료: ${outputPath}`);
-        return true;
+        return { success: true, finalSrtFile: outputPath };
 
     } catch (e) {
         log.write(`❌ 결합 에러: ${e.message}`);
-        return false;
+        return { success: false, finalSrtFile: null };
     }
 }
 

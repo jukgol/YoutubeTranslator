@@ -50,6 +50,9 @@ export class CombineSection {
                 const result = await window.electronAPI.process.runTimeline(filename);
                 if (result.success) {
                     log(result.message);
+                    if (result.finalSrtFile) {
+                        log(`생성된 최종 SRT 파일: ${result.finalSrtFile}`);
+                    }
                     if (this.#resultSection) {
                         log('결과 섹션을 새로고침합니다.');
                         this.#resultSection.refresh();

@@ -50,6 +50,9 @@ export class TranslateSection {
                 const result = await window.electronAPI.process.runCombine(folderName);
                 if (result.success) {
                     log(result.message);
+                    if (result.combinedFile) {
+                        log(`생성된 합치기 파일: ${result.combinedFile}`);
+                    }
                     if (this.#combineSection) {
                         log('합치기 섹션을 새로고침합니다.');
                         this.#combineSection.refresh();

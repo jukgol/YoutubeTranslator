@@ -1,4 +1,5 @@
 const { contextBridge, ipcRenderer } = require('electron');
+const path = require('path');
 
 try {
   const loggingAPI = require('./api/logging');
@@ -21,7 +22,10 @@ try {
     settings: settings,
     system: system,
     urlManager: urlManager,
-    process: process
+    process: process,
+    path: { // Expose path functions needed in renderer
+      basename: path.basename
+    }
   });
   
   console.log("Electron API 등록 완료");

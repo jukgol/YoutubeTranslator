@@ -51,6 +51,9 @@ export class SplitSection {
                 const result = await window.electronAPI.process.runTranslation(folderName);
                 if (result.success) {
                     log(result.message);
+                    if (result.translatedFolder) {
+                        log(`생성된 번역 폴더: ${result.translatedFolder}`);
+                    }
                     if (this.#translateSection) {
                         log('번역 섹션을 새로고침합니다.');
                         this.#translateSection.refresh();

@@ -45,7 +45,7 @@ export async function initializeRunallTab() {
     // Explicitly instantiate sections with dependencies
     const queueSection = new QueueSection(sectionsMap.queueEl);
     const originalDataSection = new OriginalDataSection(sectionsMap.originalDataEl, queueSection);
-    const progressSection = new ProgressSection(sectionsMap.progressEl);
+    const progressSection = new ProgressSection(sectionsMap.progressEl, originalDataSection);
     const resultSection = new ResultSection(sectionsMap.finalResultEl);
 
 

@@ -37,9 +37,9 @@ function setupProcessHandlers() {
             const fullPath = path.join(originDir, filename);
             
             log.write(`[IPC] 'process:run-split' 요청 수신: ${fullPath}`);
-            await splitSubtitleLogic(fullPath);
+            const createdFolderPath = await splitSubtitleLogic(fullPath);
             
-            return { success: true, message: `${filename} 파일 분할이 완료되었습니다.` };
+            return { success: true, message: `${filename} 파일 분할이 완료되었습니다.`, createdFolder: createdFolderPath };
 
         } catch (error) {
             log.write(`[Error] 파일 분할 중 오류 발생 (${filename}): ${error.message}`);
@@ -55,12 +55,12 @@ function setupProcessHandlers() {
 
         try {
             log.write(`[IPC] 'process:run-combine' 요청 수신: ${folderName}`);
-            const success = await combinePartsLogic(folderName);
+            const result = await combinePartsLogic(folderName); // Capture the result object
             
-            if (success) {
-                return { success: true, message: `${folderName} 파트 합치기가 완료되었습니다.` };
+            if (result.success) {
+                return { success: true, message: `${folderName} 파트 합치기가 완료되었습니다.`, combinedFile: result.combinedFile };
             } else {
-                return { success: false, message: `${folderName} 파트 합치기 중 오류가 발생했거나, 합칠 파일이 없습니다.` };
+                return { success: false, message: result.message || `${folderName} 파트 합치기 중 오류가 발생했거나, 합칠 파일이 없습니다.`, combinedFile: null };
             }
 
         } catch (error) {
@@ -89,12 +89,12 @@ function setupProcessHandlers() {
                 return { success: false, message };
             }
 
-            const success = await combineTimelineLogic(combinedTextPath, originSrtPath);
+            const result = await combineTimelineLogic(combinedTextPath, originSrtPath);
 
-            if (success) {
-                return { success: true, message: `타임라인 생성이 완료되었습니다: ${path.basename(originSrtPath)}` };
+            if (result.success) {
+                return { success: true, message: `타임라인 생성이 완료되었습니다: ${path.basename(originSrtPath)}`, finalSrtFile: result.finalSrtFile };
             } else {
-                return { success: false, message: '타임라인 생성 중 오류가 발생했습니다.' };
+                return { success: false, message: result.message || '타임라인 생성 중 오류가 발생했습니다.', finalSrtFile: null };
             }
 
         } catch (error) {
@@ -120,10 +120,18 @@ function setupProcessHandlers() {
             }
 
             let allSucceeded = true;
+            let finalTranslatedFolder = null; // To store the path of the created folder
+
             for (const file of txtFiles) {
                 const filePath = path.join(folderPath, file);
-                const success = await translateSubtitleLogic(filePath);
-                if (!success) {
+                const result = await translateSubtitleLogic(filePath); // Capture the result object
+                
+                if (result.success) {
+                    if (finalTranslatedFolder === null) {
+                        // Assume all translated files go into the same folder
+                        finalTranslatedFolder = result.translatedFolder; 
+                    }
+                } else {
                     allSucceeded = false;
                     // Optionally break here if you want to stop on first failure
                     // break; 
@@ -131,9 +139,9 @@ function setupProcessHandlers() {
             }
             
             if (allSucceeded) {
-                return { success: true, message: `${folderName} 폴더의 모든 파일 번역이 완료되었습니다.` };
+                return { success: true, message: `${folderName} 폴더의 모든 파일 번역이 완료되었습니다.`, translatedFolder: finalTranslatedFolder };
             } else {
-                return { success: false, message: `${folderName} 폴더 번역 중 일부 파일에서 오류가 발생했습니다.` };
+                return { success: false, message: `${folderName} 폴더 번역 중 일부 파일에서 오류가 발생했습니다.`, translatedFolder: finalTranslatedFolder };
             }
 
         } catch (error) {

@@ -8,19 +8,16 @@ export class QueueSection {
     #startBtn;
     #stopBtn;
     #clearBtn;
-    #testBtn;
     #queue = [];
     #sectionName = 'RunAll_Queue';
-    #isTestRunning = false;
-    #testPauseIndex = 0;
 
     constructor(element) {
         this.#element = element;
+        
         this.#listField = this.#element.querySelector('.list-field');
         this.#startBtn = this.#element.querySelector('#queue-start-btn');
         this.#stopBtn = this.#element.querySelector('#queue-stop-btn');
         this.#clearBtn = this.#element.querySelector('#clear-queue-btn');
-        this.#testBtn = this.#element.querySelector('#queue-test-btn');
         
         this.#bindEvents();
         this.refresh();
@@ -32,10 +29,12 @@ export class QueueSection {
             // Logic to be implemented
         });
 
+        // The stop logic for the full routine is now handled by ProgressSection.
+        // This stop button would control the current QueueSection's own processing if any,
+        // but for now, we remove the #stopRequested logic.
         this.#stopBtn.addEventListener('click', () => {
-            log('큐 테스트 중단 요청됨.');
-            this.#isTestRunning = false;
-            this.#setButtonsDisabled(false);
+            log('큐의 현재 작업을 중단합니다. (기능 미구현)');
+            // Placeholder for future individual stop logic if needed
         });
 
         this.#clearBtn.addEventListener('click', () => {
@@ -43,70 +42,12 @@ export class QueueSection {
             this.#queue = [];
             this.#renderList();
         });
-
-        // this.#testBtn.addEventListener('click', () => this.#runTest()); // Removed
-        this.#testBtn.addEventListener('click', () => this.#runTest());
     }
 
     #setButtonsDisabled(disabled) {
-        // 'disabled' is true when test starts/runs, false when test stops/finishes
-        this.#startBtn.disabled = disabled; // Disable "번역 시작"
-        this.#clearBtn.disabled = disabled; // Disable "큐 초기화"
-        this.#testBtn.disabled = disabled;   // Disable "테스트"
-        this.#stopBtn.disabled = !disabled; // Enable "멈춤" when test is running, disable when test is stopped
-    }
-
-    async #runTest() {
-        if (this.#isTestRunning) {
-            log('테스트가 이미 실행 중입니다.');
-            return;
-        }
-
-        log(`큐 테스트를 시작합니다... (재개 지점: ${this.#testPauseIndex})`);
-        this.#isTestRunning = true;
-        this.#setButtonsDisabled(true);
-
-        const listItems = this.#listField.querySelectorAll('li[data-type="file"]');
-        if (listItems.length !== this.#queue.length) {
-            console.error('큐와 UI 목록의 아이템 개수가 일치하지 않습니다.');
-            this.#isTestRunning = false;
-            this.#testPauseIndex = 0;
-            this.#setButtonsDisabled(false);
-            return;
-        }
-
-        for (let i = this.#testPauseIndex; i < this.#queue.length; i++) {
-            if (!this.#isTestRunning) {
-                break; // Exit loop if test is stopped
-            }
-
-            const item = this.#queue[i];
-            const listItem = listItems[i];
-            
-            log(`[테스트] 처리 중: ${item.name}`);
-            
-            // Wait for 2 seconds
-            await new Promise(resolve => setTimeout(resolve, 2000));
-            
-            if (!this.#isTestRunning) { // Check again after await
-                break; // Exit loop if test is stopped during await
-            }
-
-            item.status = 'completed';
-            listItem.style.backgroundColor = '#A7F3D0'; // Light green
-            log(`[테스트] 완료: ${item.name}`);
-            this.#testPauseIndex = i + 1; // Update pause index
-        }
-        
-        if (!this.#isTestRunning) {
-            log('큐 테스트가 중단되었습니다.');
-        } else {
-            log('큐 테스트가 완료되었습니다.');
-            this.#testPauseIndex = 0; // Reset only if completed fully
-        }
-
-        this.#isTestRunning = false;
-        this.#setButtonsDisabled(false);
+        this.#startBtn.disabled = disabled;
+        this.#stopBtn.disabled = disabled;
+        this.#clearBtn.disabled = disabled;
     }
 
     add(item) {
@@ -141,5 +82,9 @@ export class QueueSection {
     async refresh() {
         log('QueueSection refreshed.');
         this.#renderList();
+    }
+
+    getQueueItems() {
+        return this.#queue;
     }
 }

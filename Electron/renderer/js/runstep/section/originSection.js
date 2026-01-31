@@ -50,6 +50,9 @@ export class OriginSection {
                 const result = await window.electronAPI.process.runSplit(filename);
                 if (result.success) {
                     log(result.message);
+                    if (result.createdFolder) {
+                        log(`생성된 폴더: ${result.createdFolder}`);
+                    }
                     if (this.#splitSection) {
                         log('스플릿 섹션을 새로고침합니다.');
                         this.#splitSection.refresh();

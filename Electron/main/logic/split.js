@@ -138,6 +138,7 @@ async function splitSubtitleLogic(filePath) { // originDir removed from paramete
         log.write(`저장 완료: ${outputName} (총 ${totalLines} 라인)`);
     }
     log.write(`[분할] 자막 파일 분할 완료: ${filePath}`);
+    return saveDir; // Return the path of the created folder
 }
 
 module.exports = {

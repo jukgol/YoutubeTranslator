@@ -27,7 +27,7 @@ async function combinePartsLogic(folderName) { // translateDir, combineDir remov
 
         if (files.length === 0) {
             log.write(`⚠️ ${folderName} 폴더에 합칠 파일이 없습니다.`);
-            return false;
+            return { success: false, message: `${folderName} 폴더에 합칠 파일이 없습니다.`, combinedFile: null };
         }
 
         log.write(`🚀 ${folderName} 파트 합치기 시작 (총 ${files.length}개 파트)`);
@@ -58,11 +58,11 @@ async function combinePartsLogic(folderName) { // translateDir, combineDir remov
         await fs.writeFile(outputPath, combinedContentParts.join(''), 'utf-8');
 
         log.write(`✅ 합치기 완료: ${outputPath}`);
-        return true;
+        return { success: true, combinedFile: outputPath };
 
     } catch (e) {
         log.write(`❌ 작업 중 에러 발생: ${e.message}`);
-        return false;
+        return { success: false, combinedFile: null };
     }
 }
 
