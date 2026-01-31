@@ -1,23 +1,13 @@
 // Electron/renderer/js/runstep/index.js
 
-import { createItemClickHandler } from './selectionHandler.js';
 import { OriginSection } from './section/originSection.js';
 import { SplitSection } from './section/splitSection.js';
 import { TranslateSection } from './section/translateSection.js';
 import { CombineSection } from './section/combineSection.js';
 import { ResultSection } from './section/resultSection.js';
 
-const pathMapping = {
-    '원본': { api: 'getSubtitleFiles', extensions: ['.srt', '.vtt'], type: 'flat' },
-    '스플릿': { api: 'getSplitFiles', type: 'nested' },
-    '번역': { api: 'getTranslatedFiles', type: 'nested' },
-    '합치기': { api: 'getCombineFiles', type: 'flat' },
-    '결과': { api: 'getResultFiles', type: 'flat' },
-};
-
 export async function initializeRunstepTab() {
     const sections = document.querySelectorAll('#runstep-content .section-frame');
-    const handleItemClick = createItemClickHandler(pathMapping);
     const sectionInstances = {};
 
     for (const section of sections) {
@@ -28,19 +18,19 @@ export async function initializeRunstepTab() {
 
         switch (sectionName) {
             case '원본':
-                sectionInstances[sectionName] = new OriginSection(section, handleItemClick);
+                sectionInstances[sectionName] = new OriginSection(section);
                 break;
             case '스플릿':
-                sectionInstances[sectionName] = new SplitSection(section, handleItemClick);
+                sectionInstances[sectionName] = new SplitSection(section);
                 break;
             case '번역':
-                sectionInstances[sectionName] = new TranslateSection(section, handleItemClick);
+                sectionInstances[sectionName] = new TranslateSection(section);
                 break;
             case '합치기':
-                sectionInstances[sectionName] = new CombineSection(section, handleItemClick);
+                sectionInstances[sectionName] = new CombineSection(section);
                 break;
             case '결과':
-                sectionInstances[sectionName] = new ResultSection(section, handleItemClick);
+                sectionInstances[sectionName] = new ResultSection(section);
                 break;
             default:
                 console.warn(`Unknown section in runstep tab: ${sectionName}`);
@@ -51,5 +41,8 @@ export async function initializeRunstepTab() {
     // Connect sections that need to communicate
     if (sectionInstances['원본'] && sectionInstances['스플릿']) {
         sectionInstances['원본'].setSplitSection(sectionInstances['스플릿']);
+    }
+    if (sectionInstances['번역'] && sectionInstances['합치기']) {
+        sectionInstances['번역'].setCombineSection(sectionInstances['합치기']);
     }
 }

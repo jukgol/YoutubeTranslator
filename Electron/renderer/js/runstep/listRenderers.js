@@ -1,6 +1,6 @@
 // Electron/renderer/js/detail/listRenderers.js
 
-export function renderFlatList(listFieldElement, files, sectionName, handleItemClick) { // Added handleItemClick
+export function renderFlatList(listFieldElement, files, sectionName) {
     listFieldElement.innerHTML = ''; // Clear existing content
     if (files.length === 0) {
         listFieldElement.innerHTML = '<div style="color: #888; padding: 10px; text-align: center; font-style: italic;">No files found.</div>';
@@ -18,13 +18,12 @@ export function renderFlatList(listFieldElement, files, sectionName, handleItemC
         li.dataset.type = 'file'; // Set dataset type
         li.dataset.sectionName = sectionName; // Set dataset sectionName
         li.dataset.data = JSON.stringify(file); // Store actual data
-        li.onclick = () => handleItemClick(li, 'file', sectionName, file); // Attach click handler
         ul.appendChild(li);
     });
     listFieldElement.appendChild(ul);
 }
 
-export function renderNestedList(listFieldElement, data, sectionName, handleItemClick) { // Added handleItemClick
+export function renderNestedList(listFieldElement, data, sectionName) {
     listFieldElement.innerHTML = ''; // Clear existing content
 
     const folderNames = Object.keys(data).sort(); // Sort folders alphabetically
@@ -45,15 +44,6 @@ export function renderNestedList(listFieldElement, data, sectionName, handleItem
         folderLi.dataset.type = 'folder'; // Set dataset type
         folderLi.dataset.sectionName = sectionName; // Set dataset sectionName
         folderLi.dataset.data = JSON.stringify(folder); // Store actual data
-        folderLi.onclick = (event) => {
-            // If the actual target clicked is the span within the folderLi, pass the folderLi for highlighting
-            if (event.target.tagName === 'SPAN' && event.target.closest('li[data-type="folder"]') === folderLi) {
-                 handleItemClick(folderLi, 'folder', sectionName, folder);
-            } else {
-                 // If clicked on fileUl within folderLi, we still want folderLi to be the elementToHighlight
-                 handleItemClick(event.target, 'file', sectionName, folder);
-            }
-        };
         
         const folderSpan = document.createElement('span');
         folderSpan.textContent = `📁 ${folder}`; // Keep icon for clarity
@@ -80,7 +70,6 @@ export function renderNestedList(listFieldElement, data, sectionName, handleItem
                 li.dataset.type = 'file'; // Set dataset type
                 li.dataset.sectionName = sectionName; // Set dataset sectionName
                 li.dataset.data = JSON.stringify(file); // Store actual data
-                li.onclick = (event) => { event.stopPropagation(); handleItemClick(li, 'file', sectionName, file); }; 
                 fileUl.appendChild(li);
             });
             folderLi.appendChild(fileUl);

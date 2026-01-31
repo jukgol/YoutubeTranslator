@@ -2,7 +2,7 @@
 
 import { renderFlatList } from '../listRenderers.js';
 import { setupOpenFolderButton } from '../util.js';
-import { currentSelectedElements } from '../selectionHandler.js';
+import { currentSelectedElements, applyHighlight, removeHighlight } from '../selectionHandler.js';
 import { write as log } from '../../logger.js';
 
 export class OriginSection {
@@ -10,12 +10,11 @@ export class OriginSection {
     #listField;
     #openFolderButton;
     #processButton;
-    #handleItemClick;
     #splitSection = null;
+    #sectionName = '원본';
 
-    constructor(element, handleItemClick) {
+    constructor(element) {
         this.#element = element;
-        this.#handleItemClick = handleItemClick;
         
         this.#listField = this.#element.querySelector('.list-field');
         this.#openFolderButton = this.#element.querySelector('.open-folder-button');
@@ -33,7 +32,7 @@ export class OriginSection {
         setupOpenFolderButton(this.#openFolderButton, 'getAppOriginDirectory');
         
         this.#processButton.addEventListener('click', async () => {
-            const selectedEl = currentSelectedElements.get('원본');
+            const selectedEl = currentSelectedElements.get(this.#sectionName);
             if (!selectedEl) {
                 log('분리할 파일을 선택해주세요.');
                 return;
@@ -62,12 +61,29 @@ export class OriginSection {
                 log(`[Error] 분할 작업 중 예외가 발생했습니다: ${error.message}`);
             }
         });
+
+        this.#listField.addEventListener('click', (event) => {
+            const clickedLi = event.target.closest('li[data-type="file"]');
+            if (!clickedLi) return;
+
+            const previousSelected = currentSelectedElements.get(this.#sectionName);
+            if (previousSelected && previousSelected !== clickedLi) {
+                removeHighlight(previousSelected, false);
+            }
+
+            applyHighlight(clickedLi, false);
+            currentSelectedElements.set(this.#sectionName, clickedLi);
+
+            const type = clickedLi.dataset.type;
+            const data = clickedLi.dataset.data;
+            log(`선택됨 (${this.#sectionName}): 유형=${type}, 데이터=${data}`);
+        });
     }
 
     async #loadList() {
         try {
             const data = await window.electronAPI.paths.getSubtitleFiles();
-            renderFlatList(this.#listField, data, '원본', this.#handleItemClick);
+            renderFlatList(this.#listField, data, this.#sectionName);
         } catch (error) {
             console.error('Error loading origin files:', error);
             this.#listField.innerHTML = `<div class="error-message">원본 파일 로딩 중 오류가 발생했습니다.</div>`;

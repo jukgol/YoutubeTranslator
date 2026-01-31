@@ -38,6 +38,21 @@ const tabConfig = [
     }
 ];
 
+async function initializeAllTabs() {
+    log('Initializing all tabs...');
+    for (const config of tabConfig) {
+        if (config.initializer) {
+            try {
+                await config.initializer();
+            } catch (error) {
+                console.error(`Error initializing tab ${config.tabId}:`, error);
+                log(`[Error] ${config.tabId} 탭 초기화 중 오류 발생`);
+            }
+        }
+    }
+    log('All tabs initialized.');
+}
+
 function initTabSwitching() {
     const allTabs = tabConfig.map(config => document.getElementById(config.tabId));
     const allContents = tabConfig.map(config => document.getElementById(config.contentId));
@@ -47,7 +62,7 @@ function initTabSwitching() {
         const content = allContents[index];
 
         if (tab && content) {
-            tab.addEventListener('click', async () => {
+            tab.addEventListener('click', () => {
                 // Deactivate all tabs and hide all content
                 allTabs.forEach(t => t?.classList.remove('active'));
                 allContents.forEach(c => { if(c) c.style.display = 'none'; });
@@ -55,11 +70,6 @@ function initTabSwitching() {
                 // Activate the clicked tab and show its content
                 tab.classList.add('active');
                 content.style.display = 'flex';
-
-                // If an initializer function is defined for this tab, call it
-                if (config.initializer) {
-                    await config.initializer();
-                }
             });
         }
     });
@@ -111,6 +121,8 @@ export async function initializeUI() { // Made initializeUI async
     initLogListener();
     initTestButtons(); // For demonstration
     settings.initSettingsHandlers(); // Initialize settings-specific handlers
+
+    await initializeAllTabs(); // Initialize all tab logic once at startup
     
     // Signal to main process that renderer is ready for logs
     if (window.electronAPI && typeof window.electronAPI.logging.rendererReadyForLogs === 'function') {
