@@ -48,9 +48,10 @@ export async function initializeRunallTab() {
     });
 
     // Explicitly instantiate sections with dependencies
+    progressSectionInstance = new ProgressSection(sectionsMap.progressEl); // progressSection no longer needs originalDataSection
     queueSectionInstance = new QueueSection(sectionsMap.queueEl); // Store instance
+    queueSectionInstance.setProgressSection(progressSectionInstance); // Inject progressSection into queueSection
     originalDataSectionInstance = new OriginalDataSection(sectionsMap.originalDataEl, queueSectionInstance); // Pass stored instance
-    progressSectionInstance = new ProgressSection(sectionsMap.progressEl, originalDataSectionInstance); // Pass stored instance
     resultSectionInstance = new ResultSection(sectionsMap.finalResultEl); // Store instance
 
     console.log('[RunallTab] All sections initialized.');

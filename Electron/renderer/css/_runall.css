@@ -68,3 +68,20 @@
     font-weight: bold;
     color: var(--primary);
 }
+
+/* Styles for QueueSection items */
+.item-list li.status-pending {
+    background-color: transparent; /* Default or no special background */
+}
+
+.item-list li.status-processing {
+    background-color: #D1FAE5; /* Light green */
+}
+
+.item-list li.status-completed {
+    background-color: #FEF3C7; /* Light yellow */
+}
+
+.item-list li.status-failed {
+    background-color: #FEE2E2; /* Light red */
+}
