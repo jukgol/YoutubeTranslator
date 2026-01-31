@@ -45,4 +45,7 @@ export async function initializeRunstepTab() {
     if (sectionInstances['번역'] && sectionInstances['합치기']) {
         sectionInstances['번역'].setCombineSection(sectionInstances['합치기']);
     }
+    if (sectionInstances['합치기'] && sectionInstances['결과']) {
+        sectionInstances['합치기'].setResultSection(sectionInstances['결과']);
+    }
 }

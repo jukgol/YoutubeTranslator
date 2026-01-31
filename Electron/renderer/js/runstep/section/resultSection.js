@@ -20,7 +20,7 @@ export class ResultSection {
         this.#processButton = this.#element.querySelector('.process-button');
 
         this.#bindEvents();
-        this.#loadList();
+        this.refresh();
     }
 
     #bindEvents() {
@@ -49,7 +49,7 @@ export class ResultSection {
         });
     }
 
-    async #loadList() {
+    async refresh() {
         try {
             const data = await window.electronAPI.paths.getResultFiles();
             renderFlatList(this.#listField, data, this.#sectionName);

@@ -11,6 +11,7 @@ export class CombineSection {
     #openFolderButton;
     #processButton;
     #sectionName = '합치기';
+    #resultSection = null;
 
     constructor(element) {
         this.#element = element;
@@ -23,12 +24,42 @@ export class CombineSection {
         this.refresh();
     }
 
+    setResultSection(resultSection) {
+        this.#resultSection = resultSection;
+    }
+
     #bindEvents() {
         setupOpenFolderButton(this.#openFolderButton, 'getAppCombineDirectory');
 
-        this.#processButton.addEventListener('click', () => {
-            console.log('Timeline creation process started for selected items.');
-            // 기능 연결은 추후에 진행
+        this.#processButton.addEventListener('click', async () => {
+            const selectedEl = currentSelectedElements.get(this.#sectionName);
+            if (!selectedEl) {
+                log('타임라인을 생성할 파일을 선택해주세요.');
+                return;
+            }
+
+            const filename = JSON.parse(selectedEl.dataset.data);
+            if (!filename) {
+                log('선택된 파일의 정보를 찾을 수 없습니다.');
+                return;
+            }
+
+            log(`'${filename}' 파일의 타임라인 생성을 시작합니다.`);
+            
+            try {
+                const result = await window.electronAPI.process.runTimeline(filename);
+                if (result.success) {
+                    log(result.message);
+                    if (this.#resultSection) {
+                        log('결과 섹션을 새로고침합니다.');
+                        this.#resultSection.refresh();
+                    }
+                } else {
+                    log(`[Error] ${result.message}`);
+                }
+            } catch (error) {
+                log(`[Error] 타임라인 생성 작업 중 예외가 발생했습니다: ${error.message}`);
+            }
         });
 
         this.#listField.addEventListener('click', (event) => {
