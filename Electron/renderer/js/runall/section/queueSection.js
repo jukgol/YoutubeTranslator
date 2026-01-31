@@ -8,9 +8,11 @@ export class QueueSection {
     #startBtn;
     #stopBtn;
     #clearBtn;
-    // #testBtn; // Removed
+    #testBtn;
     #queue = [];
     #sectionName = 'RunAll_Queue';
+    #isTestRunning = false;
+    #testPauseIndex = 0;
 
     constructor(element) {
         this.#element = element;
@@ -18,7 +20,7 @@ export class QueueSection {
         this.#startBtn = this.#element.querySelector('#queue-start-btn');
         this.#stopBtn = this.#element.querySelector('#queue-stop-btn');
         this.#clearBtn = this.#element.querySelector('#clear-queue-btn');
-        // this.#testBtn = this.#element.querySelector('#queue-test-btn'); // Removed
+        this.#testBtn = this.#element.querySelector('#queue-test-btn');
         
         this.#bindEvents();
         this.refresh();
@@ -31,8 +33,9 @@ export class QueueSection {
         });
 
         this.#stopBtn.addEventListener('click', () => {
-            console.log('Queue Stop button clicked');
-            // Logic to be implemented
+            log('큐 테스트 중단 요청됨.');
+            this.#isTestRunning = false;
+            this.#setButtonsDisabled(false);
         });
 
         this.#clearBtn.addEventListener('click', () => {
@@ -42,43 +45,69 @@ export class QueueSection {
         });
 
         // this.#testBtn.addEventListener('click', () => this.#runTest()); // Removed
+        this.#testBtn.addEventListener('click', () => this.#runTest());
     }
 
-    // #setButtonsDisabled(disabled) { // Removed
-    //     this.#startBtn.disabled = disabled;
-    //     this.#stopBtn.disabled = disabled;
-    //     this.#clearBtn.disabled = disabled;
-    //     this.#testBtn.disabled = disabled;
-    // }
+    #setButtonsDisabled(disabled) {
+        // 'disabled' is true when test starts/runs, false when test stops/finishes
+        this.#startBtn.disabled = disabled; // Disable "번역 시작"
+        this.#clearBtn.disabled = disabled; // Disable "큐 초기화"
+        this.#testBtn.disabled = disabled;   // Disable "테스트"
+        this.#stopBtn.disabled = !disabled; // Enable "멈춤" when test is running, disable when test is stopped
+    }
 
-    // async #runTest() { // Removed
-    //     log('큐 테스트를 시작합니다...');
-    //     this.#setButtonsDisabled(true);
+    async #runTest() {
+        if (this.#isTestRunning) {
+            log('테스트가 이미 실행 중입니다.');
+            return;
+        }
 
-    //     const listItems = this.#listField.querySelectorAll('li[data-type="file"]');
-    //     if (listItems.length !== this.#queue.length) {
-    //         console.error('큐와 UI 목록의 아이템 개수가 일치하지 않습니다.');
-    //         this.#setButtonsDisabled(false);
-    //         return;
-    //     }
+        log(`큐 테스트를 시작합니다... (재개 지점: ${this.#testPauseIndex})`);
+        this.#isTestRunning = true;
+        this.#setButtonsDisabled(true);
 
-    //     for (let i = 0; i < this.#queue.length; i++) {
-    //         const item = this.#queue[i];
-    //         const listItem = listItems[i];
+        const listItems = this.#listField.querySelectorAll('li[data-type="file"]');
+        if (listItems.length !== this.#queue.length) {
+            console.error('큐와 UI 목록의 아이템 개수가 일치하지 않습니다.');
+            this.#isTestRunning = false;
+            this.#testPauseIndex = 0;
+            this.#setButtonsDisabled(false);
+            return;
+        }
+
+        for (let i = this.#testPauseIndex; i < this.#queue.length; i++) {
+            if (!this.#isTestRunning) {
+                break; // Exit loop if test is stopped
+            }
+
+            const item = this.#queue[i];
+            const listItem = listItems[i];
             
-    //         log(`[테스트] 처리 중: ${item.name}`);
+            log(`[테스트] 처리 중: ${item.name}`);
             
-    //         // Wait for 2 seconds
-    //         await new Promise(resolve => setTimeout(resolve, 2000));
+            // Wait for 2 seconds
+            await new Promise(resolve => setTimeout(resolve, 2000));
             
-    //         item.status = 'completed';
-    //         listItem.style.backgroundColor = '#A7F3D0'; // Light green
-    //         log(`[테스트] 완료: ${item.name}`);
-    //     }
+            if (!this.#isTestRunning) { // Check again after await
+                break; // Exit loop if test is stopped during await
+            }
+
+            item.status = 'completed';
+            listItem.style.backgroundColor = '#A7F3D0'; // Light green
+            log(`[테스트] 완료: ${item.name}`);
+            this.#testPauseIndex = i + 1; // Update pause index
+        }
         
-    //     log('큐 테스트가 완료되었습니다.');
-    //     this.#setButtonsDisabled(false);
-    // }
+        if (!this.#isTestRunning) {
+            log('큐 테스트가 중단되었습니다.');
+        } else {
+            log('큐 테스트가 완료되었습니다.');
+            this.#testPauseIndex = 0; // Reset only if completed fully
+        }
+
+        this.#isTestRunning = false;
+        this.#setButtonsDisabled(false);
+    }
 
     add(item) {
         if (!item || !item.name) {
