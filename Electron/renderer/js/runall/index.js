@@ -1,73 +1,48 @@
-import { renderSimpleList } from './listRenderers.js';
-import { setupQueueButtons } from './setupQueueButtons.js';
-import { setupResultButtons } from './setupResultButtons.js';
-import { setupOpenOriginalDataFolderButton } from './section/originalDataButtonHandlers.js'; // Import new handler
-import { setupOpenFinalResultFolderButton } from './section/finalResultButtonHandlers.js'; // Import new handler
+// Electron/renderer/js/runall/index.js
 
-// 섹션별 선택 상태 저장용 금고 (독립 선택 보장)
-const runallSelectedMap = new Map();
-
-/**
- * 섹션별 선택 관리 핸들러
- */
-const handleRunallSelection = (clickedElement, sectionName, data) => {
-    const previousSelected = runallSelectedMap.get(sectionName);
-
-    // 같은 섹션 내에서만 이전 선택을 지움
-    if (previousSelected && previousSelected !== clickedElement) {
-        previousSelected.classList.remove('selected');
-    }
-
-    clickedElement.classList.add('selected');
-    runallSelectedMap.set(sectionName, clickedElement);
-    clickedElement.dataset.data = JSON.stringify(data);
-};
-
-// 설정 객체
-const pathMapping = {
-    '원본 데이터': { api: 'getSubtitleFiles', selector: '#runall-content .section-frame:nth-child(1) .list-field' }, // 변경
-    '최종 결과': { api: 'getResultFiles', selector: '#runall-content .section-frame:nth-child(4) .list-field' },    // 변경
-    '작업 큐': { api: null, selector: '#runall-content .section-frame:nth-child(2) .list-field' }
-};
+import { OriginalDataSection } from './section/originalDataSection.js';
+import { QueueSection } from './section/queueSection.js';
+import { ProgressSection } from './section/progressSection.js';
+import { ResultSection } from './section/resultSection.js';
 
 export async function initializeRunallTab() {
-    console.log('[RunallTab] 초기화 시작...');
+    console.log('[RunallTab] Initializing...');
 
-    try {
-        for (const [name, config] of Object.entries(pathMapping)) {
-            if (!config.api) continue;
-
-            const listElement = document.querySelector(config.selector);
-            if (!listElement) continue;
-
-            // 데이터 로드
-            const data = await window.electronAPI.paths[config.api]();
-
-            // 리스트 렌더링 (핸들러에 섹션 이름을 박아서 전달)
-            renderSimpleList(listElement, data, name, (clickedEl) => {
-                handleRunallSelection(clickedEl, name, clickedEl.textContent);
-            });
-        }
-
-        // 버튼 초기화 (Map을 넘겨줌)
-        if (!window.runallTabInitialized) {
-            setupQueueButtons(pathMapping, runallSelectedMap);
-            setupResultButtons(pathMapping, runallSelectedMap);
-            
-            // Get section elements for new buttons
-            const originalDataSectionElement = document.querySelector('#runall-content .section-frame:nth-child(1)');
-            const finalResultSectionElement = document.querySelector('#runall-content .section-frame:nth-child(4)');
-
-            if (originalDataSectionElement) {
-                setupOpenOriginalDataFolderButton(originalDataSectionElement);
-            }
-            if (finalResultSectionElement) {
-                setupOpenFinalResultFolderButton(finalResultSectionElement);
-            }
-
-            window.runallTabInitialized = true;
-        }
-    } catch (error) {
-        console.error('[RunallTab] 초기화 중 치명적 에러:', error);
+    const runallContent = document.getElementById('runall-content');
+    if (!runallContent) {
+        console.error('Runall content not found');
+        return;
     }
+
+    const sections = runallContent.querySelectorAll('.section-frame');
+    const sectionInstances = {};
+
+    sections.forEach(section => {
+        const header = section.querySelector('.section-header');
+        if (!header) return;
+        
+        const sectionName = header.textContent.replace(/^\d+\.\s*/, '').trim();
+
+        switch(sectionName) {
+            case '원본 데이터':
+                sectionInstances.originalData = new OriginalDataSection(section);
+                break;
+            case '작업 큐':
+                sectionInstances.queue = new QueueSection(section);
+                break;
+            case '진행 상태':
+                sectionInstances.progress = new ProgressSection(section);
+                break;
+            case '최종 결과':
+                sectionInstances.finalResult = new ResultSection(section);
+                break;
+            default:
+                console.warn(`Unknown section in runall tab: ${sectionName}`);
+                break;
+        }
+    });
+
+    console.log('[RunallTab] All sections initialized.');
+    // In the future, connections between sections can be made here.
+    // e.g., sectionInstances.originalData.setQueue(sectionInstances.queue);
 }
