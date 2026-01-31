@@ -8,6 +8,7 @@ const { registerSettingHandlers } = require('./ipc/settingHandlers.js');
 const { registerPathHandlers } = require('./ipc/pathHandlers.js');
 const { registerAppHandlers } = require('./ipc/appHandlers.js');
 const { registerUrlHandlers } = require('./ipc/urlHandlers.js');
+const { setupProcessHandlers } = require('./ipc/processHandlers.js');
 const { urlManager } = require('./download/urlManager.js'); // 새로 추가: urlManager 인스턴스 가져오기
 
 let mainWindow; // Declare mainWindow as a module-level variable
@@ -36,6 +37,7 @@ app.whenReady().then(async () => {
   registerPathHandlers(ipcMain, appEnv.configFunc);
   registerAppHandlers(ipcMain, app, logManager);
   registerUrlHandlers(ipcMain); // 수정: urlManager 인자 제거
+  setupProcessHandlers();
 
   createWindow();
   logManager.initialize(mainWindow);

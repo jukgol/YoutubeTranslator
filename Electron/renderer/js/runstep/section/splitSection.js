@@ -19,7 +19,7 @@ export class SplitSection {
         this.#processButton = this.#element.querySelector('.process-button');
 
         this.#bindEvents();
-        this.#loadList();
+        this.refresh();
     }
 
     #bindEvents() {
@@ -31,7 +31,7 @@ export class SplitSection {
         });
     }
 
-    async #loadList() {
+    async refresh() {
         try {
             const data = await window.electronAPI.paths.getSplitFiles();
             renderNestedList(this.#listField, data, '스플릿', this.#handleItemClick);

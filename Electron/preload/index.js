@@ -6,19 +6,22 @@ try {
   const settingsAPI = require('./api/settings');
   const systemAPI = require('./api/system');
   const urlManagerAPI = require('./api/urlManager'); // Add this line
+  const processAPI = require('./api/process');
 
   const logging = loggingAPI(ipcRenderer);
   const paths = pathsAPI(ipcRenderer);
   const settings = settingsAPI(ipcRenderer);
   const system = systemAPI(ipcRenderer);
   const urlManager = urlManagerAPI(ipcRenderer); // Add this line
+  const process = processAPI(ipcRenderer);
 
   contextBridge.exposeInMainWorld('electronAPI', {
     logging: logging,
     paths: paths,
     settings: settings,
     system: system,
-    urlManager: urlManager
+    urlManager: urlManager,
+    process: process
   });
   
   console.log("Electron API 등록 완료");

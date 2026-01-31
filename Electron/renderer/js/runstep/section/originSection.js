@@ -2,6 +2,8 @@
 
 import { renderFlatList } from '../listRenderers.js';
 import { setupOpenFolderButton } from '../util.js';
+import { currentSelectedElements } from '../selectionHandler.js';
+import { write as log } from '../../logger.js';
 
 export class OriginSection {
     #element;
@@ -9,6 +11,7 @@ export class OriginSection {
     #openFolderButton;
     #processButton;
     #handleItemClick;
+    #splitSection = null;
 
     constructor(element, handleItemClick) {
         this.#element = element;
@@ -22,12 +25,42 @@ export class OriginSection {
         this.#loadList();
     }
 
+    setSplitSection(splitSection) {
+        this.#splitSection = splitSection;
+    }
+
     #bindEvents() {
         setupOpenFolderButton(this.#openFolderButton, 'getAppOriginDirectory');
         
-        this.#processButton.addEventListener('click', () => {
-            console.log('Split process started for selected items.');
-            // 기능 연결은 추후에 진행
+        this.#processButton.addEventListener('click', async () => {
+            const selectedEl = currentSelectedElements.get('원본');
+            if (!selectedEl) {
+                log('분리할 파일을 선택해주세요.');
+                return;
+            }
+
+            const filename = JSON.parse(selectedEl.dataset.data);
+            if (!filename) {
+                log('선택된 파일의 정보를 찾을 수 없습니다.');
+                return;
+            }
+
+            log(`'${filename}' 파일 분할을 시작합니다.`);
+            
+            try {
+                const result = await window.electronAPI.process.runSplit(filename);
+                if (result.success) {
+                    log(result.message);
+                    if (this.#splitSection) {
+                        log('스플릿 섹션을 새로고침합니다.');
+                        this.#splitSection.refresh();
+                    }
+                } else {
+                    log(`[Error] ${result.message}`);
+                }
+            } catch (error) {
+                log(`[Error] 분할 작업 중 예외가 발생했습니다: ${error.message}`);
+            }
         });
     }
 

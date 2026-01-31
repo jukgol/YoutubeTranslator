@@ -18,6 +18,7 @@ const pathMapping = {
 export async function initializeRunstepTab() {
     const sections = document.querySelectorAll('#runstep-content .section-frame');
     const handleItemClick = createItemClickHandler(pathMapping);
+    const sectionInstances = {};
 
     for (const section of sections) {
         const header = section.querySelector('.section-header');
@@ -27,23 +28,28 @@ export async function initializeRunstepTab() {
 
         switch (sectionName) {
             case '원본':
-                new OriginSection(section, handleItemClick);
+                sectionInstances[sectionName] = new OriginSection(section, handleItemClick);
                 break;
             case '스플릿':
-                new SplitSection(section, handleItemClick);
+                sectionInstances[sectionName] = new SplitSection(section, handleItemClick);
                 break;
             case '번역':
-                new TranslateSection(section, handleItemClick);
+                sectionInstances[sectionName] = new TranslateSection(section, handleItemClick);
                 break;
             case '합치기':
-                new CombineSection(section, handleItemClick);
+                sectionInstances[sectionName] = new CombineSection(section, handleItemClick);
                 break;
             case '결과':
-                new ResultSection(section, handleItemClick);
+                sectionInstances[sectionName] = new ResultSection(section, handleItemClick);
                 break;
             default:
                 console.warn(`Unknown section in runstep tab: ${sectionName}`);
                 break;
         }
+    }
+
+    // Connect sections that need to communicate
+    if (sectionInstances['원본'] && sectionInstances['스플릿']) {
+        sectionInstances['원본'].setSplitSection(sectionInstances['스플릿']);
     }
 }
