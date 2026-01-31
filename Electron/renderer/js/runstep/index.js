@@ -1,65 +1,49 @@
 // Electron/renderer/js/runstep/index.js
 
 import { createItemClickHandler } from './selectionHandler.js';
-import { renderFlatList, renderNestedList } from './listRenderers.js';
-import { setupOpenOriginFolderButton } from './section/originButtonHandlers.js';
-import { setupOpenSplitFolderButton } from './section/splitButtonHandlers.js';
-import { setupOpenTranslateFolderButton } from './section/translateButtonHandlers.js';
-import { setupOpenCombineFolderButton } from './section/combineButtonHandlers.js';
-import { setupOpenResultFolderButton } from './section/resultButtonHandlers.js';
+import { OriginSection } from './section/originSection.js';
+import { SplitSection } from './section/splitSection.js';
+import { TranslateSection } from './section/translateSection.js';
+import { CombineSection } from './section/combineSection.js';
+import { ResultSection } from './section/resultSection.js';
 
 const pathMapping = {
-    '원본': { api: 'getSubtitleFiles', extensions: ['.srt', '.vtt'], type: 'flat' }, // 변경
-    '스플릿': { api: 'getSplitFiles', type: 'nested' }, // 변경
-    '번역': { api: 'getTranslatedFiles', type: 'nested' }, // 변경
-    '합치기': { api: 'getCombineFiles', type: 'flat' }, // 변경
-    '결과': { api: 'getResultFiles', type: 'flat' },    // 변경
+    '원본': { api: 'getSubtitleFiles', extensions: ['.srt', '.vtt'], type: 'flat' },
+    '스플릿': { api: 'getSplitFiles', type: 'nested' },
+    '번역': { api: 'getTranslatedFiles', type: 'nested' },
+    '합치기': { api: 'getCombineFiles', type: 'flat' },
+    '결과': { api: 'getResultFiles', type: 'flat' },
 };
 
-const handleItemClick = createItemClickHandler(pathMapping); // Create the handler with pathMapping
-
 export async function initializeRunstepTab() {
-    const sections = document.querySelectorAll('.section-frame');
+    const sections = document.querySelectorAll('#runstep-content .section-frame');
+    const handleItemClick = createItemClickHandler(pathMapping);
 
     for (const section of sections) {
         const header = section.querySelector('.section-header');
-        const listField = section.querySelector('.list-field');
-        const sectionName = header.textContent.replace(/^\d+\.\s*/, '').trim(); // "1. 원본" -> "원본"
+        if (!header) continue;
 
-        // Setup "Open Folder" buttons
+        const sectionName = header.textContent.replace(/^\d+\.\s*/, '').trim();
+
         switch (sectionName) {
             case '원본':
-                setupOpenOriginFolderButton(section);
+                new OriginSection(section, handleItemClick);
                 break;
             case '스플릿':
-                setupOpenSplitFolderButton(section);
+                new SplitSection(section, handleItemClick);
                 break;
             case '번역':
-                setupOpenTranslateFolderButton(section);
+                new TranslateSection(section, handleItemClick);
                 break;
             case '합치기':
-                setupOpenCombineFolderButton(section);
+                new CombineSection(section, handleItemClick);
                 break;
             case '결과':
-                setupOpenResultFolderButton(section);
+                new ResultSection(section, handleItemClick);
                 break;
-        }
-
-        if (pathMapping[sectionName]) {
-            const { api, type } = pathMapping[sectionName];
-            try {
-                let data;
-                if (type === 'flat') {
-                    data = await window.electronAPI.paths[api](); // 변경
-                    renderFlatList(listField, data, sectionName, handleItemClick); // Pass handleItemClick
-                } else if (type === 'nested') {
-                    data = await window.electronAPI.paths[api](); // 변경
-                    renderNestedList(listField, data, sectionName, handleItemClick); // Pass handleItemClick
-                }
-            } catch (error) {
-                console.error(`Error fetching data for ${sectionName}:`, error);
-                listField.innerHTML = `<div style="color: red; font-weight: bold; padding: 10px; text-align: center;">Error loading data: ${error.message}</div>`;
-            }
+            default:
+                console.warn(`Unknown section in runstep tab: ${sectionName}`);
+                break;
         }
     }
 }

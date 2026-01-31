@@ -14,8 +14,7 @@ module.exports = {
     });
 
     ipcMain.on('close-app', () => {
-      console.log('--- Electron: app.quit() is being called ---');
-      app.quit();
+              console.log('[Main] 프로그램이 정상적으로 종료되었습니다.');      app.quit();
     });
   }
 };
