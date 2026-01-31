@@ -1,7 +1,7 @@
 // Electron/renderer/js/runall/section/originalDataSection.js
 import { write as log } from '../../logger.js';
 import { currentSelectedElements, applyHighlight, removeHighlight } from '../../runstep/selectionHandler.js';
-import { renderFlatList } from '../../runstep/listRenderers.js';
+import { renderFlatList } from '../listRenderers.js';
 import { setupOpenFolderButton } from '../../runstep/util.js';
 
 export class OriginalDataSection {
@@ -9,10 +9,12 @@ export class OriginalDataSection {
     #listField;
     #addToQueueBtn;
     #openFolderBtn;
+    #queueSection; // Added private field
     #sectionName = 'RunAll_Original'; // Unique name for selection map
 
-    constructor(element) {
+    constructor(element, queueSection) { // Modified constructor
         this.#element = element;
+        this.#queueSection = queueSection; // Store queueSection instance
         this.#listField = this.#element.querySelector('.list-field');
         this.#addToQueueBtn = this.#element.querySelector('#add-to-queue-btn');
         this.#openFolderBtn = this.#element.querySelector('#open-original-data-folder-button');
@@ -25,8 +27,15 @@ export class OriginalDataSection {
         setupOpenFolderButton(this.#openFolderBtn, 'getAppOriginDirectory');
 
         this.#addToQueueBtn.addEventListener('click', () => {
-            console.log('Add to Queue button clicked');
-            // Logic to be implemented
+            const selectedLi = currentSelectedElements.get(this.#sectionName);
+
+            if (!selectedLi) {
+                log('추가할 항목을 먼저 선택하세요.');
+                return;
+            }
+
+            const itemName = selectedLi.textContent;
+            this.#queueSection.add({ name: itemName, status: 'pending' }); // Call add method
         });
 
         this.#listField.addEventListener('click', (event) => {

@@ -1,7 +1,7 @@
 // Electron/renderer/js/runall/section/finalResultSection.js
 import { write as log } from '../../logger.js';
 import { currentSelectedElements, applyHighlight, removeHighlight } from '../../runstep/selectionHandler.js';
-import { renderFlatList } from '../../runstep/listRenderers.js';
+import { renderFlatList } from '../listRenderers.js';
 import { setupOpenFolderButton } from '../../runstep/util.js';
 
 export class ResultSection {

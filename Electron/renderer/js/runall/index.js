@@ -14,27 +14,27 @@ export async function initializeRunallTab() {
         return;
     }
 
-    const sections = runallContent.querySelectorAll('.section-frame');
-    const sectionInstances = {};
+    const sectionElements = runallContent.querySelectorAll('.section-frame');
+    const sectionsMap = {};
 
-    sections.forEach(section => {
-        const header = section.querySelector('.section-header');
+    sectionElements.forEach(sectionEl => {
+        const header = sectionEl.querySelector('.section-header');
         if (!header) return;
         
         const sectionName = header.textContent.replace(/^\d+\.\s*/, '').trim();
 
         switch(sectionName) {
             case '원본 데이터':
-                sectionInstances.originalData = new OriginalDataSection(section);
+                sectionsMap.originalDataEl = sectionEl;
                 break;
             case '작업 큐':
-                sectionInstances.queue = new QueueSection(section);
+                sectionsMap.queueEl = sectionEl;
                 break;
             case '진행 상태':
-                sectionInstances.progress = new ProgressSection(section);
+                sectionsMap.progressEl = sectionEl;
                 break;
             case '최종 결과':
-                sectionInstances.finalResult = new ResultSection(section);
+                sectionsMap.finalResultEl = sectionEl;
                 break;
             default:
                 console.warn(`Unknown section in runall tab: ${sectionName}`);
@@ -42,7 +42,12 @@ export async function initializeRunallTab() {
         }
     });
 
+    // Explicitly instantiate sections with dependencies
+    const queueSection = new QueueSection(sectionsMap.queueEl);
+    const originalDataSection = new OriginalDataSection(sectionsMap.originalDataEl, queueSection);
+    const progressSection = new ProgressSection(sectionsMap.progressEl);
+    const resultSection = new ResultSection(sectionsMap.finalResultEl);
+
+
     console.log('[RunallTab] All sections initialized.');
-    // In the future, connections between sections can be made here.
-    // e.g., sectionInstances.originalData.setQueue(sectionInstances.queue);
 }

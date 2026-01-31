@@ -62,3 +62,7 @@
     color: white;
     font-weight: bold;
 }
+
+#queue-list .list-item {
+    font-size: 0.7em;   /* 원하는 글자 크기 */    
+}
