@@ -27,7 +27,7 @@ async function translateTestLogic(filePath) {
         
         log.write(`🧪 테스트 모드 실행 중... (${filename})`);
         for (let i = 3; i > 0; i--) {
-            log.updateTimer(`⏳ ${i}초 대기 중...`);
+            log.write(`⏳ ${i}초 대기 중...`, true);
             await delay(1000);
         }
         log.write("✅ 테스트 종료");
@@ -59,7 +59,7 @@ async function translateSubtitleLogic(filePath) {
         const startTime = Date.now();
         timerId = setInterval(() => {
             const elapsed = Math.round((Date.now() - startTime) / 1000);
-            log.updateTimer(`⏳ Gemini 번역 대기 중... (${elapsed}초 경과)`);
+            log.write(`⏳ Gemini 번역 대기 중... (${elapsed}초 경과)`, true);
         }, 1000);
 
         const genAI = new GoogleGenerativeAI(apiKey);

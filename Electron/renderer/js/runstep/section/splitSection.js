@@ -11,6 +11,7 @@ export class SplitSection {
     #openFolderButton;
     #processButton;
     #sectionName = '스플릿';
+    #translateSection = null;
 
     constructor(element) {
         this.#element = element;
@@ -23,12 +24,45 @@ export class SplitSection {
         this.refresh();
     }
 
+    setTranslateSection(translateSection) {
+        this.#translateSection = translateSection;
+    }
+
     #bindEvents() {
         setupOpenFolderButton(this.#openFolderButton, 'getAppSplitDirectory');
 
-        this.#processButton.addEventListener('click', () => {
-            console.log('Translate process started for selected items.');
-            // 기능 연결은 추후에 진행
+        this.#processButton.addEventListener('click', async () => {
+            const selectedEl = currentSelectedElements.get(this.#sectionName);
+            if (!selectedEl) {
+                log('번역을 시작할 폴더를 선택해주세요.');
+                return;
+            }
+
+            const folderName = JSON.parse(selectedEl.dataset.data);
+            if (!folderName) {
+                log('선택된 폴더의 정보를 찾을 수 없습니다.');
+                return;
+            }
+
+            this.#processButton.disabled = true;
+            log(`'${folderName}' 폴더의 번역을 시작합니다.`);
+            
+            try {
+                const result = await window.electronAPI.process.runTranslation(folderName);
+                if (result.success) {
+                    log(result.message);
+                    if (this.#translateSection) {
+                        log('번역 섹션을 새로고침합니다.');
+                        this.#translateSection.refresh();
+                    }
+                } else {
+                    log(`[Error] ${result.message}`);
+                }
+            } catch (error) {
+                log(`[Error] 번역 작업 중 예외가 발생했습니다: ${error.message}`);
+            } finally {
+                this.#processButton.disabled = false;
+            }
         });
 
         this.#listField.addEventListener('click', (event) => {

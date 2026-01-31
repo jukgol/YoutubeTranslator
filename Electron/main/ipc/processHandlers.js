@@ -4,6 +4,8 @@ const fs = require('fs').promises;
 const { splitSubtitleLogic } = require('../logic/split');
 const { combinePartsLogic } = require('../logic/combine');
 const { combineTimelineLogic } = require('../logic/combineTimeline');
+const { translateSubtitleLogic } = require('../logic/translate');
+
 const appEnv = require('../appEnv/appEnv');
 const log = require('../js/logManager');
 
@@ -98,6 +100,45 @@ function setupProcessHandlers() {
         } catch (error) {
             log.write(`[Error] 타임라인 생성 중 오류 발생 (${combinedTxtFilename}): ${error.message}`);
             return { success: false, message: `타임라인 생성 중 오류 발생: ${error.message}` };
+        }
+    });
+
+    ipcMain.handle('process:run-translation', async (event, folderName) => {
+        if (!folderName) {
+            log.write('[Error] 번역 실행: 폴더 이름이 제공되지 않았습니다.');
+            return { success: false, message: '폴더 이름이 제공되지 않았습니다.' };
+        }
+        
+        try {
+            log.write(`[IPC] 'process:run-translation' 요청 수신: ${folderName}`);
+            const folderPath = path.join(appEnv.pathData.splitDir, folderName);
+            const files = await fs.readdir(folderPath);
+            const txtFiles = files.filter(f => f.toLowerCase().endsWith('.txt')).sort();
+
+            if (txtFiles.length === 0) {
+                return { success: true, message: '번역할 파일이 없습니다.' };
+            }
+
+            let allSucceeded = true;
+            for (const file of txtFiles) {
+                const filePath = path.join(folderPath, file);
+                const success = await translateSubtitleLogic(filePath);
+                if (!success) {
+                    allSucceeded = false;
+                    // Optionally break here if you want to stop on first failure
+                    // break; 
+                }
+            }
+            
+            if (allSucceeded) {
+                return { success: true, message: `${folderName} 폴더의 모든 파일 번역이 완료되었습니다.` };
+            } else {
+                return { success: false, message: `${folderName} 폴더 번역 중 일부 파일에서 오류가 발생했습니다.` };
+            }
+
+        } catch (error) {
+            log.write(`[Error] 번역 작업 중 오류 발생 (${folderName}): ${error.message}`);
+            return { success: false, message: `번역 작업 중 오류 발생: ${error.message}` };
         }
     });
 }

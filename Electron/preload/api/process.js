@@ -4,4 +4,5 @@ module.exports = (ipcRenderer) => ({
   runSplit: (filename) => ipcRenderer.invoke('process:run-split', filename),
   runCombine: (folderName) => ipcRenderer.invoke('process:run-combine', folderName),
   runTimeline: (filename) => ipcRenderer.invoke('process:run-timeline', filename),
+  runTranslation: (folderName) => ipcRenderer.invoke('process:run-translation', folderName),
 });

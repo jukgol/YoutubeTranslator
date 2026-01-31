@@ -42,6 +42,9 @@ export async function initializeRunstepTab() {
     if (sectionInstances['원본'] && sectionInstances['스플릿']) {
         sectionInstances['원본'].setSplitSection(sectionInstances['스플릿']);
     }
+    if (sectionInstances['스플릿'] && sectionInstances['번역']) {
+        sectionInstances['스플릿'].setTranslateSection(sectionInstances['번역']);
+    }
     if (sectionInstances['번역'] && sectionInstances['합치기']) {
         sectionInstances['번역'].setCombineSection(sectionInstances['합치기']);
     }

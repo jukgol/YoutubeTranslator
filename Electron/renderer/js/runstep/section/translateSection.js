@@ -21,7 +21,7 @@ export class TranslateSection {
         this.#processButton = this.#element.querySelector('.process-button');
 
         this.#bindEvents();
-        this.#loadList();
+        this.refresh();
     }
 
     setCombineSection(combineSection) {
@@ -90,7 +90,7 @@ export class TranslateSection {
         });
     }
 
-    async #loadList() {
+    async refresh() {
         try {
             const data = await window.electronAPI.paths.getTranslatedFiles();
             renderNestedList(this.#listField, data, this.#sectionName);
