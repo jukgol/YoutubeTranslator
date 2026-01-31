@@ -6,6 +6,12 @@ import { TranslateSection } from './section/translateSection.js';
 import { CombineSection } from './section/combineSection.js';
 import { ResultSection } from './section/resultSection.js';
 
+let originSectionInstance = null;
+let splitSectionInstance = null;
+let translateSectionInstance = null;
+let combineSectionInstance = null;
+let resultSectionInstance = null;
+
 export async function initializeRunstepTab() {
     const sections = document.querySelectorAll('#runstep-content .section-frame');
     const sectionInstances = {};
@@ -18,19 +24,24 @@ export async function initializeRunstepTab() {
 
         switch (sectionName) {
             case '원본':
-                sectionInstances[sectionName] = new OriginSection(section);
+                originSectionInstance = new OriginSection(section);
+                sectionInstances[sectionName] = originSectionInstance;
                 break;
             case '스플릿':
-                sectionInstances[sectionName] = new SplitSection(section);
+                splitSectionInstance = new SplitSection(section);
+                sectionInstances[sectionName] = splitSectionInstance;
                 break;
             case '번역':
-                sectionInstances[sectionName] = new TranslateSection(section);
+                translateSectionInstance = new TranslateSection(section);
+                sectionInstances[sectionName] = translateSectionInstance;
                 break;
             case '합치기':
-                sectionInstances[sectionName] = new CombineSection(section);
+                combineSectionInstance = new CombineSection(section);
+                sectionInstances[sectionName] = combineSectionInstance;
                 break;
             case '결과':
-                sectionInstances[sectionName] = new ResultSection(section);
+                resultSectionInstance = new ResultSection(section);
+                sectionInstances[sectionName] = resultSectionInstance;
                 break;
             default:
                 console.warn(`Unknown section in runstep tab: ${sectionName}`);
@@ -39,16 +50,34 @@ export async function initializeRunstepTab() {
     }
 
     // Connect sections that need to communicate
-    if (sectionInstances['원본'] && sectionInstances['스플릿']) {
-        sectionInstances['원본'].setSplitSection(sectionInstances['스플릿']);
+    if (originSectionInstance && splitSectionInstance) {
+        originSectionInstance.setSplitSection(splitSectionInstance);
     }
-    if (sectionInstances['스플릿'] && sectionInstances['번역']) {
-        sectionInstances['스플릿'].setTranslateSection(sectionInstances['번역']);
+    if (splitSectionInstance && translateSectionInstance) {
+        splitSectionInstance.setTranslateSection(translateSectionInstance);
     }
-    if (sectionInstances['번역'] && sectionInstances['합치기']) {
-        sectionInstances['번역'].setCombineSection(sectionInstances['합치기']);
+    if (translateSectionInstance && combineSectionInstance) {
+        translateSectionInstance.setCombineSection(combineSectionInstance);
     }
-    if (sectionInstances['합치기'] && sectionInstances['결과']) {
-        sectionInstances['합치기'].setResultSection(sectionInstances['결과']);
+    if (combineSectionInstance && resultSectionInstance) {
+        combineSectionInstance.setResultSection(resultSectionInstance);
+    }
+}
+
+export async function refreshRunstepTab() {
+    if (originSectionInstance) {
+        await originSectionInstance.refresh();
+    }
+    if (splitSectionInstance) {
+        await splitSectionInstance.refresh();
+    }
+    if (translateSectionInstance) {
+        await translateSectionInstance.refresh();
+    }
+    if (combineSectionInstance) {
+        await combineSectionInstance.refresh();
+    }
+    if (resultSectionInstance) {
+        await resultSectionInstance.refresh();
     }
 }

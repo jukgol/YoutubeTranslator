@@ -5,6 +5,11 @@ import { QueueSection } from './section/queueSection.js';
 import { ProgressSection } from './section/progressSection.js';
 import { ResultSection } from './section/resultSection.js';
 
+let originalDataSectionInstance = null;
+let resultSectionInstance = null;
+let progressSectionInstance = null; // Also store progressSection instance
+let queueSectionInstance = null; // And queueSection instance
+
 export async function initializeRunallTab() {
     console.log('[RunallTab] Initializing...');
 
@@ -43,11 +48,22 @@ export async function initializeRunallTab() {
     });
 
     // Explicitly instantiate sections with dependencies
-    const queueSection = new QueueSection(sectionsMap.queueEl);
-    const originalDataSection = new OriginalDataSection(sectionsMap.originalDataEl, queueSection);
-    const progressSection = new ProgressSection(sectionsMap.progressEl, originalDataSection);
-    const resultSection = new ResultSection(sectionsMap.finalResultEl);
-
+    queueSectionInstance = new QueueSection(sectionsMap.queueEl); // Store instance
+    originalDataSectionInstance = new OriginalDataSection(sectionsMap.originalDataEl, queueSectionInstance); // Pass stored instance
+    progressSectionInstance = new ProgressSection(sectionsMap.progressEl, originalDataSectionInstance); // Pass stored instance
+    resultSectionInstance = new ResultSection(sectionsMap.finalResultEl); // Store instance
 
     console.log('[RunallTab] All sections initialized.');
 }
+
+export async function refreshRunallTab() {
+    if (originalDataSectionInstance) {
+        await originalDataSectionInstance.refresh();
+    }
+    if (resultSectionInstance) {
+        await resultSectionInstance.refresh();
+    }
+    // Note: progressSection and queueSection do not have a 'refresh' method for file lists
+    // as per the user's initial request.
+}
+

@@ -21,7 +21,7 @@ export class OriginSection {
         this.#processButton = this.#element.querySelector('.process-button');
 
         this.#bindEvents();
-        this.#loadList();
+        this.refresh();
     }
 
     setSplitSection(splitSection) {
@@ -83,7 +83,7 @@ export class OriginSection {
         });
     }
 
-    async #loadList() {
+    async refresh() {
         try {
             const data = await window.electronAPI.paths.getSubtitleFiles();
             renderFlatList(this.#listField, data, this.#sectionName);

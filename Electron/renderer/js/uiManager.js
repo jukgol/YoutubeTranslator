@@ -1,8 +1,8 @@
 import { write as log } from './logger.js';
 import { initializeSettings } from './setting/index.js'; // Import the settings module
-import { initializeDownloadTab } from './download/index.js';
-import { initializeRunstepTab } from './runstep/index.js';
-import { initializeRunallTab } from './runall/index.js';
+import { initializeDownloadTab, refreshDownloadTab } from './download/index.js';
+import { initializeRunstepTab, refreshRunstepTab } from './runstep/index.js';
+import { initializeRunallTab, refreshRunallTab } from './runall/index.js';
 
 const settings = initializeSettings(); // Initialize the settings module once
 
@@ -19,38 +19,43 @@ const tabConfig = [
     { 
         tabId: 'tab-runall', 
         contentId: 'runall-content', 
-        initializer: initializeRunallTab
+        setup: initializeRunallTab, // Initial setup function
+        refresh: refreshRunallTab // Refresh function
     },
     { 
         tabId: 'tab-download', 
         contentId: 'download-content', 
-        initializer: initializeDownloadTab 
+        setup: initializeDownloadTab, // Initial setup function
+        refresh: refreshDownloadTab // Refresh function
     },
     { 
         tabId: 'tab-runstep', 
         contentId: 'runstep-content', 
-        initializer: initializeRunstepTab 
+        setup: initializeRunstepTab, // Initial setup function
+        refresh: refreshRunstepTab // Refresh function
     },
     { 
         tabId: 'tab-settings', 
         contentId: 'settings-content', 
-        initializer: () => settings.loadSettingsUI()
+        setup: () => settings.loadSettingsUI(), // Settings UI is its own setup/refresh
+        refresh: () => settings.loadSettingsUI() // Assuming loadSettingsUI also refreshes
     }
 ];
 
-async function initializeAllTabs() {
-    log('Initializing all tabs...');
+// This function will now only perform initial setup for each tab
+async function initialSetupAllTabs() {
+    log('Performing initial setup for all tabs...');
     for (const config of tabConfig) {
-        if (config.initializer) {
+        if (config.setup) {
             try {
-                await config.initializer();
+                await config.setup();
             } catch (error) {
-                console.error(`Error initializing tab ${config.tabId}:`, error);
-                log(`[Error] ${config.tabId} 탭 초기화 중 오류 발생`);
+                console.error(`Error performing initial setup for tab ${config.tabId}:`, error);
+                log(`[Error] ${config.tabId} 탭 초기 설정 중 오류 발생`);
             }
         }
     }
-    log('All tabs initialized.');
+    log('Initial setup for all tabs complete.');
 }
 
 function initTabSwitching() {
@@ -62,7 +67,7 @@ function initTabSwitching() {
         const content = allContents[index];
 
         if (tab && content) {
-            tab.addEventListener('click', () => {
+            tab.addEventListener('click', async () => {
                 // Deactivate all tabs and hide all content
                 allTabs.forEach(t => t?.classList.remove('active'));
                 allContents.forEach(c => { if(c) c.style.display = 'none'; });
@@ -70,6 +75,17 @@ function initTabSwitching() {
                 // Activate the clicked tab and show its content
                 tab.classList.add('active');
                 content.style.display = 'flex';
+
+                // Call the refresh function for the clicked tab
+                if (config.refresh) {
+                    try {
+                        log(`[UI] ${config.tabId} 탭 새로고침 중...`);
+                        await config.refresh();
+                    } catch (error) {
+                        console.error(`Error refreshing tab ${config.tabId}:`, error);
+                        log(`[Error] ${config.tabId} 탭 새로고침 중 오류 발생`);
+                    }
+                }
             });
         }
     });
@@ -122,13 +138,13 @@ export async function initializeUI() { // Made initializeUI async
     initTestButtons(); // For demonstration
     settings.initSettingsHandlers(); // Initialize settings-specific handlers
 
-    await initializeAllTabs(); // Initialize all tab logic once at startup
-    
+    await initialSetupAllTabs(); // Perform initial setup for all tab components once
+
     // Signal to main process that renderer is ready for logs
     if (window.electronAPI && typeof window.electronAPI.logging.rendererReadyForLogs === 'function') {
         window.electronAPI.logging.rendererReadyForLogs();
     }
 
-    // Programmatically click the default tab to ensure consistent loading
+    // Programmatically click the default tab to ensure consistent loading and trigger first refresh
     document.getElementById('tab-download').click();
 }

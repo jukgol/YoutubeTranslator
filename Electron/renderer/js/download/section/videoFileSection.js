@@ -11,11 +11,11 @@ export class VideoFileSection {
         
         this.handleItemClick = createItemClickHandler(); // 이 섹션에 특화된 handleItemClick
 
-        this.initialRender();
+        this.refresh();
         setupOpenVideoFolderButton(this.sectionElement); // Setup button for this section
     }
 
-    async initialRender() {
+    async refresh() {
         if (this.listField) {
             try {
                 // IPC를 통해 메인 프로세스에서 영상 파일 목록을 가져옵니다.

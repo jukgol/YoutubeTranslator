@@ -11,11 +11,11 @@ export class SubtitleFileSection {
         
         this.handleItemClick = createItemClickHandler(); // 이 섹션에 특화된 handleItemClick
 
-        this.initialRender();
+        this.refresh(); // Call refresh in constructor
         setupOpenSubtitleFolderButton(this.sectionElement); // Setup button for this section
     }
 
-    async initialRender() {
+    async refresh() {
         if (this.listField) {
             try {
                 // IPC를 통해 메인 프로세스에서 자막 파일 목록을 가져옵니다.
