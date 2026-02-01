@@ -40,15 +40,17 @@ function setupPythonHandlers() {
             });
 
             let errorOutput = '';
+            let successMarkerFound = false;
 
             pythonProcess.stdout.on('data', (data) => {
                 const lines = data.toString().split('\n');
                 lines.forEach(line => {
                     const trimmed = line.trim();
                     if (trimmed) {
-                        // log.write(`[Python Stdout] ${trimmed}`); // Too verbose for everything
+                        if (trimmed.includes('[DONE] Transcription complete')) {
+                            successMarkerFound = true;
+                        }
 
-                        // Parse progress tag
                         // Parse progress tag
                         if (trimmed.startsWith('[PROGRESS]')) {
                             event.sender.send('python:progress', trimmed);
@@ -58,6 +60,8 @@ function setupPythonHandlers() {
                         } else if (trimmed.startsWith('[ERROR]')) {
                             event.sender.send('python:progress', trimmed);
                             log.write(`[Python] ${trimmed}`);
+                        } else if (trimmed.startsWith('[DONE]')) {
+                            log.write(`[Python] ${trimmed}`);
                         }
                     }
                 });
@@ -65,13 +69,18 @@ function setupPythonHandlers() {
 
             pythonProcess.stderr.on('data', (data) => {
                 const msg = data.toString().trim();
+                // Ignore specific PyTorch/monitor warnings
+                if (msg.includes('MonitorThread')) return;
+
                 log.write(`[Python Stderr] ${msg}`);
                 errorOutput += msg + '\n';
             });
 
             pythonProcess.on('close', (code) => {
-                if (code === 0) {
-                    log.write(`[Python] Subtitle extraction finished successfully.`);
+                // Trust the [DONE] marker first, because sys.exit(0) can sometimes yield non-zero codes 
+                // when wrapped in poetry or due to messy thread shutdowns in Python.
+                if (successMarkerFound || code === 0) {
+                    log.write(`[Python] Subtitle extraction finished successfully (Code: ${code}, Verified: ${successMarkerFound}).`);
                     resolve({ success: true, message: 'Subtitle extraction complete.' });
                 } else {
                     log.write(`[Python] Process exited with code ${code}`);

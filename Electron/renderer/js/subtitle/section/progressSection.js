@@ -43,6 +43,14 @@ export class ProgressSection {
                 const start = startMatch ? parseFloat(startMatch[1]).toFixed(1) : '?';
                 const percent = percentMatch ? parseFloat(percentMatch[1]) : 0; // Keep as number for smoothing
 
+                // 0. Auto-Reset check: If percent drops from high to low (e.g. 100% -> 0%), it's a new video.
+                if (this.#targetPercent > 90 && percent < 5) {
+                    this.reset();
+                    // Force update immediately
+                    this.#targetPercent = percent;
+                    this.#currentPercent = percent;
+                }
+
                 // 1. Update text immediately (stored for the animation loop)
                 this.#displayProgressText(start, text);
 
