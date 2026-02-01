@@ -3,12 +3,14 @@ import { initializeSettings } from './setting/index.js'; // Import the settings 
 import { initializeDownloadTab, refreshDownloadTab } from './download/index.js';
 import { initializeRunstepTab, refreshRunstepTab } from './runstep/index.js';
 import { initializeRunallTab, refreshRunallTab } from './runall/index.js';
+import { initializeSubtitleTab, refreshSubtitleTab } from './subtitle/index.js';
+
 
 const settings = initializeSettings(); // Initialize the settings module once
 
 function initCloseButton() {
     const closeBtn = document.getElementById('close-btn');
-    if(closeBtn) {
+    if (closeBtn) {
         closeBtn.addEventListener('click', () => {
             window.electronAPI.system.closeApp();
         });
@@ -16,27 +18,33 @@ function initCloseButton() {
 }
 
 const tabConfig = [
-    { 
-        tabId: 'tab-runall', 
-        contentId: 'runall-content', 
+    {
+        tabId: 'tab-runall',
+        contentId: 'runall-content',
         setup: initializeRunallTab, // Initial setup function
         refresh: refreshRunallTab // Refresh function
     },
-    { 
-        tabId: 'tab-download', 
-        contentId: 'download-content', 
+    {
+        tabId: 'tab-download',
+        contentId: 'download-content',
         setup: initializeDownloadTab, // Initial setup function
         refresh: refreshDownloadTab // Refresh function
     },
-    { 
-        tabId: 'tab-runstep', 
-        contentId: 'runstep-content', 
+    {
+        tabId: 'tab-subtitle',
+        contentId: 'subtitle-content',
+        setup: initializeSubtitleTab, // Initial setup function
+        refresh: refreshSubtitleTab // Refresh function
+    },
+    {
+        tabId: 'tab-runstep',
+        contentId: 'runstep-content',
         setup: initializeRunstepTab, // Initial setup function
         refresh: refreshRunstepTab // Refresh function
     },
-    { 
-        tabId: 'tab-settings', 
-        contentId: 'settings-content', 
+    {
+        tabId: 'tab-settings',
+        contentId: 'settings-content',
         setup: () => settings.loadSettingsUI(), // Settings UI is its own setup/refresh
         refresh: () => settings.loadSettingsUI() // Assuming loadSettingsUI also refreshes
     }
@@ -70,7 +78,7 @@ function initTabSwitching() {
             tab.addEventListener('click', async () => {
                 // Deactivate all tabs and hide all content
                 allTabs.forEach(t => t?.classList.remove('active'));
-                allContents.forEach(c => { if(c) c.style.display = 'none'; });
+                allContents.forEach(c => { if (c) c.style.display = 'none'; });
 
                 // Activate the clicked tab and show its content
                 tab.classList.add('active');
@@ -100,7 +108,7 @@ function initLogListener() {
                 // Remove the last line if it exists
                 const lines = logView.value.split('\n');
                 if (lines.length > 0 && lines[lines.length - 1] === '') { // Remove empty last line if present
-                    lines.pop(); 
+                    lines.pop();
                 }
                 if (lines.length > 0) {
                     lines.pop(); // Remove the actual last line to be replaced
@@ -124,7 +132,7 @@ function initLogListener() {
 function initTestButtons() {
     // Find the test button by its ID
     const testBtn = document.getElementById('test-log-btn');
-    if(testBtn) {
+    if (testBtn) {
         testBtn.addEventListener('click', () => {
             log('"' + testBtn.textContent + '" button clicked.');
         });

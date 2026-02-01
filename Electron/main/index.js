@@ -10,15 +10,16 @@ const { registerAppHandlers } = require('./ipc/appHandlers.js');
 const { registerUrlHandlers } = require('./ipc/urlHandlers.js');
 const { setupProcessHandlers } = require('./ipc/processHandlers.js');
 const { setupFsHandlers } = require('./ipc/fsHandlers.js'); // Add this line
+const { setupPythonHandlers } = require('./ipc/pythonHandlers.js'); // Add this line
 const { urlManager } = require('./download/urlManager.js'); // 새로 추가: urlManager 인스턴스 가져오기
 
 let mainWindow; // Declare mainWindow as a module-level variable
 
-function createWindow () {
+function createWindow() {
   mainWindow = new BrowserWindow({ // Assign to the module-level mainWindow
     width: 1200,
     height: 800,
-    frame: false,    
+    frame: false,
     webPreferences: {
       preload: path.join(__dirname, '../preload/index.js'),
       sandbox: false
@@ -29,8 +30,8 @@ function createWindow () {
   // mainWindow.webContents.openDevTools(); // ADDED FOR DEBUGGING (REMOVED)
 }
 
-app.whenReady().then(async () => {    
-  
+app.whenReady().then(async () => {
+
   logManager.write('Application started.');
 
   // Register IPC handlers
@@ -40,6 +41,7 @@ app.whenReady().then(async () => {
   registerUrlHandlers(ipcMain); // 수정: urlManager 인자 제거
   setupProcessHandlers();
   setupFsHandlers(); // Add this line
+  setupPythonHandlers(); // Add this line
 
   createWindow();
   logManager.initialize(mainWindow);

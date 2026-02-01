@@ -1,0 +1,15 @@
+[tool.poetry]
+name = "youtubetranslator-python"
+version = "0.1.0"
+description = "Python backend for YoutubeTranslator using faster-whisper"
+authors = ["Your Name <you@example.com>"]
+
+[tool.poetry.dependencies]
+python = ">=3.10"
+faster-whisper = "^1.0.0"
+nvidia-cublas-cu12 = "^12.9.1.4"
+nvidia-cudnn-cu12 = "^9.18.1.3"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

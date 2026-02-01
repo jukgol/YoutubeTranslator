@@ -25,13 +25,17 @@ try {
     system: system,
     urlManager: urlManager,
     process: process,
+    python: { // Add this
+      runSubtitle: (videoPath, language) => ipcRenderer.invoke('python:run-subtitle', videoPath, language),
+      onProgress: (callback) => ipcRenderer.on('python:progress', (event, data) => callback(data))
+    },
     fs: fs, // Add this line
     path: { // Expose path functions needed in renderer
       basename: path.basename,
       join: path.join // Add path.join here
     }
   });
-  
+
   console.log("Electron API 등록 완료");
 } catch (e) {
   // 여기서 'module not found'가 뜨면 실제 파일 이름/경로 오타입니다.

@@ -22,6 +22,10 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (downloadContent) {
             await loadComponent('components/tab_content/download_tab_content.html', downloadContent);
         }
+        const subtitleContent = document.getElementById('subtitle-content');
+        if (subtitleContent) {
+            await loadComponent('components/tab_content/subtitle_tab_content.html', subtitleContent);
+        }
         const runstepContent = document.getElementById('runstep-content');
         if (runstepContent) {
             await loadComponent('components/tab_content/runstep_tab_content.html', runstepContent);
@@ -29,7 +33,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         const settingsContent = document.getElementById('settings-content');
         if (settingsContent) {
             await loadComponent('components/tab_content/settings_tab_content.html', settingsContent);
-        }               
+        }
         await initializeUI();
 
         // --- 여기서부터 로딩 화면 전환 로직 ---
