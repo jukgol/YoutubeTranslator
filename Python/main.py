@@ -33,17 +33,24 @@ def main():
     base_name = os.path.splitext(os.path.basename(input_file))[0]
     output_path = os.path.join(output_dir, f"{base_name}.srt")
 
+    # 3. Check if output already exists (Skip if so)
+    if os.path.exists(output_path):
+        print(f"[INFO] Subtitle file already exists: {output_path}")
+        print("[DONE] Skipping transcription.")
+        sys.exit(0)
+
     try:
-        # 3. Initialize Extractor
+        # 4. Initialize Extractor
         extractor = SubtitleExtractor(model_size=args.model, device=args.device)
         
-        # 4. Run Transcription
+        # 5. Run Transcription
         segments = extractor.transcribe(input_file, language=args.language, task=args.task)
         
-        # 5. Save Result
+        # 6. Save Result
         extractor.save_to_srt(segments, output_path)
         
         print("[DONE] Transcription complete.")
+        sys.exit(0) # Explicitly exit with 0 to ensure Electron sees success
         
     except Exception as e:
         print(f"[CRITICAL] An unexpected error occurred: {e}")

@@ -19,15 +19,6 @@
             <!-- Waiting list will be shown here -->
         </div>
         <div class="button-group">
-            <select id="subtitle-language-select"
-                style="padding: 5px; margin-right: 5px; border: 1px solid #ccc; border-radius: 4px;">
-                <option value="">언어 자동 (Auto)</option>
-                <option value="ko">한국어 (Korean)</option>
-                <option value="en">영어 (English)</option>
-                <option value="zh" selected>중국어 (Chinese - Mandarin)</option>
-                <option value="yue">광동어 (Chinese - Cantonese)</option> <!-- Added Cantonese -->
-                <option value="ja">일본어 (Japanese)</option>
-            </select>
             <button id="subtitle-start-btn" class="action-button">시작</button>
             <button id="subtitle-stop-btn" class="action-button" style="background-color: #EC4899;">중지</button>
             <button id="subtitle-clear-btn" class="action-button" style="background-color: #F87171;">비우기</button>
@@ -39,6 +30,16 @@
         <h3 class="section-header">3. 진행사항</h3>
         <div id="progressSection" style="padding: 10px; font-size: 16px; font-weight: bold; text-align: center;">
             0% 진행중
+        </div>
+        <div class="button-group" style="justify-content: center; margin-top: 10px;">
+            <select id="subtitle-language-select" style="padding: 5px; border: 1px solid #ccc; border-radius: 4px;">
+                <option value="">언어 자동 (Auto)</option>
+                <option value="ko">한국어 (Korean)</option>
+                <option value="en">영어 (English)</option>
+                <option value="zh" selected>중국어 (Chinese - Mandarin)</option>
+                <option value="yue">광동어 (Chinese - Cantonese)</option>
+                <option value="ja">일본어 (Japanese)</option>
+            </select>
         </div>
     </div>
 

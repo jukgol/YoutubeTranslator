@@ -32,7 +32,8 @@ export class WaitingListSection {
     }
 
     get selectedLanguage() {
-        const select = this.#element.querySelector('#subtitle-language-select');
+        // Moved to Progress Section, so access globally via ID
+        const select = document.getElementById('subtitle-language-select');
         return select ? select.value : null;
     }
 

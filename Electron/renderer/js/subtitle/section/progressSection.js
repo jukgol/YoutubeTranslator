@@ -108,20 +108,53 @@ export class ProgressSection {
         if (this.#animationFrameId) return; // Loop already active
 
         const animate = () => {
-            // Linear interpolation (Lerp): current moves 10% closer to target each frame
-            // Provides a nice ease-out effect
+            // Logic:
+            // 1. "Target" is the latest confirmed progress from Python logs (e.g. 15%)
+            // 2. "Current" is what is displayed.
+            // 3. User request: "Always go up". So we add a small "fake" increment every frame.
+            //    But if Target is way ahead (Catch Up), we move much faster.
+            //    If Current > Target (Overshoot), we slow down or pause, but user prefers "Always up",
+            //    so maybe just slow down drastically but don't stop? 
+            //    Actually, if we really overshoot, we MUST wait or else we reach 100% before done.
+            //    Let's clamp overshoot to Target + 5% max? No, just wait if overshot.
+
             const diff = this.#targetPercent - this.#currentPercent;
 
-            // If very close, snap to target
-            if (Math.abs(diff) < 0.1) {
-                this.#currentPercent = this.#targetPercent;
-                this.#updateRawDisplay();
-                this.#animationFrameId = null; // Stop the loop
-                return;
+            let speed = 0;
+
+            if (diff > 0) {
+                // BEHIND: Catch up mode
+                // If diff is large (e.g. 5%), move fast (e.g. 0.2 per frame)
+                // If diff is small, move normally
+
+                // User said: "Fast catchup to that time"
+                speed = diff * 0.1; // 10% of the distance per frame (Ease out)
+                if (speed < 0.005) speed = 0.005; // Minimum speed
+            } else {
+                // AHEAD or EQUAL (Overshoot or Idle between chunks):
+                // User wants "Always moving".
+                // But we cannot move past 100%. And we shouldn't move too far past the "confirmed" percent
+                // or we might look like we are at 90% when we are at 20%.
+
+                // Compromise:
+                // We allow "Speculative Increment" up to +2% of the Target.
+                // If current < target + 2.0:
+                //      creep forward very slowly (0.01 per frame)
+                // else:
+                //      wait (sadly, we must wait eventually if no data comes)
+
+                if (this.#currentPercent < this.#targetPercent + 5.0 && this.#currentPercent < 99) {
+                    speed = 0.003; // Very slow crawl
+                } else {
+                    speed = 0; // Must wait
+                }
             }
 
-            // Move closer
-            this.#currentPercent += diff * 0.05; // 5% per frame
+            // Apply speed
+            this.#currentPercent += speed;
+
+            // Cap at 100
+            if (this.#currentPercent > 100) this.#currentPercent = 100;
 
             this.#updateRawDisplay();
             this.#animationFrameId = requestAnimationFrame(animate);
@@ -132,11 +165,31 @@ export class ProgressSection {
 
     #updateRawDisplay() {
         if (this.#progressDisplay) {
-            // Format: [15.4%] [12.5s] "Hello world"
+            // Format: 
+            // "Hello world"
+            // [15.4%]
             const p = this.#currentPercent.toFixed(1);
 
             if (this.#currentText) {
-                this.#progressDisplay.textContent = `[${p}%] ${this.#currentText}`;
+                // Split stored text "[start] text" if needed, but currentText is `[${start}s] "${text}"`
+                // Let's format nicely:
+                // Line 1: "Text"
+                // Line 2: [15.4%] [12.5s]
+
+                // Parse out the components from #currentText if it's formatted as `[${start}s] "${text}"`
+                // Or just display as is but split lines
+
+                // Let's refine valid format handling
+                const match = this.#currentText.match(/^\[(.*?)\] "(.*)"$/);
+                if (match) {
+                    const time = match[1];
+                    const text = match[2];
+                    this.#progressDisplay.innerHTML = `<div>"${text}"</div><div style="font-size: 0.9em; color: #555; margin-top: 4px;">[${p}%] ${time}</div>`;
+                } else {
+                    // Fallback
+                    this.#progressDisplay.innerHTML = `<div>${this.#currentText}</div><div style="font-size: 0.9em; color: #555;">[${p}%]</div>`;
+                }
+
                 this.#progressDisplay.style.color = '#3B82F6'; // Blue
             }
         }
@@ -154,7 +207,7 @@ export class ProgressSection {
                 this.#animationFrameId = null;
             }
 
-            this.#progressDisplay.textContent = message;
+            this.#progressDisplay.innerHTML = `<div>${message}</div>`; // Use innerHTML for consistency
             this.#progressDisplay.style.color = '#3B82F6';
 
             if (isLoading) {
@@ -169,7 +222,7 @@ export class ProgressSection {
 
         // Initial state
         if (this.#progressDisplay) {
-            this.#progressDisplay.textContent = `${baseMessage} (0s)`;
+            this.#progressDisplay.innerHTML = `<div>${baseMessage}</div><div style="font-size: 0.9em; color: #888;">(0s)</div>`;
         }
 
         this.#loadingInterval = setInterval(() => {
@@ -181,7 +234,7 @@ export class ProgressSection {
             const currentSeconds = Math.floor((++seconds) / 2);
 
             if (this.#progressDisplay) {
-                this.#progressDisplay.textContent = `${baseMessage}${dotStr} (${currentSeconds}s)`;
+                this.#progressDisplay.innerHTML = `<div>${baseMessage}${dotStr}</div><div style="font-size: 0.9em; color: #888;">(${currentSeconds}s)</div>`;
             }
         }, 500);
     }
