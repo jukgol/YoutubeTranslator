@@ -2,7 +2,7 @@
   "name": "youtubetranslator",
   "version": "1.0.0",
   "description": "",
-  "main": "electron/main/index.js",
+  "main": "Electron/main/index.js",
   "scripts": {
     "start": "chcp 65001 > nul && electron .",
     "test": "echo \"Error: no test specified\" && exit 1"
@@ -20,7 +20,7 @@
   },
   "homepage": "https://github.com/jukgol/YoutubeTranslator#readme",
   "devDependencies": {
-    "electron": "^40.0.0"
+    "electron": "^40.1.0"
   },
   "dependencies": {
     "@google/generative-ai": "^0.24.1",

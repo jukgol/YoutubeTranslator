@@ -18,7 +18,7 @@ export class OriginalDataSection {
         this.#listField = this.#element.querySelector('.list-field');
         this.#addToQueueBtn = this.#element.querySelector('#add-to-queue-btn');
         this.#openFolderBtn = this.#element.querySelector('#open-original-data-folder-button');
-        
+
         this.#bindEvents();
         this.refresh();
     }

@@ -172,6 +172,7 @@ export class ProgressSection {
                     log(`타임라인 생성 완료: ${currentStepResult.finalSrtFile}`);
                     this.updateStatus(3, true);
                     this.#currentStepIndex = 4; // Routine completed
+                    this.updateStatus(4, true); // Activate "All Processes Complete" label
                 } else {
                     overallSuccess = false;
                     log(`[루틴] 타임라인 생성 단계 실패: ${currentStepResult.message}`);
