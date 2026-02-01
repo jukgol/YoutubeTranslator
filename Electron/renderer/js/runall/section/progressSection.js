@@ -4,7 +4,8 @@ import { write as log } from '../../logger.js';
 export class ProgressSection {
     #element;
     #statusLabels;
-    #stopButton;    // Matches #status-test-btn in HTML
+    #startTestButton; // Matches #start-test-btn in HTML
+    #stopButton;    // Matches #status-stop-btn in HTML
     #isRoutineRunning = false;
     #stopRequested = false;
     #currentStepIndex = -1; // -1: Ready, 0-3: processing a step, 4: completed, 5: stopped/paused
@@ -13,10 +14,16 @@ export class ProgressSection {
     constructor(element) {
         this.#element = element;
         this.#statusLabels = this.#element.querySelectorAll('.status-label');
+        this.#startTestButton = this.#element.querySelector('#start-test-btn');
         this.#stopButton = this.#element.querySelector('#status-stop-btn');
         
+        // Hide the buttons as requested
+        this.#startTestButton.style.display = 'none';
+        this.#stopButton.style.display = 'none';
+
         this.#bindEvents();
-        this.#setRoutineButtonsDisabled(false); // Initial state
+        // The buttons are hidden, so there's no need to call setRoutineButtonsDisabled on startup for visibility.
+        // #setRoutineButtonsDisabled(false); // Initial state - Removed
     }
 
     #bindEvents() {
