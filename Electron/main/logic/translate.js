@@ -21,10 +21,10 @@ async function translateTestLogic(filePath) {
         const filename = path.basename(filePath);
         const originalTitle = filename.split('_Part')[0];
         const targetDir = path.join(appEnv.pathData.translateDir, originalTitle);
-        
+
         await fs.mkdir(targetDir, { recursive: true });
         await fs.copyFile(filePath, path.join(targetDir, filename));
-        
+
         log.write(`🧪 테스트 모드 실행 중... (${filename})`);
         for (let i = 3; i > 0; i--) {
             log.write(`⏳ ${i}초 대기 중...`, true);
@@ -52,14 +52,14 @@ async function translateSubtitleLogic(filePath) {
         log.write('❌ 오류: API 키, 번역 규칙, 또는 모델 이름이 설정되지 않았습니다.');
         return { success: false, translatedFolder: null };
     }
-    
+
     let timerId = null;
     try {
         // --- Start Timer ---
         const startTime = Date.now();
         timerId = setInterval(() => {
             const elapsed = Math.round((Date.now() - startTime) / 1000);
-            log.write(`⏳ Gemini 번역 대기 중... (${elapsed}초 경과)`, true);
+            log.write(`⏳ Gemini 번역 중... (${elapsed}초 경과)`, true);
         }, 1000);
 
         const genAI = new GoogleGenerativeAI(apiKey);
@@ -74,7 +74,7 @@ async function translateSubtitleLogic(filePath) {
         let newSource = "";
         const lines = sourceText.trim().split('\n');
         let idCounter = 0;
-        
+
         const reminderTagStart = "### [SYSTEM CHECK: RULE REMINDER] ###";
         const reminderTagEnd = "### [END OF RULE REMINDER] ###";
         const reminderMsg = `\n\n${reminderTagStart}\n[중요 지시사항 다시 확인]\n${rule}\n(위 지시사항은 번역하지 말고, 아래 데이터부터 번역을 이어가세요)\n${reminderTagEnd}\n\n`;
@@ -92,7 +92,7 @@ async function translateSubtitleLogic(filePath) {
                 newSource += `${cleanLine}\n`;
             }
         }
-        
+
         const finalRule = (
             `${rule}\n\n` +
             `주의: 본문 중간에 '${reminderTagStart}'로 시작하는 문구가 나타나면 ` +
@@ -102,14 +102,14 @@ async function translateSubtitleLogic(filePath) {
 
         log.write(`🚀 번역 시작 (${idCounter}개 블록): ${filename}`);
         const result = await model.generateContent(prompt);
-        
+
         // Stop timer right after API call finishes
         clearInterval(timerId);
         timerId = null;
-        
+
         const response = await result.response;
         const translatedRaw = response.text();
-  
+
         const cleanPattern = new RegExp(`${reminderTagStart.replace(/[-\/\\^$*+?.()|[\\]{}]/g, '\\$&')}.*?${reminderTagEnd.replace(/[-\/\\^$*+?.()|[\\]{}]/g, '\\$&')}`, 'gs');
         const translatedText = translatedRaw.replace(cleanPattern, "").trim();
 
@@ -123,14 +123,14 @@ async function translateSubtitleLogic(filePath) {
                 await fs.mkdir(resultDir, { recursive: true });
             }
         }
-        
+
         const outputName = filename.replace(".txt", "_KR.txt");
         const outputPath = path.join(resultDir, outputName);
 
         await fs.writeFile(outputPath, translatedText, 'utf-8');
 
         const elapsedTime = Math.round((Date.now() - startTime) / 1000);
-        log.write(`\n✅ 완료: ${outputName}\n(${elapsedTime}초 소요)\n`);        
+        log.write(`\n✅ 완료: ${outputName}\n(${elapsedTime}초 소요)\n`);
         return { success: true, translatedFolder: resultDir };
 
     } catch (e) {
