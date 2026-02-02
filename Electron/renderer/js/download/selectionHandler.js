@@ -24,7 +24,7 @@ export function createItemClickHandler() {
         if (selectedElementInThisHandler && selectedElementInThisHandler !== elementToHighlight) {
             removeHighlight(selectedElementInThisHandler); // 이전 선택 요소의 하이라이트 제거
         }
-        
+
         applyHighlight(elementToHighlight); // 현재 클릭된 요소 하이라이트 적용
         selectedElementInThisHandler = elementToHighlight; // 현재 클릭된 요소를 새 선택 요소로 저장
 
@@ -33,7 +33,6 @@ export function createItemClickHandler() {
         elementToHighlight.dataset.type = type;
         elementToHighlight.dataset.data = JSON.stringify(data);
 
-        console.log(`Selected in ${sectionName}: Type=${type}, Data=`, data);
-        console.log('Currently highlighted element in this section:', selectedElementInThisHandler); // 로깅도 수정
+
     };
 }

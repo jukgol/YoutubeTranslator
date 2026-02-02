@@ -15,7 +15,7 @@ export class TranslateSection {
 
     constructor(element) {
         this.#element = element;
-        
+
         this.#listField = this.#element.querySelector('.list-field');
         this.#openFolderButton = this.#element.querySelector('.open-folder-button');
         this.#processButton = this.#element.querySelector('.process-button');
@@ -45,7 +45,7 @@ export class TranslateSection {
             }
 
             log(`'${folderName}' 폴더의 파트 합치기를 시작합니다.`);
-            
+
             try {
                 const result = await window.electronAPI.process.runCombine(folderName);
                 if (result.success) {
@@ -89,7 +89,7 @@ export class TranslateSection {
 
             const type = elementToHighlight.dataset.type;
             const data = elementToHighlight.dataset.data;
-            log(`선택됨 (${this.#sectionName}): 유형=${type}, 데이터=${data}`);
+
         });
     }
 

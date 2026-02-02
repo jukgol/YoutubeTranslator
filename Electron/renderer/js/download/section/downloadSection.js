@@ -75,14 +75,18 @@ export class DownloadSection {
             this.startDownloadButton.addEventListener('click', async () => {
                 console.log('다운로드 시작 버튼 클릭됨');
 
-                const qualitySelect = this.sectionElement.querySelector('#quality-select');
+                const qualitySelect = document.getElementById('quality-select');
                 const quality = qualitySelect ? qualitySelect.value : 'best';
-                console.log(`선택된 화질: ${quality}`);
+
+                const subtitleCheckbox = document.getElementById('subtitle-checkbox');
+                const downloadSubs = subtitleCheckbox ? subtitleCheckbox.checked : false;
+
+                console.log(`선택된 화질: ${quality}, 자막 다운로드 여부: ${downloadSubs}`);
 
                 this.startDownloadButton.disabled = true;
                 this.startDownloadButton.textContent = '다운로드 중...';
 
-                await window.electronAPI.urlManager.startDownload(quality); // 화질 인자 전달
+                await window.electronAPI.urlManager.startDownload(quality, downloadSubs); // 자막 여부 추가 전달
 
                 this.startDownloadButton.disabled = false;
                 this.startDownloadButton.textContent = '다운로드 시작';
@@ -104,7 +108,49 @@ export class DownloadSection {
         }
     }
 
-    initialRender() {
+    async initialRender() {
+        // this.render(); // Assuming a render method exists or will be added
+        // 설정 로드 및 적용
+        try {
+            if (window.electronAPI && window.electronAPI.urlManager && window.electronAPI.urlManager.getDownloadSettings) {
+                const settings = await window.electronAPI.urlManager.getDownloadSettings();
+                if (settings) {
+                    const qualitySelect = document.getElementById('quality-select');
+                    const subtitleCheckbox = document.getElementById('subtitle-checkbox');
+
+                    if (qualitySelect) {
+                        if (settings.quality) qualitySelect.value = settings.quality;
+
+                        // 변경 시 자동 저장
+                        qualitySelect.addEventListener('change', async () => {
+                            const currentSettings = {
+                                quality: qualitySelect.value,
+                                downloadSubs: subtitleCheckbox ? subtitleCheckbox.checked : false
+                            };
+                            await window.electronAPI.urlManager.saveDownloadSettings(currentSettings);
+                            console.log('설정 저장됨 (화질 변경):', currentSettings);
+                        });
+                    }
+
+                    if (subtitleCheckbox) {
+                        if (settings.downloadSubs !== undefined) subtitleCheckbox.checked = settings.downloadSubs;
+
+                        // 변경 시 자동 저장
+                        subtitleCheckbox.addEventListener('change', async () => {
+                            const currentSettings = {
+                                quality: qualitySelect ? qualitySelect.value : 'best',
+                                downloadSubs: subtitleCheckbox.checked
+                            };
+                            await window.electronAPI.urlManager.saveDownloadSettings(currentSettings);
+                            console.log('설정 저장됨 (자막 변경):', currentSettings);
+                        });
+                    }
+                    console.log('다운로드 설정 로드 완료:', settings);
+                }
+            }
+        } catch (error) {
+            console.error('설정 로드 실패:', error);
+        }
         // 초기 로드 시 기존에 추가된 downloadItems (가정)을 렌더링하는 로직이 있었으나,
         // 이제 downloadItems 배열이 없어졌으므로, 이 부분은 메인 프로세스에
         // 저장된 목록을 요청하는 방식으로 변경되어야 합니다.

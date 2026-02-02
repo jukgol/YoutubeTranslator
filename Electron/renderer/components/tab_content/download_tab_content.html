@@ -1,58 +1,64 @@
-<div class="main-row">
-    <!-- 1. 영상 다운로드 -->
-    <div class="section-frame">
-        <h3 class="section-header">1. 영상 다운로드</h3>
-        <div class="setting-row" style="margin-bottom: 10px;">
-            <input type="text" id="url-input" placeholder="URL을 입력하세요" style="flex-grow: 1;">
-            <button id="add-url-button" style="background-color: #818CF8; flex-grow: 0;">URL 추가</button>
+<div style="display: flex; flex-direction: column; height: 100%;">
+    <div style="display: flex; justify-content: flex-start; padding: 0 0 0 20px;">
+        <span style="font-size: 0.9em; margin-right: 5px; font-weight: bold; color: #555;">화질 선택:</span>
+        <select id="quality-select" style="padding: 2px;">
+            <option value="best">Best (최고화질)</option>
+            <option value="2160">2160p (4K)</option>
+            <option value="1440">1440p (QHD)</option>
+            <option value="1080">1080p (FHD)</option>
+            <option value="720">720p (HD)</option>
+        </select>
+        <label style="margin-left: 15px; font-size: 0.9em; display: flex; align-items: center; cursor: pointer;">
+            <input type="checkbox" id="subtitle-checkbox" checked style="margin-right: 5px;">
+            자막다운 (영/중/한)
+        </label>
+    </div>
+    <div class="main-row" style="flex-grow: 1;">
+        <!-- 1. 영상 다운로드 -->
+        <div class="section-frame">
+            <h3 class="section-header" style="margin-top: 5px;">1. 영상 다운로드</h3>
+            <div class="setting-row" style="margin-bottom: 10px;">
+                <input type="text" id="url-input" placeholder="URL을 입력하세요" style="flex-grow: 1;">
+                <button id="add-url-button" style="background-color: #818CF8; flex-grow: 0;">URL 추가</button>
+            </div>
+            <div class="list-field" id="downloadUrlList">
+                <!-- URL list will be shown here -->
+            </div>
+
+            <div class="button-group">
+                <button id="start-download-button" style="background-color: #4ADE80;">다운로드 시작</button>
+                <button id="clear-queue-button" style="background-color: #FCA5A5;">큐 비우기</button>
+            </div>
         </div>
-        <div class="list-field" id="downloadUrlList">
-            <!-- URL list will be shown here -->
+        <!-- 2. 영상 다운완료 -->
+        <div class="section-frame">
+            <h3 class="section-header">2. 영상 다운완료</h3>
+            <div class="list-field" id="completeList">
+                <!-- Download complete list will be shown here -->
+            </div>
+            <div class="button-group">
+                <button style="background-color: #FCA5A5;">목록삭제</button>
+            </div>
         </div>
-        <div class="setting-row" style="margin-top: 10px; justify-content: flex-end;">
-            <span style="font-size: 0.9em; margin-right: 5px;">화질 선택:</span>
-            <select id="quality-select" style="padding: 5px;">
-                <option value="best">Best (최고화질)</option>
-                <option value="2160">2160p (4K)</option>
-                <option value="1440">1440p (QHD)</option>
-                <option value="1080">1080p (FHD)</option>
-                <option value="720">720p (HD)</option>
-            </select>
+        <!-- 3. 영상 폴더 -->
+        <div class="section-frame">
+            <h3 class="section-header">3. 영상 폴더</h3>
+            <div class="list-field" id="videoFileList">
+                <!-- Video file list will be shown here -->
+            </div>
+            <div class="button-group">
+                <button id="open-video-folder-button" style="background-color: #9CA3AF;">폴더 열기</button>
+            </div>
         </div>
-        <div class="button-group">
-            <button id="start-download-button" style="background-color: #4ADE80;">다운로드 시작</button>
-            <button id="clear-queue-button" style="background-color: #FCA5A5;">큐 비우기</button>
+        <!-- 4. 자막 폴더 -->
+        <div class="section-frame">
+            <h3 class="section-header">4. 자막 폴더</h3>
+            <div class="list-field" id="subtitleFileList">
+                <!-- Subtitle file list will be shown here -->
+            </div>
+            <div class="button-group">
+                <button id="open-subtitle-folder-button" style="background-color: #9CA3AF;">폴더 열기</button>
+            </div>
         </div>
     </div>
-    <!-- 2. 영상 다운완료 -->
-    <div class="section-frame">
-        <h3 class="section-header">2. 영상 다운완료</h3>
-        <div class="list-field" id="completeList">
-            <!-- Download complete list will be shown here -->
-        </div>
-        <div class="button-group">
-            <button style="background-color: #FCA5A5;">목록삭제</button>
-        </div>
-    </div>
-    <!-- 3. 영상 폴더 -->
-    <div class="section-frame">
-        <h3 class="section-header">3. 영상 폴더</h3>
-        <div class="list-field" id="videoFileList">
-            <!-- Video file list will be shown here -->
-        </div>
-        <div class="button-group">
-            <button id="open-video-folder-button" style="background-color: #9CA3AF;">폴더 열기</button>
-        </div>
-    </div>
-    <!-- 4. 자막 폴더 -->
-    <div class="section-frame">
-        <h3 class="section-header">4. 자막 폴더</h3>
-        <div class="list-field" id="subtitleFileList">
-            <!-- Subtitle file list will be shown here -->
-        </div>
-        <div class="button-group">
-            <button id="open-subtitle-folder-button" style="background-color: #9CA3AF;">폴더 열기</button>
-        </div>
-    </div>
-</div>
 </div>

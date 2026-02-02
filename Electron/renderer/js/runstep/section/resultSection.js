@@ -14,7 +14,7 @@ export class ResultSection {
 
     constructor(element) {
         this.#element = element;
-        
+
         this.#listField = this.#element.querySelector('.list-field');
         this.#openFolderButton = this.#element.querySelector('.open-folder-button');
         this.#processButton = this.#element.querySelector('.process-button');
@@ -80,7 +80,7 @@ export class ResultSection {
 
             const type = clickedLi.dataset.type;
             const data = clickedLi.dataset.data;
-            log(`선택됨 (${this.#sectionName}): 유형=${type}, 데이터=${data}`);
+
         });
     }
 

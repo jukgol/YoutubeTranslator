@@ -6,6 +6,9 @@ module.exports = (ipcRenderer) => ({
     clearUrlList: () => ipcRenderer.invoke('urlManager:clear-url-list'),
     fetchUrlTitle: (url) => ipcRenderer.invoke('urlManager:fetch-url-title', url),
     getNext: () => ipcRenderer.invoke('urlManager:get-next'),
-    startDownload: (quality) => ipcRenderer.invoke('url:start-download', quality),
-    onUpdateItem: (callback) => ipcRenderer.on('urlManager:item-updated', (_event, itemData) => callback(itemData)), // 추가
+    startDownload: (quality, downloadSubs) => ipcRenderer.invoke('url:start-download', quality, downloadSubs),
+    startDownload: (quality, downloadSubs) => ipcRenderer.invoke('url:start-download', quality, downloadSubs),
+    onUpdateItem: (callback) => ipcRenderer.on('urlManager:item-updated', (_event, itemData) => callback(itemData)),
+    getDownloadSettings: () => ipcRenderer.invoke('settings:get-download'),
+    saveDownloadSettings: (settings) => ipcRenderer.invoke('settings:save-download', settings),
 });

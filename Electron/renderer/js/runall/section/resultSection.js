@@ -16,7 +16,7 @@ export class ResultSection {
         this.#listField = this.#element.querySelector('.list-field');
         this.#moveFileBtn = this.#element.querySelector('#move-file-btn');
         this.#openFolderBtn = this.#element.querySelector('#open-final-result-folder-button');
-        
+
         this.#bindEvents();
         this.refresh();
     }
@@ -72,7 +72,7 @@ export class ResultSection {
             applyHighlight(clickedLi, false);
             currentSelectedElements.set(this.#sectionName, clickedLi);
 
-            log(`선택됨 (${this.#sectionName}): ${clickedLi.textContent}`);
+
         });
     }
 

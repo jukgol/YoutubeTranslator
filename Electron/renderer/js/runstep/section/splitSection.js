@@ -15,7 +15,7 @@ export class SplitSection {
 
     constructor(element) {
         this.#element = element;
-        
+
         this.#listField = this.#element.querySelector('.list-field');
         this.#openFolderButton = this.#element.querySelector('.open-folder-button');
         this.#processButton = this.#element.querySelector('.process-button');
@@ -46,7 +46,7 @@ export class SplitSection {
 
             this.#processButton.disabled = true;
             log(`'${folderName}' 폴더의 번역을 시작합니다.`);
-            
+
             try {
                 const result = await window.electronAPI.process.runTranslation(folderName);
                 if (result.success) {
@@ -92,7 +92,7 @@ export class SplitSection {
 
             const type = elementToHighlight.dataset.type;
             const data = elementToHighlight.dataset.data;
-            log(`선택됨 (${this.#sectionName}): 유형=${type}, 데이터=${data}`);
+
         });
     }
 

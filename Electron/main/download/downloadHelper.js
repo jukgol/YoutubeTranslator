@@ -31,9 +31,9 @@ exports._fetchTitleAsync = async (targetUrl, itemToUpdate) => {
     }
 };
 
-exports._runDownloadProcess = async (url, title, quality) => {
+exports._runDownloadProcess = async (url, title, quality, downloadSubs) => {
     try {
-        log.write(`▶ [다운로드 시작] ${title} (화질: ${quality})`);
+        log.write(`▶ [다운로드 시작] ${title} (화질: ${quality}, 자막: ${downloadSubs})`);
 
         let formatOption = 'bestvideo+bestaudio/best';
 
@@ -45,13 +45,9 @@ exports._runDownloadProcess = async (url, title, quality) => {
             formatOption = 'bestvideo[ext=mp4]+bestaudio[ext=m4a]/best[ext=mp4]/best';
         }
 
-        const subprocess = ytdlp.exec(url, {
+        const options = {
             output: path.join(appEnv.pathData.videoDir, '%(title)s.%(ext)s'),
             format: formatOption,
-            writeSubs: true,
-            writeAutoSubs: true,
-            subLangs: 'zh-Hans,en,ko,id,zh',
-            subFormat: 'srt',
             cookies: appEnv.pathData.cookieFile,
             noCheckCertificates: true,
             // 1. JS 런타임 경고 해결 (Node.js 사용 명시)
@@ -60,8 +56,18 @@ exports._runDownloadProcess = async (url, title, quality) => {
             // 2. 봇 감지 우회를 위한 User-Agent 설정
             // 실제 브라우저인 것처럼 속입니다.
             userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36',
-            referer: 'https://www.dailymotion.com/' // Referer 추가
-        });
+            referer: 'https://www.dailymotion.com/', // Referer 추가
+            // 자막 옵션 조건부 설정
+            writeSubs: downloadSubs,
+            writeAutoSubs: downloadSubs,
+        };
+
+        if (downloadSubs) {
+            options.subLangs = 'zh-Hans,en,ko,id,zh';
+            options.subFormat = 'srt';
+        }
+
+        const subprocess = ytdlp.exec(url, options);
 
         let totalSizeLogDone = false;
 

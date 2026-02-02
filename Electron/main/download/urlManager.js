@@ -163,7 +163,7 @@ class UrlManager {
         }, 1000);
     }
 
-    async startDownload(quality = 'best') {
+    async startDownload(quality = 'best', downloadSubs = true) {
         if (this.failed.length > 0) {
             log.write(`${this.failed.length}개의 실패 항목을 다시 확인합니다...`);
             this.pending.push(...this.failed);
@@ -195,7 +195,7 @@ class UrlManager {
             }
 
             try {
-                await _runDownloadProcess(item.url, item.title, quality);
+                await _runDownloadProcess(item.url, item.title, quality, downloadSubs);
                 this.markAsDone(item);
             } catch (error) {
                 this.markAsFailed(item);

@@ -1,8 +1,20 @@
 // Electron/renderer/js/runstep/urlHandler.js
 
 export const addUrl = async (url) => {
-    const item = await window.electronAPI.urlManager.addUrl(url); // 변경
+    const item = await window.electronAPI.urlManager.addUrl(url);
     return item;
+};
+
+export const startDownload = async (quality, downloadSubs) => {
+    return await window.electronAPI.urlManager.startDownload(quality, downloadSubs);
+};
+
+export const getDownloadSettings = async () => {
+    return await window.electronAPI.urlManager.getDownloadSettings();
+};
+
+export const saveDownloadSettings = async (settings) => {
+    return await window.electronAPI.urlManager.saveDownloadSettings(settings);
 };
 
 export const removeUrl = async (url) => {

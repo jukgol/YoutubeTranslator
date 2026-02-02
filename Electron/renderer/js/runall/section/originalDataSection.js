@@ -49,7 +49,7 @@ export class OriginalDataSection {
             applyHighlight(clickedLi, false);
             currentSelectedElements.set(this.#sectionName, clickedLi);
 
-            log(`선택됨 (${this.#sectionName}): ${clickedLi.textContent}`);
+
         });
     }
 

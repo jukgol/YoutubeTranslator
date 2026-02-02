@@ -87,7 +87,7 @@ function initTabSwitching() {
                 // Call the refresh function for the clicked tab
                 if (config.refresh) {
                     try {
-                        log(`[UI] ${config.tabId} 탭 새로고침 중...`);
+
                         await config.refresh();
                     } catch (error) {
                         console.error(`Error refreshing tab ${config.tabId}:`, error);

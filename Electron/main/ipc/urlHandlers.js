@@ -5,6 +5,8 @@ const log = require('../js/logManager');
 
 module.exports = {
   registerUrlHandlers: (ipcMain) => { // urlManager 인자 제거
+    const downloadSettings = require('../download/downloadSettings');
+
     ipcMain.handle('system:start-test-counter', async () => {
       urlManager.startTestCounter();
       return true;
@@ -40,9 +42,18 @@ module.exports = {
       return success;
     });
 
-    ipcMain.handle('url:start-download', async (event, quality) => {
-      log.write(`[IPC] Received url:start-download call. Quality: ${quality}`);
-      await urlManager.startDownload(quality);
+    ipcMain.handle('settings:get-download', async () => {
+      return downloadSettings.loadSettings();
+    });
+
+    ipcMain.handle('settings:save-download', async (event, settings) => {
+      return downloadSettings.saveSettings(settings);
+    });
+
+    ipcMain.handle('url:start-download', async (event, quality, downloadSubs) => {
+      log.write(`[IPC] Received url:start-download call. Quality: ${quality}, DownloadSubs: ${downloadSubs}`);
+
+      await urlManager.startDownload(quality, downloadSubs);
       return true; // Signal completion
     });
   }
