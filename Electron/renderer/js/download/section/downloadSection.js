@@ -12,6 +12,7 @@ export class DownloadSection {
         this.startDownloadButton = sectionElement.querySelector('#start-download-button');
         this.urlInput = sectionElement.querySelector('#url-input');
         this.downloadUrlList = sectionElement.querySelector('#downloadUrlList');
+        this.clearQueueButton = sectionElement.querySelector('#clear-queue-button'); // 큐 비우기 버튼 참조 추가
         this.handleItemClick = createItemClickHandler();
         this.setupEventListeners();
         this.initialRender();
@@ -48,7 +49,7 @@ export class DownloadSection {
                 const url = this.urlInput.value.trim();
                 if (url) {
                     this.addUrlButton.disabled = true;
-                    const newItem = await addUrl(url); 
+                    const newItem = await addUrl(url);
                     if (newItem) {
                         console.log('URL 추가 완료:', newItem);
                         // downloadItems 배열 없이 바로 DOM에 추가
@@ -61,19 +62,45 @@ export class DownloadSection {
                 }
             });
         }
-        
+
+        if (this.clearQueueButton) {
+            this.clearQueueButton.addEventListener('click', async () => {
+                const confirmed = confirm('다운로드 대기 목록을 모두 지우시겠습니까?');
+                if (confirmed) {
+                    await this.clearQueue();
+                }
+            });
+        }
         if (this.startDownloadButton) {
             this.startDownloadButton.addEventListener('click', async () => {
                 console.log('다운로드 시작 버튼 클릭됨');
+
+                const qualitySelect = this.sectionElement.querySelector('#quality-select');
+                const quality = qualitySelect ? qualitySelect.value : 'best';
+                console.log(`선택된 화질: ${quality}`);
+
                 this.startDownloadButton.disabled = true;
                 this.startDownloadButton.textContent = '다운로드 중...';
 
-                await window.electronAPI.urlManager.startDownload();
+                await window.electronAPI.urlManager.startDownload(quality); // 화질 인자 전달
 
                 this.startDownloadButton.disabled = false;
                 this.startDownloadButton.textContent = '다운로드 시작';
                 console.log('모든 다운로드 작업 완료됨');
             });
+        }
+    }
+
+    async clearQueue() {
+        console.log('큐 비우기 실행');
+        this.downloadUrlList.innerHTML = '';
+        try {
+            if (window.electronAPI && window.electronAPI.urlManager && window.electronAPI.urlManager.clearUrlList) {
+                await window.electronAPI.urlManager.clearUrlList();
+                console.log('큐 비우기 완료');
+            }
+        } catch (error) {
+            console.error('큐 비우기 실패:', error);
         }
     }
 

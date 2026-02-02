@@ -13,7 +13,7 @@ class DownloadItem {
     toUiLines() {
         const symbols = { "대기": "⏳", "제목 확인 완료": "📝", "다운로드 중": "📥", "완료": "✅", "실패": "❌" };
         const symbol = symbols[this.status] || "•";
-        
+
         const separator = `${'='.repeat(12)} [ ${symbol} ${this.status} ] ${'='.repeat(12)}`;
         const lineId = ` ID: ${this.id}`;
         const lineTitle = ` 제목: ${this.title}`;
@@ -32,7 +32,7 @@ class UrlManager {
         this.currentCount = 0;
         this.nextId = 0;
         this._mainWindow = null;
-    }   
+    }
 
     setMainWindow(mainWindow) {
         this._mainWindow = mainWindow;
@@ -54,9 +54,9 @@ class UrlManager {
         const newItem = new DownloadItem(this.nextId++, url);
         this.pending.push(newItem);
         log.write("대기열에 추가되었습니다.");
-        
+
         // 내부 로직을 지우고 downloadHelper의 함수를 호출
-        this.fetchUrlTitle(newItem); 
+        this.fetchUrlTitle(newItem);
         return newItem;
     }
 
@@ -67,11 +67,19 @@ class UrlManager {
         return this.pending.length < initialLength;
     }
 
+    clearUrlList() {
+        this.pending = [];
+        this.inProgress = []; // (Optional) Do we want to stop running items? For now just clear the list references
+        this.failed = [];
+        log.write("대기 목록이 초기화되었습니다.");
+        return true;
+    }
+
     // downloadHelper의 _fetchTitleAsync를 호출하도록 수정
     async fetchUrlTitle(item) {
         try {
             await _fetchTitleAsync(item.url, item);
-            
+
             if (item.title !== "유효하지 않은 URL 또는 접근 제한" && item.title !== "제목을 찾을 수 없음") {
                 item.status = "제목 확인 완료";
             } else {
@@ -79,19 +87,19 @@ class UrlManager {
             }
 
             if (this._mainWindow) {
-                this._mainWindow.webContents.send('urlManager:item-updated', { 
-                    id: item.id, 
-                    title: item.title, 
-                    status: item.status 
+                this._mainWindow.webContents.send('urlManager:item-updated', {
+                    id: item.id,
+                    title: item.title,
+                    status: item.status
                 });
             }
         } catch (error) {
             item.status = "실패";
             if (this._mainWindow) {
-                this._mainWindow.webContents.send('urlManager:item-updated', { 
-                    id: item.id, 
-                    title: item.title, 
-                    status: item.status 
+                this._mainWindow.webContents.send('urlManager:item-updated', {
+                    id: item.id,
+                    title: item.title,
+                    status: item.status
                 });
             }
         }
@@ -155,13 +163,13 @@ class UrlManager {
         }, 1000);
     }
 
-    async startDownload() {
+    async startDownload(quality = 'best') {
         if (this.failed.length > 0) {
             log.write(`${this.failed.length}개의 실패 항목을 다시 확인합니다...`);
             this.pending.push(...this.failed);
             this.failed = [];
         }
-    
+
         if (this.pending.length === 0) {
             log.write("처리할 항목이 대기열에 없습니다.");
             return;
@@ -169,13 +177,13 @@ class UrlManager {
 
         while (this.pending.length > 0) {
             const item = this.pending.shift();
-    
+
             if (item.status !== '제목 확인 완료') {
                 log.write(`[${item.id}] 항목이 다운로드 준비 상태가 아니므로 실패 목록으로 이동합니다. (상태: ${item.status})`);
                 this.failed.push(item);
                 continue;
             }
-    
+
             item.status = "다운로드 중";
             this.inProgress.push(item);
             if (this._mainWindow) {
@@ -185,9 +193,9 @@ class UrlManager {
                     status: item.status
                 });
             }
-            
+
             try {
-                await _runDownloadProcess(item.url, item.title);
+                await _runDownloadProcess(item.url, item.title, quality);
                 this.markAsDone(item);
             } catch (error) {
                 this.markAsFailed(item);

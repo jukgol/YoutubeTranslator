@@ -1,17 +1,21 @@
 // electron/main/download/downloadHelper.js
 const ytdlp = require('yt-dlp-exec');
-const path = require('path'); 
+const path = require('path');
 
 const log = require('../js/logManager');
-const appEnv = require('../appEnv/appEnv'); 
+const appEnv = require('../appEnv/appEnv');
 
 // UrlManager에서 호출할 제목 가져오기 함수
 exports._fetchTitleAsync = async (targetUrl, itemToUpdate) => {
     try {
-        // 403 방지를 위해 appEnv의 쿠키 설정 활용
+        // 403 방지를 위해 appEnv의 쿠키 및 User-Agent 설정 추가
         const info = await ytdlp(targetUrl, {
             dumpSingleJson: true,
-            noCheckCertificates: true,            
+            noCheckCertificates: true,
+            cookies: appEnv.pathData.cookieFile, // 쿠키 파일 경로 추가
+            jsRuntimes: 'node',                  // JS 런타임 설정
+            userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36',
+            referer: 'https://www.dailymotion.com/' // Referer 추가
         });
 
         if (info && info.title) {
@@ -27,13 +31,23 @@ exports._fetchTitleAsync = async (targetUrl, itemToUpdate) => {
     }
 };
 
-exports._runDownloadProcess = async (url, title) => {
+exports._runDownloadProcess = async (url, title, quality) => {
     try {
-        log.write(`▶ [다운로드 시작] ${title}`);
+        log.write(`▶ [다운로드 시작] ${title} (화질: ${quality})`);
+
+        let formatOption = 'bestvideo+bestaudio/best';
+
+        if (quality && quality !== 'best') {
+            // 선택한 해상도 이하 중 최고 화질 + 오디오, 없으면 best
+            formatOption = `bestvideo[height<=${quality}][ext=mp4]+bestaudio[ext=m4a]/best[height<=${quality}][ext=mp4]/best`;
+        } else {
+            // 기존 Best 옵션 (mp4 선호)
+            formatOption = 'bestvideo[ext=mp4]+bestaudio[ext=m4a]/best[ext=mp4]/best';
+        }
 
         const subprocess = ytdlp.exec(url, {
             output: path.join(appEnv.pathData.videoDir, '%(title)s.%(ext)s'),
-            format: 'bestvideo[ext=mp4]+bestaudio[ext=m4a]/best[ext=mp4]/best',
+            format: formatOption,
             writeSubs: true,
             writeAutoSubs: true,
             subLangs: 'zh-Hans,en,ko,id,zh',
@@ -45,7 +59,8 @@ exports._runDownloadProcess = async (url, title) => {
             jsRuntimes: 'node',
             // 2. 봇 감지 우회를 위한 User-Agent 설정
             // 실제 브라우저인 것처럼 속입니다.
-            userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36'
+            userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36',
+            referer: 'https://www.dailymotion.com/' // Referer 추가
         });
 
         let totalSizeLogDone = false;
