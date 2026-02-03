@@ -108,17 +108,32 @@ class SubtitleExtractor:
             task=task,
             initial_prompt=initial_prompt,
             condition_on_previous_text=False, # Prevent repetition loops (hallucinations)
-            no_speech_threshold=0.6, # Adjust threshold to be less sensitive to silence
-            vad_filter= False, # 소리 없는 구간을 물리적으로 제거
-            vad_parameters=dict(min_silence_duration_ms=500), # 0.5초 이상 조용하면 자막 끊기
+            no_speech_threshold=0.5, # Adjust threshold to be less sensitive to silence
+            vad_filter=False, # 소리 없는 구간을 물리적으로 제거하여 환청 방지
+            vad_parameters=dict(
+                min_silence_duration_ms=1000, # 1초 이상 조용하면 자막 끊기
+                speech_pad_ms=400 # 음성 전후 여백
+            ),
             word_timestamps=True,
+            log_prob_threshold=-0.8,
         )
 
         print(f"[INFO] Detected language '{info.language}' with probability {info.language_probability:.2f}", flush=True)
 
+        # Known hallucination phrases to filter out
+        hallucination_phrases = [
+            "优优独播剧场", "YoYo Television", "独播剧场", "좋아요, 구독, 공유후원으로"
+            "字幕", "Subtitles", "Amara.org", "MBC", "SBS", "TBS", "KBS"
+        ]
+
         results = []
         # Segments are a generator, so we iterate to process them
         for segment in segments:
+            # Filter out known hallucinations
+            if any(phrase in segment.text for phrase in hallucination_phrases):
+                print(f"[INFO] Filtered hallucination: {segment.text}", flush=True)
+                continue
+
             # Calculate percentage
             percentage = 0.0
             if info.duration and info.duration > 0:

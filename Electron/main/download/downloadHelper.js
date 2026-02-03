@@ -12,7 +12,7 @@ exports._fetchTitleAsync = async (targetUrl, itemToUpdate) => {
         const info = await ytdlp(targetUrl, {
             dumpSingleJson: true,
             noCheckCertificates: true,
-            cookies: appEnv.pathData.cookieFile, // 쿠키 파일 경로 추가
+            // cookies: appEnv.pathData.cookieFile, // 401 Unauthorized 방지를 위해 제목 가져올 때는 쿠키 미사용
             jsRuntimes: 'node',                  // JS 런타임 설정
             userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36',
             referer: 'https://www.dailymotion.com/' // Referer 추가
@@ -48,7 +48,7 @@ exports._runDownloadProcess = async (url, title, quality, downloadSubs) => {
         const options = {
             output: path.join(appEnv.pathData.videoDir, '%(title)s.%(ext)s'),
             format: formatOption,
-            cookies: appEnv.pathData.cookieFile,
+            // cookies: appEnv.pathData.cookieFile, // 401 Error 방지
             noCheckCertificates: true,
             // 1. JS 런타임 경고 해결 (Node.js 사용 명시)
             // yt-dlp가 유튜브 시그니처를 풀기 위해 필요합니다.

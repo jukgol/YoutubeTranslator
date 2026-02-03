@@ -1,4 +1,4 @@
-// electron/main/js/logManager.js
+const readline = require('readline');
 
 let mainWindow = null;
 let logBuffer = []; // Stores objects { message: string, replace: boolean }
@@ -39,8 +39,16 @@ function write(message, replace = false) {
     const formattedMessage = `[${timestamp}] ${message}`;
 
     if (replace) {
-        // replace가 true일 때만 줄바꿈 없이 커서를 맨 앞으로 보내고 기존 내용을 지움
-        process.stdout.write(`\r[Main] ${formattedMessage}\x1b[K`);
+        if (process.stdout.isTTY) {
+            readline.clearLine(process.stdout, 0);  // 현재 줄 지우기
+            readline.cursorTo(process.stdout, 0);   // 커서를 맨 앞으로 이동
+            process.stdout.write(`[Main] ${formattedMessage}`);
+        } else {
+            // TTY가 아니면(예: 일부 디버그 콘솔) 그냥 출력하되 줄바꿈은 하지 않음 (혹은 줄바꿈 함)
+            // VSCode Debug Console은 \r을 지원하지 않아 새 줄로 나옵니다. 방법이 없습니다.
+            // 일단 터미널 환경을 위해 process.stdout.write를 유지합니다.
+            process.stdout.write(`[Main] ${formattedMessage}\n`);
+        }
     } else {
         // 기존처럼 그대로 출력 (console.log는 자동으로 줄바꿈이 됨)
         console.log(`[Main] ${formattedMessage}`);
