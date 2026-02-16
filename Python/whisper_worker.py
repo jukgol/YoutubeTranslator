@@ -111,8 +111,8 @@ class SubtitleExtractor:
             no_speech_threshold=0.5, # Adjust threshold to be less sensitive to silence
             vad_filter=False, # 소리 없는 구간을 물리적으로 제거하여 환청 방지
             vad_parameters=dict(
-                min_silence_duration_ms=1000, # 1초 이상 조용하면 자막 끊기
-                speech_pad_ms=400 # 음성 전후 여백
+                min_silence_duration_ms = 500, # 1초 이상 조용하면 자막 끊기
+                speech_pad_ms = 400 # 음성 전후 여백
             ),
             word_timestamps=True,
             log_prob_threshold=-0.8,
@@ -122,7 +122,7 @@ class SubtitleExtractor:
 
         # Known hallucination phrases to filter out
         hallucination_phrases = [
-            "优优独播剧场", "YoYo Television", "独播剧场", "좋아요, 구독, 공유후원으로"
+            "优优独播剧场", "YoYo Television", "独播剧场", "좋아요, 구독, 공유, 후원으로 명경과 점점 칼럼을 응원해주세요."
             "字幕", "Subtitles", "Amara.org", "MBC", "SBS", "TBS", "KBS"
         ]
 
