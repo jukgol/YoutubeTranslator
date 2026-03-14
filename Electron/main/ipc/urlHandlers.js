@@ -32,6 +32,11 @@ module.exports = {
       return title;
     });
 
+    ipcMain.handle('urlManager:fetch-playlist-urls', async (event, url) => {
+      const entries = await urlManager.fetchPlaylistUrls(url);
+      return entries;
+    });
+
     ipcMain.handle('urlManager:get-next', async () => {
       const item = urlManager.getNext();
       return item;
@@ -55,6 +60,10 @@ module.exports = {
 
       await urlManager.startDownload(quality, downloadSubs);
       return true; // Signal completion
+    });
+
+    ipcMain.handle('url:cancel-download', async () => {
+      return urlManager.cancelDownload();
     });
   }
 };

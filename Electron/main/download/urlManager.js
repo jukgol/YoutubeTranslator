@@ -1,11 +1,16 @@
 const log = require('../js/logManager');
 // downloadHelper에서 두 함수를 모두 가져옴
-const { _runDownloadProcess, _fetchTitleAsync } = require('../download/downloadHelper.js');
+const { _runDownloadProcess, _fetchTitleAsync, _fetchPlaylistUrls } = require('../download/downloadHelper.js');
 
 class DownloadItem {
     constructor(id, url) {
         this.id = id;
-        this.url = url.split('?')[0];
+        // 유튜브나 데일리모션 주소는 쿼리 파라미터(v= 등)가 중요하므로 자르지 않음
+        if (url.includes('youtube.com') || url.includes('youtu.be') || url.includes('dailymotion.com') || url.includes('dai.ly')) {
+            this.url = url;
+        } else {
+            this.url = url.split('?')[0];
+        }
         this.title = "🔍 제목 확인 중...";
         this.status = "대기";
     }
@@ -32,6 +37,7 @@ class UrlManager {
         this.currentCount = 0;
         this.nextId = 0;
         this._mainWindow = null;
+        this.stopRequested = false;
     }
 
     setMainWindow(mainWindow) {
@@ -61,7 +67,9 @@ class UrlManager {
     }
 
     removeUrl(urlToRemove) {
-        urlToRemove = urlToRemove.split('?')[0];
+        if (!(urlToRemove.includes('youtube.com') || urlToRemove.includes('youtu.be') || urlToRemove.includes('dailymotion.com') || urlToRemove.includes('dai.ly'))) {
+            urlToRemove = urlToRemove.split('?')[0];
+        }
         const initialLength = this.pending.length;
         this.pending = this.pending.filter(item => item.url !== urlToRemove);
         return this.pending.length < initialLength;
@@ -102,6 +110,16 @@ class UrlManager {
                     status: item.status
                 });
             }
+        }
+    }
+
+    async fetchPlaylistUrls(playlistUrl) {
+        try {
+            const entries = await _fetchPlaylistUrls(playlistUrl);
+            return entries;
+        } catch (error) {
+            log.write(`[UrlManager] 플레이리스트 추출 실패: ${error.message}`);
+            return [];
         }
     }
 
@@ -164,6 +182,8 @@ class UrlManager {
     }
 
     async startDownload(quality = 'best', downloadSubs = true) {
+        this.stopRequested = false; 
+
         if (this.failed.length > 0) {
             log.write(`${this.failed.length}개의 실패 항목을 다시 확인합니다...`);
             this.pending.push(...this.failed);
@@ -176,6 +196,11 @@ class UrlManager {
         }
 
         while (this.pending.length > 0) {
+            if (this.stopRequested) {
+                log.write("🛑 다운로드 중단 요청됨. 다음 항목부터 중지합니다.");
+                break;
+            }
+
             const item = this.pending.shift();
 
             if (item.status !== '제목 확인 완료') {
@@ -207,6 +232,12 @@ class UrlManager {
     getCompleted() { return this.completed; }
     clearCompleted() {
         this.completed = [];
+        return true;
+    }
+
+    cancelDownload() {
+        this.stopRequested = true;
+        log.write("다운로드 중단이 예약되었습니다.");
         return true;
     }
 }

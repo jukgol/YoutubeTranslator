@@ -14,6 +14,25 @@
         </label>
     </div>
     <div class="main-row" style="flex-grow: 1;">
+        <!-- 0. 영상 리스트 추가 -->
+        <div class="section-frame">
+            <h3 class="section-header" style="margin-top: 5px;">0. 영상 리스트 추가</h3>
+            <div class="setting-row" style="margin-bottom: 10px;">
+                <input type="text" id="add-list-url-input" placeholder="추가할 URL을 입력하세요" style="flex-grow: 1;">
+                <button id="add-to-list-button" style="background-color: #818CF8; flex-grow: 0;">추가</button>
+            </div>
+            <div class="list-field" id="videoAddList">
+                <!-- Added URL list will be shown here -->
+            </div>
+
+            <div class="button-group">
+                <button id="add-list-start-download-button" style="background-color: #4ADE80;">다운로드 시작</button>
+                <button id="add-list-stop-download-button" style="background-color: #FCA5A5; display: none;">다운로드 중지</button>
+                <button id="add-list-delete-selected-button" style="background-color: #FCA5A5;">선택삭제</button>
+                <button id="add-list-clear-queue-button" style="background-color: #FCA5A5;">큐 비우기</button>
+            </div>
+        </div>
+
         <!-- 1. 영상 다운로드 -->
         <div class="section-frame">
             <h3 class="section-header" style="margin-top: 5px;">1. 영상 다운로드</h3>

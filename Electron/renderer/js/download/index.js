@@ -2,6 +2,7 @@
 
 // 새로 생성한 섹션 컴포넌트들 import
 import { DownloadSection } from './section/downloadSection.js';
+import { AddListSection } from './section/addListSection.js';
 import { VideoFileSection } from './section/videoFileSection.js';
 import { SubtitleFileSection } from './section/subtitleFileSection.js';
 import { CompleteSection } from './section/completeSection.js';
@@ -9,6 +10,7 @@ import { CompleteSection } from './section/completeSection.js';
 let videoFileSectionInstance = null;
 let subtitleFileSectionInstance = null;
 let downloadSectionInstance = null;
+let addListSectionInstance = null;
 let completeSectionInstance = null;
 
 export async function initializeDownloadTab() {
@@ -22,6 +24,9 @@ export async function initializeDownloadTab() {
         const sectionName = header.textContent.replace(/^\d+\.\s*/, '').trim();
 
         switch (sectionName) {
+            case '영상 리스트 추가':
+                addListSectionInstance = new AddListSection(section);
+                break;
             case '영상 다운로드':
                 downloadSectionInstance = new DownloadSection(section);
                 break;
