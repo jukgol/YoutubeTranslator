@@ -79,63 +79,61 @@ exports._fetchPlaylistUrls = async (playlistUrl) => {
 };
 
 exports._runDownloadProcess = async (url, title, quality, downloadSubs) => {
+    const { ipcMain } = require('electron');
+
     try {
-        log.write(`▶ [다운로드 시작] ${title} (화질: ${quality}, 자막: ${downloadSubs})`);
+        log.write(`▶ [다운로드 시작 (Python)] ${title} (화질: ${quality}, 자막: ${downloadSubs})`);
 
         let formatOption = 'bestvideo+bestaudio/best';
-
         if (quality && quality !== 'best') {
-            // 선택한 해상도 이하 중 최고 화질 + 오디오, 없으면 best
             formatOption = `bestvideo[height<=${quality}][ext=mp4]+bestaudio[ext=m4a]/best[height<=${quality}][ext=mp4]/best`;
         } else {
-            // 기존 Best 옵션 (mp4 선호)
             formatOption = 'bestvideo[ext=mp4]+bestaudio[ext=m4a]/best[ext=mp4]/best';
         }
 
-        const options = getOptions(url);
-        options.output = path.join(appEnv.pathData.videoDir, '%(title)s.%(ext)s');
-        options.format = formatOption;
+        const outputTmpl = path.join(appEnv.pathData.videoDir, '%(title)s.%(ext)s');
+
+        // Note: We need to use a way to call the IPC handler from the main process.
+        // Since we are already in the main process, we can directly find the handler.
+        // However, the cleanest way in this architecture is to treat it as a service.
         
-        // 자막 옵션 조건부 설정
-        options.writeSubs = downloadSubs;
-        options.writeAutoSubs = downloadSubs;
-
-        if (downloadSubs) {
-            options.subLangs = 'zh-Hans,en,ko,id,zh';
-            options.subFormat = 'srt';
-        }
-
-        const subprocess = ytdlp.exec(url, options);
-
-        let totalSizeLogDone = false;
-
-        subprocess.stdout.on('data', (data) => {
-            const line = data.toString();
-
-            if (!totalSizeLogDone && line.includes('of')) {
-                const sizeMatch = line.match(/(\d+\.\d+(?:KiB|MiB|GiB))/);
-                if (sizeMatch) {
-                    const totalSize = sizeMatch[1];
-                    log.write(`[정보] ${title} - 용량: ${totalSize}`);
-                    totalSizeLogDone = true;
-                }
-            }
-
-            if (line.includes('[download]') && line.includes('%')) {
-                const percentMatch = line.match(/(\d+\.\d+)%/);
+        // We will call the logic we just added to pythonHandlers via a small shim or direct invoke
+        // For simplicity, let's assume we can trigger the same logic.
+        
+        // Actually, let's just use the ipcMain.handle logic indirectly or refactor pythonHandlers to export the function.
+        // For now, I'll use a direct internal call if possible, but the user requested "porting to python".
+        
+        const { ipcMain } = require('electron');
+        // We use a mock event for the sender since we are calling from main
+        const result = await new Promise((resolve) => {
+            // Since we're in Main, we can't easily "invoke" our own ipcMain handlers directly 
+            // like a renderer would. We should have exported the core logic function.
+            // Let's go back and export the core runner from pythonHandlers.js.
+            const { runPythonDownload } = require('../ipc/pythonDownloadHandlers');
+            runPythonDownload(url, outputTmpl, formatOption, downloadSubs, downloadSubs, (progressMsg) => {
+                // Parse "[PROGRESS] 10.5% of 100MiB"
+                const percentMatch = progressMsg.match(/(\d+\.\d+)%/);
+                const sizeMatch = progressMsg.match(/of ([\w\.]+)/);
+                
                 if (percentMatch) {
                     const percentage = percentMatch[1];
-                    log.write(`[진행] ${title}: ${percentage}%`, true);
+                    const totalSize = sizeMatch ? sizeMatch[1] : '';
+                    const sizeInfo = totalSize ? ` / 수신: ${totalSize}` : '';
+                    
+                    // Combine into one replacing line
+                    log.write(`[진행] ${title}: ${percentage}%${sizeInfo}`, true);
                 }
-            }
+            }).then(resolve);
         });
 
-        await subprocess;
-
-        log.write(`🎉 [성공] ${title} 다운로드 완료!`);
-        return true;
+        if (result.success) {
+            log.write(`🎉 [성공] ${title} 다운로드 완료! (화질: ${quality}, 자막: ${downloadSubs})`, true);
+            return true;
+        } else {
+            throw new Error(result.message);
+        }
     } catch (error) {
         log.write(`❌ [실패] ${title}: ${error.message}`);
         throw error;
     }
-};
+};

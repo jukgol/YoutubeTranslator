@@ -10,7 +10,9 @@ const { registerAppHandlers } = require('./ipc/appHandlers.js');
 const { registerUrlHandlers } = require('./ipc/urlHandlers.js');
 const { setupProcessHandlers } = require('./ipc/processHandlers.js');
 const { setupFsHandlers } = require('./ipc/fsHandlers.js'); // Add this line
-const { setupPythonHandlers, cleanupPythonProcesses } = require('./ipc/pythonHandlers.js'); // Updated
+const { cleanupPythonProcesses } = require('./ipc/pythonProcessManager.js'); // Updated
+const { setupPythonSubtitleHandlers } = require('./ipc/pythonSubtitleHandlers.js'); // New
+const { setupPythonDownloadHandlers } = require('./ipc/pythonDownloadHandlers.js'); // New
 const { urlManager } = require('./download/urlManager.js'); // 새로 추가: urlManager 인스턴스 가져오기
 
 let mainWindow; // Declare mainWindow as a module-level variable
@@ -41,7 +43,8 @@ app.whenReady().then(async () => {
   registerUrlHandlers(ipcMain); // 수정: urlManager 인자 제거
   setupProcessHandlers();
   setupFsHandlers(); // Add this line
-  setupPythonHandlers(); // Add this line
+  setupPythonSubtitleHandlers(); // Updated
+  setupPythonDownloadHandlers(); // Updated
 
   createWindow();
   logManager.initialize(mainWindow);
