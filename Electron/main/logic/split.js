@@ -55,11 +55,11 @@ function getLineCountSplitGroups(detectedEps, epMap, hasStart = false) {
     if (allUnits.length > 0) {
         groups.push(allUnits.slice(0, 3)); // Part 1 (앞의 3단위)
     }
-    
+
     if (allUnits.length > 3) {
         groups.push(allUnits.slice(3, 6)); // Part 2 (그다음 3단위)
     }
-        
+
     if (allUnits.length > 6) {
         groups.push(allUnits.slice(6));  // Part 3 (남은 전부)
     }
@@ -77,34 +77,35 @@ async function splitSubtitleLogic(filePath) { // originDir removed from paramete
     const content = await fs.readFile(filePath, 'utf-8');
     const cleanedContent = content.replace(/^\ufeff/, ''); // BOM 제거
 
-    const blocks = cleanedContent.trim().split('\n\n');
-    
+    const blocks = cleanedContent.trim().split(/\r?\n\s*\r?\n/);
+
     const epMap = new Map(); // Use Map for better key handling (int vs string)
     let currentEp = "Start"; // Python default was "Start"
 
     for (const block of blocks) {
-        const lines = block.split('\n');
+        const lines = block.split('\n').map(l => l.trim()).filter(l => l !== "");
         if (lines.length < 2) continue;
 
         const match = block.match(/=Episode (\d+)=/);
         if (match) {
             currentEp = parseInt(match[1], 10);
         }
-            
+
         if (!epMap.has(currentEp)) {
             epMap.set(currentEp, []);
         }
 
         const index = lines[0];
-        // Python: if '-->' in lines[1] else "\n".join(lines[1:])
-        // Node.js: lines[1].includes('-->') ? lines.slice(2).join('\n') : lines.slice(1).join('\n')
-        const text = lines[1].includes('-->') ? lines.slice(2).join('\n') : lines.slice(1).join('\n');
+        // 타임라인('-->')이 포함된 줄이 있다면 제외하고 대사만 추출합니다.
+        const hasTimeline = lines[1].includes('-->');
+        const text = hasTimeline ? lines.slice(2).join('\n') : lines.slice(1).join('\n');
+
         epMap.get(currentEp).push(`${index}\n${text}`);
     }
 
     // Sort detected episode numbers
     const detectedEps = Array.from(epMap.keys()).filter(key => typeof key === 'number').sort((a, b) => a - b);
-    
+
     // [수정된 부분] 라인 수 기반 그룹화 함수 호출 (ep_map 전달)
     const groups = getLineCountSplitGroups(detectedEps, epMap, epMap.has("Start"));
 
@@ -118,23 +119,23 @@ async function splitSubtitleLogic(filePath) { // originDir removed from paramete
     // 5. 파일 저장
     for (const [i, group] of groups.entries()) {
         if (group.length === 0) continue;
-        
+
         const outputData = [];
         let totalLines = 0;
-        for (const unit of group) { 
+        for (const unit of group) {
             // unit 자체가 이미 자막 텍스트 리스트이므로 바로 사용합니다.
             outputData.push(...unit);
             totalLines += unit.length; // 각 unit은 slice로 잘린 부분임
         }
-        
+
         if (outputData.length === 0) continue;
 
         // [수정된 부분] 파일명에 에피소드 번호 대신 Line(인덱스 수) 표시
         const outputName = `${baseName}_Part${i + 1}_Line_${totalLines}_no_time.txt`;
         const outputPath = path.join(saveDir, outputName);
-        
+
         await fs.writeFile(outputPath, outputData.join("\n\n"), 'utf-8');
-            
+
         log.write(`저장 완료: ${outputName} (총 ${totalLines} 라인)`);
     }
     log.write(`[분할] 자막 파일 분할 완료: ${filePath}`);

@@ -108,22 +108,21 @@ class SubtitleExtractor:
             task=task,
             initial_prompt=initial_prompt,
             condition_on_previous_text=False, # Prevent repetition loops (hallucinations)
-            no_speech_threshold=0.5, # Adjust threshold to be less sensitive to silence
-            vad_filter=False, # 소리 없는 구간을 물리적으로 제거하여 환청 방지
-            vad_parameters=dict(
-                min_silence_duration_ms = 500, # 1초 이상 조용하면 자막 끊기
-                speech_pad_ms = 400 # 음성 전후 여백
-            ),
+            vad_filter=False, # BUG: vad_filter in faster-whisper causes timestamp stretching/dragging
             word_timestamps=True,
             log_prob_threshold=-0.8,
+            no_speech_threshold=0.7, # Increased from 0.6 for stricter speech detection without VAD
+            compression_ratio_threshold=2.4, # Prevent repetitive hallucination loops
         )
 
         print(f"[INFO] Detected language '{info.language}' with probability {info.language_probability:.2f}", flush=True)
 
         # Known hallucination phrases to filter out
         hallucination_phrases = [
-            "优优独播剧场", "YoYo Television", "独播剧场", "좋아요, 구독, 공유, 후원으로 명경과 점점 칼럼을 응원해주세요."
-            "字幕", "Subtitles", "Amara.org", "MBC", "SBS", "TBS", "KBS"
+            "优优独播剧场", "YoYo Television", "独播剧场"
+            , "字幕", "Subtitles", "Amara.org", "MBC", "SBS", "TBS", "KBS"
+            , "本节目由", "感谢观看", "Thanks for watching", "Please subscribe"            
+            , "中文字幕志愿者 李宗盛", "请不吝点赞 订阅 转发 打赏支持明镜与点点栏目"
         ]
 
         results = []
@@ -134,15 +133,32 @@ class SubtitleExtractor:
                 print(f"[INFO] Filtered hallucination: {segment.text}", flush=True)
                 continue
 
+            # Determine more precise end time using word timestamps if available
+            segment_start = segment.start
+            segment_end = segment.end
+            
+            if segment.words:
+                segment_end = segment.words[-1].end
+                # print(f"[DEBUG] Refined end time: {segment.end:.2f} -> {segment_end:.2f}", flush=True)
+
             # Calculate percentage
             percentage = 0.0
             if info.duration and info.duration > 0:
-                percentage = (segment.end / info.duration) * 100
+                percentage = (segment_end / info.duration) * 100
                 if percentage > 100: percentage = 100.0
 
             # Print progress with percentage
-            print(f"[PROGRESS] percentage={percentage:.1f} start={segment.start:.2f} end={segment.end:.2f} text={segment.text}", flush=True)
-            results.append(segment)
+            print(f"[PROGRESS] percentage={percentage:.1f} start={segment_start:.2f} end={segment_end:.2f} text={segment.text}", flush=True)
+            
+            # Create a modified segment object or just store the refined values
+            # For simplicity in results, we'll store refined values in a dict or similar if needed,
+            # but since save_to_srt uses results, let's update the segment object if it allows or store a custom object.
+            # faster-whisper segments are typically namedtuples or similar, so we might need a wrapper.
+            results.append({
+                'start': segment_start,
+                'end': segment_end,
+                'text': segment.text
+            })
         
         return results
 
@@ -151,15 +167,22 @@ class SubtitleExtractor:
             with open(output_path, "w", encoding="utf-8") as f:
                 # Post-processing: Create artificial gaps between contiguous segments
                 for i, segment in enumerate(segments):
-                    start = segment.start
-                    end = segment.end
+                    # handle both dict (custom) and object (original) types
+                    if isinstance(segment, dict):
+                        start = segment['start']
+                        end = segment['end']
+                        text = segment['text']
+                    else:
+                        start = segment.start
+                        end = segment.end
+                        text = segment.text
 
                     fmt_start = self._format_timestamp(start)
                     fmt_end = self._format_timestamp(end)
                     
                     f.write(f"{i+1}\n")
                     f.write(f"{fmt_start} --> {fmt_end}\n")
-                    f.write(f"{segment.text.strip()}\n")
+                    f.write(f"{text.strip()}\n")
                     f.write("\n")
             print(f"[INFO] Saved subtitles to: {output_path}")
         except Exception as e:

@@ -13,6 +13,26 @@ const log = require('../js/logManager');
 const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 
 /**
+ * 폴더 내용을 지우거나 폴더가 없으면 생성합니다.
+ * @param {string} folderPath - 처리할 폴더 경로
+ */
+async function clearFolderContents(folderPath) {
+    try {
+        await fs.access(folderPath); // Check if folder exists
+        const files = await fs.readdir(folderPath);
+        await Promise.all(files.map(file => fs.unlink(path.join(folderPath, file))));
+        log.write(`저장 폴더 비움: ${folderPath}`);
+    } catch (error) {
+        if (error.code === 'ENOENT') { // Folder does not exist
+            await fs.mkdir(folderPath, { recursive: true });
+            log.write(`저장 폴더 생성: ${folderPath}`);
+        } else {
+            throw error; // Other errors
+        }
+    }
+}
+
+/**
  * Test logic that simulates translation by copying the file and waiting.
  * @param {string} filePath - Path to the file to "translate".
  */
@@ -146,4 +166,5 @@ async function translateSubtitleLogic(filePath) {
 module.exports = {
     translateSubtitleLogic,
     translateTestLogic,
+    clearFolderContents,
 };

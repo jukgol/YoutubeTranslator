@@ -56,7 +56,6 @@ module.exports = {
     });
 
     ipcMain.handle('url:start-download', async (event, quality, downloadSubs) => {
-      // log.write(`[IPC] Received url:start-download call. Quality: ${quality}, DownloadSubs: ${downloadSubs}`);
 
       await urlManager.startDownload(quality, downloadSubs);
       return true; // Signal completion

@@ -4,7 +4,7 @@ const fs = require('fs').promises;
 const { splitSubtitleLogic } = require('../logic/split');
 const { combinePartsLogic } = require('../logic/combine');
 const { combineTimelineLogic } = require('../logic/combineTimeline');
-const { translateSubtitleLogic } = require('../logic/translate');
+const { translateSubtitleLogic, clearFolderContents } = require('../logic/translate');
 
 const appEnv = require('../appEnv/appEnv');
 const log = require('../js/logManager');
@@ -35,8 +35,6 @@ function setupProcessHandlers() {
         try {
             const originDir = appEnv.pathData.originDir;
             const fullPath = path.join(originDir, filename);
-            
-            log.write(`[IPC] 'process:run-split' 요청 수신: ${fullPath}`);
             const createdFolderPath = await splitSubtitleLogic(fullPath);
             
             return { success: true, message: `${filename} 파일 분할이 완료되었습니다.`, createdFolder: createdFolderPath };
@@ -54,7 +52,6 @@ function setupProcessHandlers() {
         }
 
         try {
-            log.write(`[IPC] 'process:run-combine' 요청 수신: ${folderName}`);
             const result = await combinePartsLogic(folderName); // Capture the result object
             
             if (result.success) {
@@ -76,7 +73,6 @@ function setupProcessHandlers() {
         }
 
         try {
-            log.write(`[IPC] 'process:run-timeline' 요청 수신: ${combinedTxtFilename}`);
             
             const combinedTextPath = path.join(appEnv.pathData.combineDir, combinedTxtFilename);
             const baseName = combinedTxtFilename.replace(/\.txt$/, '');
@@ -102,7 +98,6 @@ function setupProcessHandlers() {
             return { success: false, message: `타임라인 생성 중 오류 발생: ${error.message}` };
         }
     });
-
     ipcMain.handle('process:run-translation', async (event, folderName) => {
         if (!folderName) {
             log.write('[Error] 번역 실행: 폴더 이름이 제공되지 않았습니다.');
@@ -110,8 +105,12 @@ function setupProcessHandlers() {
         }
         
         try {
-            log.write(`[IPC] 'process:run-translation' 요청 수신: ${folderName}`);
             const folderPath = path.join(appEnv.pathData.splitDir, folderName);
+            
+            // 번역을 시작하기 전에 해당 영상의 번역 결과 폴더를 비웁니다.
+            const resultDir = path.join(appEnv.pathData.translateDir, folderName);
+            await clearFolderContents(resultDir);
+
             const files = await fs.readdir(folderPath);
             const txtFiles = files.filter(f => f.toLowerCase().endsWith('.txt')).sort();
 
