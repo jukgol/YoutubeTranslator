@@ -58,8 +58,8 @@ function runPythonDownload(url, outputTmpl, formatOpt, subs, autoSubs, onProgres
                     } else if (trimmed.startsWith('[ERROR]')) {
                         log.write(`[Python Downloader] ${trimmed}`);
                     } else if (trimmed.startsWith('[INFO]') || trimmed.startsWith('[DONE]')) {
-                        // Suppress info/done logs from UI to keep it clean
-                        console.log(`[Python Downloader] ${trimmed}`);
+                        // Suppress info/done logs from both UI and Console to keep it clean
+                        // console.log(`[Python Downloader] ${trimmed}`);
                     }
                 }
             });
