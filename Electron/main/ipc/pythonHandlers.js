@@ -12,7 +12,7 @@ function setupPythonHandlers() {
 
         // appEnv.getPath is not available. Using relative path from this file (Electron/main/ipc/pythonHandlers.js)
         const projectRoot = path.resolve(__dirname, '../../../Python');
-        const mainScript = path.join(projectRoot, 'main.py');
+        const mainScript = path.join(projectRoot, 'subtitleEx', 'main.py');
         const originDir = appEnv.pathData.originDir;
 
         log.write(`[Python] Starting subtitle extraction for: ${videoPath}, Language: ${language || 'Auto'}`);
