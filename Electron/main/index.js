@@ -10,7 +10,7 @@ const { registerAppHandlers } = require('./ipc/appHandlers.js');
 const { registerUrlHandlers } = require('./ipc/urlHandlers.js');
 const { setupProcessHandlers } = require('./ipc/processHandlers.js');
 const { setupFsHandlers } = require('./ipc/fsHandlers.js'); // Add this line
-const { setupPythonHandlers } = require('./ipc/pythonHandlers.js'); // Add this line
+const { setupPythonHandlers, cleanupPythonProcesses } = require('./ipc/pythonHandlers.js'); // Updated
 const { urlManager } = require('./download/urlManager.js'); // 새로 추가: urlManager 인스턴스 가져오기
 
 let mainWindow; // Declare mainWindow as a module-level variable
@@ -55,3 +55,8 @@ app.whenReady().then(async () => {
 app.on('window-all-closed', function () {
   if (process.platform !== 'darwin') app.exit(0);
 });
+
+// Cleanup processes on app quit
+app.on('will-quit', () => {
+  cleanupPythonProcesses();
+});

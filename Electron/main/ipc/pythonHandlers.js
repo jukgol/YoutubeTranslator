@@ -3,6 +3,10 @@ const { spawn } = require('child_process');
 const path = require('path');
 const appEnv = require('../appEnv/appEnv');
 const log = require('../js/logManager');
+const { exec } = require('child_process');
+
+// Track active Python processes for cleanup on app quit
+const activeProcesses = new Set();
 
 function setupPythonHandlers() {
     ipcMain.handle('python:run-subtitle', async (event, videoPath, language) => {
@@ -38,6 +42,9 @@ function setupPythonHandlers() {
                 shell: true,
                 env: { ...process.env, PYTHONIOENCODING: 'utf-8', HF_HUB_DISABLE_SYMLINKS_WARNING: '1' }
             });
+
+            activeProcesses.add(pythonProcess);
+            log.write(`[Python] Process spawned (PID: ${pythonProcess.pid}). Active count: ${activeProcesses.size}`);
 
             let errorOutput = '';
             let successMarkerFound = false;
@@ -77,6 +84,9 @@ function setupPythonHandlers() {
             });
 
             pythonProcess.on('close', (code) => {
+                activeProcesses.delete(pythonProcess);
+                log.write(`[Python] Process closed (PID: ${pythonProcess.pid}). Remaining active: ${activeProcesses.size}`);
+
                 // Trust the [DONE] marker first, because sys.exit(0) can sometimes yield non-zero codes 
                 // when wrapped in poetry or due to messy thread shutdowns in Python.
                 if (successMarkerFound || code === 0) {
@@ -96,4 +106,27 @@ function setupPythonHandlers() {
     });
 }
 
-module.exports = { setupPythonHandlers };
+function cleanupPythonProcesses() {
+    if (activeProcesses.size === 0) return;
+
+    log.write(`[Cleanup] Killing ${activeProcesses.size} active Python processes...`);
+    activeProcesses.forEach(proc => {
+        if (proc && !proc.killed) {
+            try {
+                // On Windows, taskkill /F /T /PID is more reliable for clearing the process tree (including poetry's children)
+                if (process.platform === 'win32') {
+                    exec(`taskkill /F /T /PID ${proc.pid}`, (err) => {
+                        if (err) log.write(`[Cleanup] Taskkill error for PID ${proc.pid}: ${err.message}`);
+                    });
+                } else {
+                    proc.kill('SIGKILL');
+                }
+            } catch (err) {
+                log.write(`[Cleanup] Error killing process ${proc.pid}: ${err.message}`);
+            }
+        }
+    });
+    activeProcesses.clear();
+}
+
+module.exports = { setupPythonHandlers, cleanupPythonProcesses };
