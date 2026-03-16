@@ -21,11 +21,9 @@ async function clearFolderContents(folderPath) {
         await fs.access(folderPath); // Check if folder exists
         const files = await fs.readdir(folderPath);
         await Promise.all(files.map(file => fs.unlink(path.join(folderPath, file))));
-        log.write(`저장 폴더 비움: ${folderPath}`);
     } catch (error) {
         if (error.code === 'ENOENT') { // Folder does not exist
             await fs.mkdir(folderPath, { recursive: true });
-            log.write(`저장 폴더 생성: ${folderPath}`);
         } else {
             throw error; // Other errors
         }
