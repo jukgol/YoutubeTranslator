@@ -20,7 +20,9 @@ const getOptions = (targetUrl) => {
     }
 
     // 쿠키 파일이 존재하면 사용 (권장)
-    if (fs.existsSync(appEnv.pathData.cookieFile)) {
+    // Dailymotion은 쿠키 사용 시 401 오류가 발생하는 경우가 있어 제외
+    const isDailymotion = targetUrl.includes('dailymotion.com') || targetUrl.includes('dai.ly');
+    if (!isDailymotion && fs.existsSync(appEnv.pathData.cookieFile)) {
         options.cookies = appEnv.pathData.cookieFile;
     }
 

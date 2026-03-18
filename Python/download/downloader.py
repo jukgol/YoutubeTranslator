@@ -1,65 +1,98 @@
 import argparse
 import sys
 import os
-import yt_dlp
-
-def progress_hook(d):
-    if d['status'] == 'downloading':
-        p_str = d.get('_percent_str', '0.0%').replace('%', '').strip()
-        try:
-            p_val = float(p_str)
-        except ValueError:
-            p_val = 0.0
-
-        # Only print if it's the first call or if the percentage changed meaningfully (e.g., 0.1%)
-        last_p = getattr(progress_hook, 'last_p', -1.0)
-        if p_val - last_p >= 0.1 or p_val >= 99.9 or p_val == 0.0:
-            s = d.get('_total_bytes_str') or d.get('_total_bytes_estimate_str', 'Unknown')
-            # Flush to ensure Electron receives it promptly
-            print(f"[PROGRESS] {p_str}% of {s}", flush=True)
-            progress_hook.last_p = p_val
-    elif d['status'] == 'finished':
-        print("[INFO] Download complete, now post-processing...", flush=True)
+import subprocess
+import re
 
 def run_download(url, output_tmpl, format_opt, write_subs, write_auto_subs, cookie_file=None):
-    # Standard settings matching the JS downloadHelper.js implementation
-    ydl_opts = {
-        'format': format_opt,
-        'outtmpl': output_tmpl,
-        'progress_hooks': [progress_hook],
-        'nocheckcertificate': True,
-        'quiet': True,
-        'no_warnings': True,
-        # Match JS environment User-Agent
-        'user_agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36',
-    }
+    # Find the yt-dlp binary from node_modules
+    # downloader.py is in Python/download/
+    # binary is in node_modules/yt-dlp-exec/bin/yt-dlp.exe
+    project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
+    binary_path = os.path.join(project_root, "node_modules", "yt-dlp-exec", "bin", "yt-dlp.exe")
+    
+    if not os.path.exists(binary_path):
+        print(f"[ERROR] yt-dlp binary not found at: {binary_path}")
+        return False
 
-    # Add cookie file if provided
-    if cookie_file and os.path.exists(cookie_file):
-        ydl_opts['cookiefile'] = os.path.abspath(cookie_file)
-        print(f"[INFO] Using cookie file: {ydl_opts['cookiefile']}")
+    # Construct arguments
+    args = [
+        binary_path,
+        url,
+        "--format", format_opt,
+        "--output", output_tmpl,
+        "--no-check-certificates",
+        "--js-runtimes", "node",
+        "--user-agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36",
+        "--newline",
+        "--progress",
+        "--no-playlist",
+    ]
 
-    # Match JS environment Referer
+    # Add Referer
     if "youtube.com" in url or "youtu.be" in url:
-        ydl_opts['referer'] = 'https://www.youtube.com/'
+        args.extend(["--referer", "https://www.youtube.com/"])
+    elif "dailymotion.com" in url or "dai.ly" in url:
+        args.extend(["--referer", "https://www.dailymotion.com/"])
+
+    # Add cookies if provided (skip for Dailymotion to avoid 401 error)
+    # The Electron handler already filters this, but just in case
+    is_dailymotion = "dailymotion.com" in url or "dai.ly" in url
+    if cookie_file and os.path.exists(cookie_file) and not is_dailymotion:
+        args.extend(["--cookies", os.path.abspath(cookie_file)])
+        print(f"[INFO] Using cookie file: {cookie_file}")
 
     if write_subs:
-        ydl_opts['writesubtitles'] = True
-        ydl_opts['writeautomaticsub'] = write_auto_subs
-        ydl_opts['subtitleslangs'] = ['zh-Hans', 'en', 'ko', 'id', 'zh']
-        ydl_opts['postprocessors'] = [{
-            'key': 'FFmpegSubtitlesConvertor',
-            'format': 'srt',
-        }]
+        args.append("--write-subs")
+        if write_auto_subs:
+            args.append("--write-auto-subs")
+        args.extend(["--sub-langs", "zh-Hans,en,ko,id,zh"])
+        args.extend(["--convert-subs", "srt"])
 
-    print(f"[INFO] Running download with updated yt-dlp library for: {url}")
+    print(f"[INFO] Running download using binary: {binary_path} for: {url}")
+    
     try:
-        with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-            ydl.download([url])
-        print("[DONE] Download finished successfully.")
-        return True
+        # Start subprocess
+        process = subprocess.Popen(
+            args,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.STDOUT,
+            text=True,
+            encoding='utf-8',
+            errors='replace',
+            bufsize=1
+        )
+
+        # Progress regex: [download]  10.5% of 100.00MiB at ... (Size can have ~)
+        progress_re = re.compile(r"\[download\]\s+(\d+\.\d+)%\s+of\s+([~\w\.]+)")
+
+        for line in process.stdout:
+            line = line.strip()
+            if not line:
+                continue
+            
+            # Match progress
+            match = progress_re.search(line)
+            if match:
+                percent = match.group(1)
+                size = match.group(2)
+                # Matches Electron's parser: [PROGRESS] 10.5% of 100MiB
+                print(f"[PROGRESS] {percent}% of {size}", flush=True)
+            elif "ERROR:" in line:
+                print(f"[ERROR] {line}", flush=True)
+            # You can add more info filters here if needed
+
+        process.wait()
+        
+        if process.returncode == 0:
+            print("[DONE] Download finished successfully.")
+            return True
+        else:
+            print(f"[ERROR] Process exited with code {process.returncode}")
+            return False
+
     except Exception as e:
-        print(f"[ERROR] {str(e)}")
+        print(f"[ERROR] Exception during execution: {str(e)}")
         return False
 
 def main():

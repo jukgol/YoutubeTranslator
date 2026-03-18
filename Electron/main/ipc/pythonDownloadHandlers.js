@@ -33,8 +33,9 @@ function runPythonDownload(url, outputTmpl, formatOpt, subs, autoSubs, onProgres
         if (subs) args.push('--subs');
         if (autoSubs) args.push('--autosubs');
 
-        // Add cookies if available
-        if (fs.existsSync(appEnv.pathData.cookieFile)) {
+        // Add cookies if available (skip for Dailymotion to avoid 401 error)
+        const isDailymotion = url.includes('dailymotion.com') || url.includes('dai.ly');
+        if (!isDailymotion && fs.existsSync(appEnv.pathData.cookieFile)) {
             args.push('--cookies', appEnv.pathData.cookieFile);
         }
 
