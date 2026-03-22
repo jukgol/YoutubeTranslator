@@ -66,7 +66,12 @@ def run_download(url, output_tmpl, format_opt, write_subs, write_auto_subs, cook
         # Progress regex: [download]  10.5% of 100.00MiB at ... (Size can have ~)
         progress_re = re.compile(r"\[download\]\s+(\d+\.\d+)%\s+of\s+([~\w\.]+)")
 
-        for line in process.stdout:
+        stdout = process.stdout
+        if stdout is None:
+            print("[ERROR] Could not capture process output (stdout is None)", flush=True)
+            return False
+
+        for line in stdout:
             line = line.strip()
             if not line:
                 continue
