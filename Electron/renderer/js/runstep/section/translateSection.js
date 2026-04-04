@@ -9,6 +9,7 @@ export class TranslateSection {
     #element;
     #listField;
     #openFolderButton;
+    #clearFolderButton;
     #processButton;
     #sectionName = '번역';
     #combineSection = null;
@@ -18,6 +19,7 @@ export class TranslateSection {
 
         this.#listField = this.#element.querySelector('.list-field');
         this.#openFolderButton = this.#element.querySelector('.open-folder-button');
+        this.#clearFolderButton = this.#element.querySelector('.clear-folder-button');
         this.#processButton = this.#element.querySelector('.process-button');
 
         this.#bindEvents();
@@ -62,6 +64,23 @@ export class TranslateSection {
                 }
             } catch (error) {
                 log(`[Error] 파트 합치기 작업 중 예외가 발생했습니다: ${error.message}`);
+            }
+        });
+
+        this.#clearFolderButton.addEventListener('click', async () => {
+            if (!confirm('번역 폴더를 비우시겠습니까? 모든 폴더와 파일이 삭제됩니다.')) return;
+
+            try {
+                const dirPath = await window.electronAPI.paths.getAppTranslateDirectory();
+                const result = await window.electronAPI.fs.emptyDir(dirPath);
+                if (result.success) {
+                    log('번역 폴더를 비웠습니다.');
+                    this.refresh();
+                } else {
+                    log(`[Error] 폴더 비우기 실패: ${result.message}`);
+                }
+            } catch (error) {
+                log(`[Error] 폴더 비우기 중 예외 발생: ${error.message}`);
             }
         });
 

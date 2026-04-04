@@ -9,6 +9,7 @@ export class ResultSection {
     #element;
     #listField;
     #openFolderButton;
+    #clearFolderButton;
     #processButton;
     #sectionName = '결과';
 
@@ -17,6 +18,7 @@ export class ResultSection {
 
         this.#listField = this.#element.querySelector('.list-field');
         this.#openFolderButton = this.#element.querySelector('.open-folder-button');
+        this.#clearFolderButton = this.#element.querySelector('.clear-folder-button');
         this.#processButton = this.#element.querySelector('.process-button');
 
         this.#bindEvents();
@@ -63,6 +65,23 @@ export class ResultSection {
                 }
             } catch (error) {
                 log(`[Error] 파일 복사 중 예외 발생: ${error.message}`);
+            }
+        });
+
+        this.#clearFolderButton.addEventListener('click', async () => {
+            if (!confirm('결과 폴더를 비우시겠습니까? 모든 파일이 삭제됩니다.')) return;
+
+            try {
+                const dirPath = await window.electronAPI.paths.getAppResultDirectory();
+                const result = await window.electronAPI.fs.emptyDir(dirPath);
+                if (result.success) {
+                    log('결과 폴더를 비웠습니다.');
+                    this.refresh();
+                } else {
+                    log(`[Error] 폴더 비우기 실패: ${result.message}`);
+                }
+            } catch (error) {
+                log(`[Error] 폴더 비우기 중 예외 발생: ${error.message}`);
             }
         });
 

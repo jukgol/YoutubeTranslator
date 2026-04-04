@@ -12,6 +12,16 @@ function setupFsHandlers() {
             return { success: false, message: `Failed to copy file: ${error.message}` };
         }
     });
+
+    ipcMain.handle('fs:empty-dir', async (event, dirPath) => {
+        try {
+            await fs.emptyDir(dirPath);
+            return { success: true, message: `Directory cleared: ${dirPath}` };
+        } catch (error) {
+            console.error(`Error clearing directory: ${error.message}`);
+            return { success: false, message: `Failed to clear directory: ${error.message}` };
+        }
+    });
 }
 
 module.exports = { setupFsHandlers };
