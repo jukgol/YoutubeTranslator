@@ -67,6 +67,8 @@ export class VideoListSection {
     async refresh() {
         try {
             const files = await window.electronAPI.paths.getVideoFiles();
+            // Sort files alphabetically and numerically
+            files.sort((a, b) => a.localeCompare(b, undefined, { numeric: true, sensitivity: 'base' }));
             renderFlatList(this.#listField, files, this.#sectionName);
         } catch (error) {
             console.error('Error fetching video files:', error);
