@@ -8,6 +8,7 @@ export class VideoListSection {
     #listField;
     #openFolderBtn;
     #addToQueueBtn;
+    #addAllToQueueBtn;
     #waitingListSection;
     #sectionName = 'Subtitle_VideoList'; // Unique name
 
@@ -18,6 +19,7 @@ export class VideoListSection {
         this.#listField = sectionElement.querySelector('#subtitleVideoList');
         this.#openFolderBtn = sectionElement.querySelector('#subtitle-open-video-folder-button');
         this.#addToQueueBtn = sectionElement.querySelector('#subtitle-add-to-queue-btn');
+        this.#addAllToQueueBtn = sectionElement.querySelector('#subtitle-add-all-to-queue-btn');
 
         this.#bindEvents();
         this.refresh();
@@ -61,6 +63,36 @@ export class VideoListSection {
             });
         } else {
             console.error('[VideoList] Add to Queue button not found in DOM');
+        }
+
+        // Add All to Queue button click
+        if (this.#addAllToQueueBtn) {
+            this.#addAllToQueueBtn.addEventListener('click', async () => {
+                log('[VideoList] "Add All to Queue" clicked');
+                try {
+                    const files = await window.electronAPI.paths.getVideoFiles();
+                    if (!files || files.length === 0) {
+                        log('[VideoList] Adding failed: No files found in directory');
+                        return;
+                    }
+
+                    // Sort files alphabetically and numerically
+                    files.sort((a, b) => a.localeCompare(b, undefined, { numeric: true, sensitivity: 'base' }));
+
+                    if (this.#waitingListSection) {
+                        files.forEach(fileName => {
+                            this.#waitingListSection.add({ name: fileName });
+                        });
+                        log(`[VideoList] Added ${files.length} files to queue`);
+                    } else {
+                        console.error('[VideoList] Critical Error: WaitingListSection instance is missing.');
+                        log('[VideoList] Critical Error: WaitingListSection connection failed');
+                    }
+                } catch (error) {
+                    console.error('Error adding all files to queue:', error);
+                    log('[VideoList] Error: Failed to add all files');
+                }
+            });
         }
     }
 

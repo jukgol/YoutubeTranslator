@@ -28,7 +28,7 @@ async function clearFolderContents(folderPath) {
  * @param {Array<number|string>} detectedEps - 감지된 에피소드 번호 또는 "Start" 키의 정렬된 배열.
  * @param {Object} epMap - 에피소드/키에 대한 자막 라인 배열을 매핑하는 객체.
  * @param {boolean} hasStart - epMap에 "Start" 키가 있는지 여부.
- * @returns {Array<Array<Array<string>>>} - 3개의 파트로 그룹화된 자막 단위 배열.
+ * @returns {Array<Array<string>>} - 250라인씩 나누어진 자막 단위 배열.
  */
 function getLineCountSplitGroups(detectedEps, epMap, hasStart = false) {
     const allUnits = [];
@@ -50,21 +50,7 @@ function getLineCountSplitGroups(detectedEps, epMap, hasStart = false) {
         }
     }
 
-    // 요청하신 3개 / 3개 / 나머지 규칙 적용
-    const groups = [];
-    if (allUnits.length > 0) {
-        groups.push(allUnits.slice(0, 3)); // Part 1 (앞의 3단위)
-    }
-
-    if (allUnits.length > 3) {
-        groups.push(allUnits.slice(3, 6)); // Part 2 (그다음 3단위)
-    }
-
-    if (allUnits.length > 6) {
-        groups.push(allUnits.slice(6));  // Part 3 (남은 전부)
-    }
-
-    return groups;
+    return allUnits; // 묶지 않고 모든 단위를 그대로 반환
 }
 
 
@@ -117,25 +103,14 @@ async function splitSubtitleLogic(filePath) { // originDir removed from paramete
     await clearFolderContents(saveDir);
 
     // 5. 파일 저장
-    for (const [i, group] of groups.entries()) {
-        if (group.length === 0) continue;
-
-        const outputData = [];
-        let totalLines = 0;
-        for (const unit of group) {
-            // unit 자체가 이미 자막 텍스트 리스트이므로 바로 사용합니다.
-            outputData.push(...unit);
-            totalLines += unit.length; // 각 unit은 slice로 잘린 부분임
-        }
-
+    for (const [i, outputData] of groups.entries()) {
         if (outputData.length === 0) continue;
 
-        // [수정된 부분] 파일명에 에피소드 번호 대신 Line(인덱스 수) 표시
+        const totalLines = outputData.length;
         const outputName = `${baseName}_Part${i + 1}_Line_${totalLines}_no_time.txt`;
         const outputPath = path.join(saveDir, outputName);
 
         await fs.writeFile(outputPath, outputData.join("\n\n"), 'utf-8');
-
         log.write(`저장 완료: ${outputName} (총 ${totalLines} 라인)`);
     }
     log.write(`[분할] 자막 파일 분할 완료: ${filePath}`);
