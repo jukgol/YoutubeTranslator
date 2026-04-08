@@ -55,17 +55,37 @@ class SubtitleExtractor:
         self._load_models(device)
 
     def _load_models(self, device):
-        print(f"[INFO] 자막 작업을 준비 중입니다...", flush=True)
-        # 1. Set library log levels to silence them as much as possible
-        os.environ["MODELSCOPE_LOG_LEVEL"] = "50" # CRITICAL only
-        os.environ["FUNASR_LOG_LEVEL"] = "ERROR"
-        os.environ["TQDM_MININTERVAL"] = "10.0" # Prevent modelscope tqdm
+        import os
+        import logging
+        import sys
+        import threading
+        import time
+
+        # 1. Background thread to show activity with dots on the same line (using \r)
+        stop_loading_event = threading.Event()
+        def print_dots():
+            dot_count = 1
+            while not stop_loading_event.is_set():
+                dots = "." * dot_count
+                # Use \r to return to start of line and print
+                # We use sys.__stdout__ to ensure it goes to the real stdout stream
+                sys.__stdout__.write(f"\r[INFO] 자막 작업을 준비 중입니다{dots}   ")
+                sys.__stdout__.flush()
+                dot_count = (dot_count % 3) + 1
+                time.sleep(1)
+            sys.__stdout__.write("\n") # New line when loading is done
+            sys.__stdout__.flush()
         
-        # Silence native python logging for these libraries
+        dot_thread = threading.Thread(target=print_dots, daemon=True)
+        
+        # 2. Set library log levels to silence them as much as possible
+        os.environ["MODELSCOPE_LOG_LEVEL"] = "50" 
+        os.environ["FUNASR_LOG_LEVEL"] = "ERROR"
+        os.environ["TQDM_MININTERVAL"] = "10.0" 
+        
         for logger_name in ["funasr", "modelscope", "mslib"]:
             logging.getLogger(logger_name).setLevel(logging.CRITICAL)
 
-        # 2. Hard suppression of stdout/stderr during model loading to catch unblockable prints
         class suppress_output:
             def __enter__(self):
                 self._original_stdout = sys.stdout
@@ -79,6 +99,7 @@ class SubtitleExtractor:
                 sys.stderr = self._original_stderr
 
         try:
+            dot_thread.start()
             with suppress_output():
                 self.asr_model = AutoModel(
                     model=self.model_name,
@@ -95,9 +116,13 @@ class SubtitleExtractor:
                 )
             
             self.device = device
+            stop_loading_event.set()
+            dot_thread.join(timeout=1)
+            
         except Exception as e:
+            stop_loading_event.set()
             # If suppress_output fails or error occurs, ensure we can see the error
-            print(f"[ERROR] 자막 모델 로드 실패: {e}", flush=True)
+            print(f"\n[ERROR] 자막 모델 로드 실패: {e}", flush=True)
             if device == "cuda":
                 self._load_models("cpu")
             else:

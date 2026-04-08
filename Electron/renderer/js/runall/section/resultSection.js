@@ -25,7 +25,7 @@ export class ResultSection {
         setupOpenFolderButton(this.#openFolderBtn, 'getAppResultDirectory');
 
         this.#moveFileBtn.addEventListener('click', async () => {
-            log('파일 복사 버튼 클릭됨.');
+
             const selectedLi = currentSelectedElements.get(this.#sectionName);
 
             if (!selectedLi) {
@@ -48,11 +48,11 @@ export class ResultSection {
                 const destDir = await window.electronAPI.paths.getAppVideoDirectory(); // Assuming this API exists
                 const destPath = await window.electronAPI.path.join(destDir, filename);
 
-                log(`파일 복사 시작: ${sourcePath} -> ${destPath}`);
+
                 const copyResult = await window.electronAPI.fs.copyFile(sourcePath, destPath); // Assuming this API exists
 
                 if (copyResult.success) {
-                    log(`✅ 파일 복사 성공: ${filename}`);
+                    log(`✅ 파일 복사 성공 : ${sourcePath} -> ${destPath}`);
                 } else {
                     log(`❌ 파일 복사 실패: ${copyResult.message}`);
                 }
