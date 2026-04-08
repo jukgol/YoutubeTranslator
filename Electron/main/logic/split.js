@@ -28,11 +28,11 @@ async function clearFolderContents(folderPath) {
  * @param {Array<number|string>} detectedEps - 감지된 에피소드 번호 또는 "Start" 키의 정렬된 배열.
  * @param {Object} epMap - 에피소드/키에 대한 자막 라인 배열을 매핑하는 객체.
  * @param {boolean} hasStart - epMap에 "Start" 키가 있는지 여부.
- * @returns {Array<Array<string>>} - 250라인씩 나누어진 자막 단위 배열.
+ * @returns {Array<Array<string>>} - 500라인씩 나누어진 자막 단위 배열.
  */
 function getLineCountSplitGroups(detectedEps, epMap, hasStart = false) {
     const allUnits = [];
-    const textIndex = 250; // 한 단위당 최대 라인 수
+    const textIndex = 500; // 한 단위당 최대 라인 수
 
     // "Start" 부분 처리
     if (hasStart) {

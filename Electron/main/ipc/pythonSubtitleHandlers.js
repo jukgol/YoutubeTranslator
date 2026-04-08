@@ -6,7 +6,7 @@ const log = require('../js/logManager');
 const { activeProcesses } = require('./pythonProcessManager');
 
 function setupPythonSubtitleHandlers() {
-    ipcMain.handle('python:run-subtitle', async (event, videoPath, language) => {
+    ipcMain.handle('python:run-subtitle', async (event, videoPath, language, engine) => {
         if (!videoPath) {
             return { success: false, message: 'Video path is required.' };
         }
@@ -15,7 +15,7 @@ function setupPythonSubtitleHandlers() {
         const mainScript = path.join(projectRoot, 'subtitleEx', 'main.py');
         const originDir = appEnv.pathData.originDir;
 
-        log.write(`[Python] Starting subtitle extraction for: ${videoPath}, Language: ${language || 'Auto'}`);
+
 
         return new Promise((resolve) => {
             const pythonExe = path.join(projectRoot, '.venv', 'Scripts', 'python.exe');
@@ -25,14 +25,15 @@ function setupPythonSubtitleHandlers() {
                 '-u', relativeScriptPath,
                 '--file', videoPath,
                 '--output', originDir,
-                '--task', 'transcribe'
+                '--task', 'transcribe',
+                '--engine', engine || 'sense'
             ];
             
             if (language) {
                 args.push('--language', language);
             }
 
-            log.write(`[Python] Spawning: ${pythonExe} ${args.join(' ')}`);
+
 
             const pythonProcess = spawn(pythonExe, args, {
                 cwd: projectRoot,
@@ -40,40 +41,58 @@ function setupPythonSubtitleHandlers() {
             });
 
             activeProcesses.add(pythonProcess);
-            log.write(`[Python] Subtitle process spawned (PID: ${pythonProcess.pid}). Total active: ${activeProcesses.size}`);
+
 
             let errorOutput = '';
             let successMarkerFound = false;
 
             pythonProcess.stdout.on('data', (data) => {
-                const lines = data.toString().split('\n');
+                const ansiRegex = /[\u001b\u009b][[()#;?]*(?:[0-9]{1,4}(?:;[0-9]{0,4})*)?[0-9A-ORZcf-nqry=><]/g;
+                const str = data.toString().replace(ansiRegex, '');
+                const lines = str.split(/[\r\n]+/);
                 lines.forEach(line => {
                     const trimmed = line.trim();
-                    if (trimmed) {
-                        if (trimmed.includes('[DONE] Transcription complete')) {
-                            successMarkerFound = true;
-                        }
+                    if (!trimmed) return;
 
-                        if (trimmed.startsWith('[PROGRESS]')) {
-                            event.sender.send('python:progress', trimmed);
-                        } else if (trimmed.startsWith('[INFO]') || trimmed.startsWith('[ERROR]') || trimmed.startsWith('[DONE]')) {
-                            event.sender.send('python:progress', trimmed);
-                            log.write(`[Python] ${trimmed}`);
-                        }
+                    if (trimmed.includes('[DONE] 자막 작업이 완료되었습니다')) {
+                        successMarkerFound = true;
+                    }
+
+                    if (trimmed.startsWith('[PROGRESS]')) {
+                        event.sender.send('python:progress', trimmed);
+                    } else if (trimmed.startsWith('[INFO]') || trimmed.startsWith('[ERROR]') || trimmed.startsWith('[DONE]')) {
+                        event.sender.send('python:progress', trimmed);
+                        log.write(`[Python] ${trimmed}`);
+                    } else {
+                        // Intelligent replace detection: only if it looks like a progress bar
+                        const isReplace = /%\|.*\|/.test(trimmed);
+                        log.write(`[Python] ${trimmed}`, isReplace);
                     }
                 });
             });
 
             pythonProcess.stderr.on('data', (data) => {
-                const msg = data.toString().trim();
-                if (msg.includes('MonitorThread')) return;
-                log.write(`[Python Stderr] ${msg}`);
-                errorOutput += msg + '\n';
+                const ansiRegex = /[\u001b\u009b][[()#;?]*(?:[0-9]{1,4}(?:;[0-9]{0,4})*)?[0-9A-ORZcf-nqry=><]/g;
+                const str = data.toString().replace(ansiRegex, '');
+                const lines = str.split(/[\r\n]+/);
+                lines.forEach(line => {
+                    const trimmed = line.trim();
+                    if (!trimmed) return;
+                    if (trimmed.includes('MonitorThread')) return;
+
+                    // Only replace if it contains the progress bar pattern (%|...|)
+                    const isReplace = /%\|.*\|/.test(trimmed);
+                    log.write(`[Python Stderr] ${trimmed}`, isReplace);
+                    
+                    if (!isReplace) {
+                        errorOutput += trimmed + '\n';
+                    }
+                });
             });
 
             pythonProcess.on('close', (code) => {
                 activeProcesses.delete(pythonProcess);
-                log.write(`[Python] Subtitle process closed (PID: ${pythonProcess.pid}). Remaining: ${activeProcesses.size}`);
+
                 
                 if (successMarkerFound || code === 0) {
                     resolve({ success: true, message: 'Subtitle extraction complete.' });

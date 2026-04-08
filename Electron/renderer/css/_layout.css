@@ -91,3 +91,34 @@
     color: var(--text-main);
     padding: 10px;
 }
+
+/* Engine Selector - Segmented Control Style */
+.engine-selector {
+    display: flex;
+    background-color: var(--bg-color);
+    padding: 4px;
+    border-radius: 10px;
+    border: 1px solid var(--border-color);
+    width: fit-content;
+    margin-bottom: 5px;
+}
+.engine-selector input[type="radio"] {
+    display: none;
+}
+.engine-selector label {
+    padding: 8px 20px;
+    cursor: pointer;
+    border-radius: 7px;
+    font-size: 0.9em;
+    font-weight: 500;
+    transition: all 0.2s ease;
+    color: #64748b;
+}
+.engine-selector input[type="radio"]:checked + label {
+    background-color: var(--primary);
+    color: white;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+.engine-selector label:hover:not(input[type="radio"]:checked + label) {
+    background-color: rgba(0,0,0,0.05);
+}

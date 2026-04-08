@@ -37,6 +37,14 @@ export class WaitingListSection {
         return select ? select.value : null;
     }
 
+    get selectedEngine() {
+        const whisper = document.getElementById('engine-whisper');
+        const sense = document.getElementById('engine-sense');
+        if (sense && sense.checked) return 'sense';
+        if (whisper && whisper.checked) return 'whisper';
+        return 'sense'; // Default
+    }
+
     #bindEvents() {
         if (this.#startBtn) {
             this.#startBtn.addEventListener('click', () => {
@@ -60,13 +68,13 @@ export class WaitingListSection {
 
     add(item) {
         if (!item || !item.name) {
-            log('[WaitingList] Add failed: Invalid item');
+
             return;
         }
 
         // Check for duplicates
         if (this.#queue.some(existingItem => existingItem.name === item.name)) {
-            log(`[WaitingList] Duplicate ignored: ${item.name}`);
+
             return;
         }
 
@@ -75,7 +83,7 @@ export class WaitingListSection {
             status: 'pending'
         });
 
-        log(`[WaitingList] Item added to queue: ${item.name}`);
+
         this.renderList();
     }
 

@@ -1,13 +1,13 @@
 import argparse
 import sys
 import os
-from whisper_worker import SubtitleExtractor
 
 def main():
     # Setup argument parser to receive commands from Electron
     parser = argparse.ArgumentParser(description="YoutubeTranslator Python Backend")
     parser.add_argument("--file", required=True, help="Path to the media file to transcribe")
-    parser.add_argument("--model", default="large-v3", help="Whisper model size (tiny, base, small, medium, large-v3)")
+    parser.add_argument("--engine", default="sense", choices=["whisper", "sense"], help="STT engine to use (whisper, sense)")
+    parser.add_argument("--model", help="Model name or size (e.g. large-v3 for whisper, iic/SenseVoiceSmall for sense)")
     parser.add_argument("--device", default="cuda", help="Device to use (cuda, cpu)")
     parser.add_argument("--output", help="Optional output directory. Defaults to same as input file.")
     parser.add_argument("--language", help="Language code (e.g. en, ko, ja, zh)")
@@ -17,6 +17,16 @@ def main():
 
     input_file = args.file
     
+    # 0. Engine specific defaults and imports
+    if args.engine == "sense":
+        from sense_worker import SubtitleExtractor
+        if not args.model:
+            args.model = "iic/SenseVoiceSmall"
+    else:
+        from whisper_worker import SubtitleExtractor
+        if not args.model:
+            args.model = "large-v3"
+
     # 1. Validate Input
     if not os.path.exists(input_file):
         print(f"[ERROR] File not found: {input_file}")
@@ -44,12 +54,15 @@ def main():
         extractor = SubtitleExtractor(model_size=args.model, device=args.device)
         
         # 5. Run Transcription
-        segments = extractor.transcribe(input_file, language=args.language, task=args.task)
+        # Note: SenseVoice auto-detects language, but we pass args.language if provided.
+        # For sense_worker, 'auto' is a valid language choice.
+        lang = args.language if args.language else "auto"
+        
+        segments = extractor.transcribe(input_file, language=lang, task=args.task)
         
         # 6. Save Result
         extractor.save_to_srt(segments, output_path)
         
-        print("[DONE] Transcription complete.")
         sys.exit(0) # Explicitly exit with 0 to ensure Electron sees success
         
     except Exception as e:

@@ -59,7 +59,8 @@ export class QueueProcessor {
 
             // 2. Call Python
             const language = this.#waitingListSection.selectedLanguage;
-            const result = await window.electronAPI.python.runSubtitle(fullPath, language);
+            const engine = this.#waitingListSection.selectedEngine;
+            const result = await window.electronAPI.python.runSubtitle(fullPath, language, engine);
 
             if (result.success) {
                 log(`[QueueProcessor] Success: ${fileName}`);

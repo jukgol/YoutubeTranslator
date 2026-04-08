@@ -11,6 +11,10 @@ export class ProgressSection {
     #animationFrameId = null;
     #currentText = '';
 
+    #engineWhisper;
+    #engineSense;
+    #languageSelect;
+
     constructor(sectionElement) {
         this.#element = sectionElement;
         this.#progressDisplay = sectionElement.querySelector('#progressSection');
@@ -24,6 +28,26 @@ export class ProgressSection {
             window.electronAPI.python.onProgress((logLine) => {
                 this.#parseAndDisplay(logLine);
             });
+        }
+
+        this.#engineWhisper = this.#element.querySelector('#engine-whisper');
+        this.#engineSense = this.#element.querySelector('#engine-sense');
+        this.#languageSelect = this.#element.querySelector('#subtitle-language-select');
+
+        if (this.#engineWhisper && this.#engineSense && this.#languageSelect) {
+            const toggleLanguageSelect = () => {
+                if (this.#engineSense.checked) {
+                    this.#languageSelect.style.display = 'none';
+                } else {
+                    this.#languageSelect.style.display = 'block';
+                }
+            };
+
+            this.#engineWhisper.addEventListener('change', toggleLanguageSelect);
+            this.#engineSense.addEventListener('change', toggleLanguageSelect);
+
+            // Initial sync
+            toggleLanguageSelect();
         }
     }
 

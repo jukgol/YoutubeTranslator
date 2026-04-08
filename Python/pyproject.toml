@@ -5,12 +5,16 @@ description = "Python backend for YoutubeTranslator using faster-whisper"
 authors = ["Your Name <you@example.com>"]
 
 [tool.poetry.dependencies]
-python = ">=3.10"
+python = ">=3.10,<3.13"
 faster-whisper = "^1.0.0"
 nvidia-cublas-cu12 = "^12.9.1.4"
 nvidia-cudnn-cu12 = "^9.18.1.3"
 yt-dlp = "^2026.3.13"
 google-generativeai = "^0.8.6"
+funasr = "^1.3.1"
+modelscope = "^1.35.3"
+torch = "^2.5.1"
+torchaudio = "^2.5.1"
 
 [build-system]
 requires = ["poetry-core"]

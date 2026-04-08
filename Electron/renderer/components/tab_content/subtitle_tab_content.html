@@ -33,8 +33,14 @@
         <div id="progressSection" style="padding: 10px; font-size: 16px; font-weight: bold; text-align: center;">
             0% 진행중
         </div>
-        <div class="button-group" style="justify-content: center; margin-top: 10px;">
-            <select id="subtitle-language-select" style="padding: 5px; border: 1px solid #ccc; border-radius: 4px;">
+        <div class="button-group" style="justify-content: center; margin-top: 10px; flex-direction: column; align-items: center; gap: 15px;">
+            <div class="engine-selector">
+                <input type="radio" id="engine-whisper" name="stt-engine" value="whisper">
+                <label for="engine-whisper">Whisper</label>
+                <input type="radio" id="engine-sense" name="stt-engine" value="sense" checked>
+                <label for="engine-sense">Sense</label>
+            </div>
+            <select id="subtitle-language-select" style="padding: 8px 12px; border: 1px solid var(--border-color); border-radius: 8px; width: 200px; background-color: var(--bg-color); color: var(--text-main);">
                 <option value="">언어 자동 (Auto)</option>
                 <option value="ko">한국어 (Korean)</option>
                 <option value="en">영어 (English)</option>
