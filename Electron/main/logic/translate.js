@@ -13,6 +13,21 @@ const log = require('../js/logManager');
 const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 
 /**
+ * 1분(60초) 대기하면서 매초 남은 시간을 로그에 갱신합니다.
+ * log.write의 replace 옵션을 true 로 지정해 같은 라인에 덮어씁니다.
+ */
+async function waitOneMinute() {
+    log.write('✅ 대기 시작');
+    for (let i = 90; i > 0; i--) {
+        log.write(`⏳ ${i}s 대기 중...`, true);
+        await delay(1000);
+    }
+    // 대기 완료 후 개행
+    log.write('✅ 대기 완료');
+}
+
+
+/**
  * 폴더 내용을 지우거나 폴더가 없으면 생성합니다.
  * @param {string} folderPath - 처리할 폴더 경로
  */
@@ -165,4 +180,5 @@ module.exports = {
     translateSubtitleLogic,
     translateTestLogic,
     clearFolderContents,
+    waitOneMinute,
 };

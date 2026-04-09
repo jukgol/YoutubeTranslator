@@ -4,7 +4,7 @@ const fs = require('fs').promises;
 const { splitSubtitleLogic } = require('../logic/split');
 const { combinePartsLogic } = require('../logic/combine');
 const { combineTimelineLogic } = require('../logic/combineTimeline');
-const { translateSubtitleLogic, clearFolderContents } = require('../logic/translate');
+const { translateSubtitleLogic, clearFolderContents, waitOneMinute } = require('../logic/translate');
 
 const appEnv = require('../appEnv/appEnv');
 const log = require('../js/logManager');
@@ -121,19 +121,24 @@ function setupProcessHandlers() {
             let allSucceeded = true;
             let finalTranslatedFolder = null; // To store the path of the created folder
 
-            for (const file of txtFiles) {
+            for (let i = 0; i < txtFiles.length; i++) {
+                const file = txtFiles[i];
                 const filePath = path.join(folderPath, file);
                 const result = await translateSubtitleLogic(filePath); // Capture the result object
                 
                 if (result.success) {
                     if (finalTranslatedFolder === null) {
                         // Assume all translated files go into the same folder
-                        finalTranslatedFolder = result.translatedFolder; 
+                        finalTranslatedFolder = result.translatedFolder;
                     }
                 } else {
                     allSucceeded = false;
                     // Optionally break here if you want to stop on first failure
-                    // break; 
+                    // break;
+                }
+                // If there is another file after this one, wait 1 minute (regardless of success/failure)
+                if (i < txtFiles.length - 1) {
+                    await waitOneMinute();
                 }
             }
             

@@ -11,7 +11,7 @@ const appEnv = require('../appEnv/appEnv'); // Import appEnv singleton
 async function combinePartsLogic(folderName) { // translateDir, combineDir removed from parameters
     try {
         const sourceFolder = path.join(appEnv.pathData.translateDir, folderName); // Use appEnv.pathData.translateDir
-        
+
         try {
             await fs.access(sourceFolder); // Check if folder exists
         } catch (error) {
@@ -23,7 +23,9 @@ async function combinePartsLogic(folderName) { // translateDir, combineDir remov
         }
 
         let files = await fs.readdir(sourceFolder);
-        files = files.filter(f => f.toLowerCase().endsWith('.txt')).sort();
+        files = files
+            .filter(f => f.toLowerCase().endsWith('.txt'))
+            .sort((a, b) => a.localeCompare(b, undefined, { numeric: true, sensitivity: 'base' }));
 
         if (files.length === 0) {
             log.write(`⚠️ ${folderName} 폴더에 합칠 파일이 없습니다.`);
@@ -38,20 +40,20 @@ async function combinePartsLogic(folderName) { // translateDir, combineDir remov
             const filePath = path.join(sourceFolder, filename);
             let content = await fs.readFile(filePath, 'utf-8');
             content = content.trim();
-            
+
             // Python re.sub(r'[\[]ID:(\d+)[\]]\s*', r'\n\1\n', content).strip()
             // JavaScript equivalent:
             content = content.replace(/[\[]ID:(\d+)[\]]\s*/g, '\n$1\n').trim();
-            
+
             combinedContentParts.push(content);
-            
+
             if (i < files.length - 1) {
-                combinedContentParts.push("\n\n"); 
+                combinedContentParts.push("\n\n");
             }
         }
 
         const outputPath = path.join(appEnv.pathData.combineDir, `${folderName}.txt`); // Use appEnv.pathData.combineDir
-        
+
         // Ensure combineDir exists
         await fs.mkdir(appEnv.pathData.combineDir, { recursive: true }); // Use appEnv.pathData.combineDir
 
