@@ -88,9 +88,10 @@ exports._runDownloadProcess = async (url, title, quality, downloadSubs) => {
 
         let formatOption = 'bestvideo+bestaudio/best';
         if (quality && quality !== 'best') {
-            formatOption = `bestvideo[height<=${quality}][ext=mp4]+bestaudio[ext=m4a]/best[height<=${quality}][ext=mp4]/best`;
+            // Try preferred mp4/m4a first, but fallback to any best quality for the given height if not found (needed for Dailymotion)
+            formatOption = `bestvideo[height<=${quality}][ext=mp4]+bestaudio[ext=m4a]/best[height<=${quality}][ext=mp4]/bestvideo[height<=${quality}]+bestaudio/best[height<=${quality}]/best`;
         } else {
-            formatOption = 'bestvideo[ext=mp4]+bestaudio[ext=m4a]/best[ext=mp4]/best';
+            formatOption = 'bestvideo[ext=mp4]+bestaudio[ext=m4a]/best[ext=mp4]/bestvideo+bestaudio/best';
         }
 
         const outputTmpl = path.join(appEnv.pathData.videoDir, '%(title)s.%(ext)s');

@@ -25,7 +25,6 @@ export async function initSettingsHandlers() {
                     await window.electronAPI.settings.writeApiKeys(updatedKeys);
                     apiNewKeyInput.value = ''; // Clear input field
                     await loadSettingsUI(); // Refresh UI to show new key selected
-                    log(`[UI] API Key 추가됨: ${newKey.substring(0, 10)}...`);
                 } catch (ipcError) {
                     log(`[UI Error] Failed to add API Key: ${ipcError.message}`);
                     console.error('[UI Error] Failed to add API Key:', ipcError);
@@ -46,7 +45,6 @@ export async function initSettingsHandlers() {
                     const updatedKeys = await window.electronAPI.settings.getReorderedKeys(selectedKey);
                     await window.electronAPI.settings.writeApiKeys(updatedKeys);
                     await loadSettingsUI(); // Refresh UI to ensure selected is first
-                    log(`[UI] API Key 선택됨: ${selectedKey.substring(0, 10)}...`);
                 } catch (ipcError) {
                     log(`[UI Error] Failed to select API Key: ${ipcError.message}`);
                     console.error('[UI Error] Failed to select API Key:', ipcError);
@@ -67,7 +65,6 @@ export async function initSettingsHandlers() {
                     const updatedKeys = currentKeys.filter(key => key !== selectedKey);
                     await window.electronAPI.settings.writeApiKeys(updatedKeys);
                     await loadSettingsUI(); // Refresh UI
-                    log(`[UI] API Key 삭제됨: ${selectedKey.substring(0, 10)}...`);
                 } catch (ipcError) {
                     log(`[UI Error] Failed to delete API Key: ${ipcError.message}`);
                     console.error('[UI Error] Failed to delete API Key:', ipcError);

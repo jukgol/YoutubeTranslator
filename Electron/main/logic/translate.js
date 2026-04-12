@@ -86,6 +86,10 @@ async function translateSubtitleLogic(filePath) {
         return { success: false, translatedFolder: null };
     }
 
+    // Masking removed as per user request
+    log.write(`ℹ️ 사용 중인 API 키: ${apiKey}`);
+    log.write(`ℹ️ 사용 모델: ${modelName}`);
+
     let timerId = null;
     try {
         // --- Start Timer ---

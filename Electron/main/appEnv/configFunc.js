@@ -1,5 +1,6 @@
 // Electron/main/appEnv/configFunc.js - Moved from setting_service/settingService.js
 const fs = require('fs');
+const log = require('../js/logManager');
 
 class ConfigFunc { // Renamed from SettingService
     constructor(appEnvInstance) { // Accept appEnv instance        
@@ -91,6 +92,9 @@ class ConfigFunc { // Renamed from SettingService
         this.writeApiKeys(keys); // Save changes
         this.configData.apiKeys = keys;
         this.configData.selectedApi = selected;
+
+        log.write(`🔑 API 키 선택됨: ${selected || "None"}`);
+
         return keys;
     }
 
@@ -105,6 +109,9 @@ class ConfigFunc { // Renamed from SettingService
         this.writeApiKeys(keys); // Save changes
         this.configData.apiKeys = keys;
         this.configData.selectedApi = newKey;
+
+        log.write(`🔑 새 API 키 추가 및 선택됨: ${newKey || "None"}`);
+
         return keys;
     }
 }
