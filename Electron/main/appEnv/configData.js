@@ -9,6 +9,7 @@ const appConfig = {
 
     // 2. 로직 설정 정보 (Context Group)
     promptRule: "",        // 번역 규칙/프롬프트 내용
+    selectedRulePreset: "", // 번역 지침 프리셋 선택값 (파일명)
     modelVersion: "",      // Gemini 모델 버전 (예: gemini-1.5-pro)
 
     // 3. 기타 상태 정보

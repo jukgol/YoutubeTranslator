@@ -104,4 +104,93 @@ export async function initSettingsHandlers() {
             }
         });
     }
+
+    // Handle Prompt Rule Select change
+    const promptRuleSelect = document.getElementById('promptRuleSelect');
+    if (promptRuleSelect) {
+        promptRuleSelect.addEventListener('change', async () => {
+            const filename = promptRuleSelect.value;
+            try {
+                // Always save the selection state (custom or preset name)
+                await window.electronAPI.settings.saveSelectedRulePreset(filename);
+
+                if (filename && filename !== 'custom') {
+                    const content = await window.electronAPI.settings.readRulePreset(filename);
+                    await window.electronAPI.settings.saveRule(content); // Saves to configData and current rule file
+                    const promptRuleTextarea = document.getElementById('promptRuleTextarea');
+                    if (promptRuleTextarea) {
+                        promptRuleTextarea.value = content;
+                    }
+                    log(`[UI] 번역 지침이 프리셋에서 로드되었습니다: ${filename}`);
+                }
+            } catch (ipcError) {
+                log(`[UI Error] Failed to handle rule selection: ${ipcError.message}`);
+                console.error('[UI Error] Failed to handle rule selection:', ipcError);
+            }
+        });
+    }
+
+    // Handle Create Rule File button click
+    const createRuleFileBtn = document.getElementById('createRuleFileBtn');
+    const newRuleFileNameInput = document.getElementById('newRuleFileName');
+
+    if (createRuleFileBtn && newRuleFileNameInput && promptRuleTextarea) {
+        createRuleFileBtn.addEventListener('click', async () => {
+            let filename = newRuleFileNameInput.value.trim();
+            const content = promptRuleTextarea.value.trim();
+
+            if (!filename) {
+                // log('[UI] 파일 이름을 입력해주세요.'); // Optional: can add a visible warning if needed
+                return;
+            }
+
+            try {
+                const success = await window.electronAPI.settings.createRulePreset(filename, content);
+                if (success) {
+                    if (!filename.endsWith('.txt')) filename += '.txt';
+                    log(`[UI] 새 지침 파일이 생성되었습니다: ${filename}`);
+                    newRuleFileNameInput.value = ''; // Clear input
+                    await loadSettingsUI(); // Refresh dropdown
+                    
+                    // Automatically select the new file in the dropdown
+                    const promptRuleSelect = document.getElementById('promptRuleSelect');
+                    if (promptRuleSelect) {
+                        promptRuleSelect.value = filename;
+                        // Also save this selection state to initdata.json
+                        await window.electronAPI.settings.saveSelectedRulePreset(filename);
+                    }
+                } else {
+                    log('[UI Error] 파일 생성에 실패했습니다.');
+                }
+            } catch (ipcError) {
+                log(`[UI Error] Failed to create rule preset: ${ipcError.message}`);
+                console.error('[UI Error] Failed to create rule preset:', ipcError);
+            }
+        });
+    }
+
+    // Handle Delete Rule Preset button click
+    const deleteRulePresetBtn = document.getElementById('deleteRulePresetBtn');
+    if (deleteRulePresetBtn && promptRuleSelect) {
+        deleteRulePresetBtn.addEventListener('click', async () => {
+            const selectedPreset = promptRuleSelect.value;
+            if (selectedPreset && selectedPreset !== 'custom') {
+                try {
+                    const success = await window.electronAPI.settings.deleteRulePreset(selectedPreset);
+                    if (success) {
+                        log(`[UI] 지침 프리셋 파일이 삭제되었습니다: ${selectedPreset}`);
+                        await window.electronAPI.settings.saveSelectedRulePreset('custom');
+                        await loadSettingsUI(); // Refresh UI and reset to custom
+                    } else {
+                        log('[UI Error] 지침 프리셋 삭제에 실패했습니다.');
+                    }
+                } catch (ipcError) {
+                    log(`[UI Error] Failed to delete rule preset: ${ipcError.message}`);
+                    console.error('[UI Error] Failed to delete rule preset:', ipcError);
+                }
+            } else {
+                log('[UI] 삭제할 프리셋이 선택되지 않았습니다.');
+            }
+        });
+    }
 }

@@ -1,5 +1,6 @@
 // Electron/main/appEnv/configFunc.js - Moved from setting_service/settingService.js
 const fs = require('fs');
+const path = require('path');
 const log = require('../js/logManager');
 
 class ConfigFunc { // Renamed from SettingService
@@ -8,7 +9,7 @@ class ConfigFunc { // Renamed from SettingService
         this.configData = appEnvInstance.configData; // Direct access to configData
         this.readApiKeys();
         this.loadVersion();
-        this.loadRule();
+        this.loadInitData();
         this.readCookies(); // Load cookies on initialization
     }
 
@@ -83,6 +84,46 @@ class ConfigFunc { // Renamed from SettingService
         return rule;
     }
 
+    loadInitData() {
+        const filePath = this.path.initDataFile;
+        if (!fs.existsSync(filePath)) {
+            this.configData.selectedRulePreset = "custom";
+            return this.loadRule();
+        }
+        try {
+            const data = JSON.parse(fs.readFileSync(filePath, "utf-8"));
+            const presetName = data.promptRule || "custom";
+            this.configData.selectedRulePreset = presetName;
+
+            if (presetName === "custom") {
+                return this.loadRule();
+            } else {
+                const content = this.readRulePreset(presetName);
+                if (content) {
+                    this.configData.promptRule = content;
+                    return content;
+                } else {
+                    return this.loadRule();
+                }
+            }
+        } catch (error) {
+            log.write(`❌ initdata.json 읽기 실패: ${error.message}`);
+            this.configData.selectedRulePreset = "custom";
+            return this.loadRule();
+        }
+    }
+
+    saveInitData(presetName) {
+        try {
+            const data = { promptRule: presetName };
+            this._writeFile(this.path.initDataFile, JSON.stringify(data, null, 2));
+            this.configData.selectedRulePreset = presetName;
+            log.write(`💾 설정 저장됨 (initdata.json): ${presetName}`);
+        } catch (error) {
+            log.write(`❌ initdata.json 저장 실패: ${error.message}`);
+        }
+    }
+
     getReorderedKeys(selected) {
         let keys = this.readApiKeys(); // Get current keys
         if (selected && keys.includes(selected)) {
@@ -113,6 +154,58 @@ class ConfigFunc { // Renamed from SettingService
         log.write(`🔑 새 API 키 추가 및 선택됨: ${newKey || "None"}`);
 
         return keys;
+    }
+
+    getRuleFiles() {
+        const dirPath = this.path.ruleDir;
+        if (!fs.existsSync(dirPath)) {
+            return [];
+        }
+        try {
+            return fs.readdirSync(dirPath).filter(file => {
+                const fullPath = path.join(dirPath, file);
+                return fs.statSync(fullPath).isFile();
+            });
+        } catch (error) {
+            log.write(`❌ 규칙 파일 목록 읽기 실패: ${error.message}`);
+            return [];
+        }
+    }
+
+    readRulePreset(filename) {
+        const filePath = path.join(this.path.ruleDir, filename);
+        return this._readFile(filePath);
+    }
+
+    createRulePreset(filename, content) {
+        if (!filename.endsWith('.txt')) {
+            filename += '.txt';
+        }
+        const filePath = path.join(this.path.ruleDir, filename);
+        try {
+            this._writeFile(filePath, content);
+            log.write(`📄 새 지침 파일 생성됨: ${filename}`);
+            return true;
+        } catch (error) {
+            log.write(`❌ 지침 파일 생성 실패: ${error.message}`);
+            return false;
+        }
+    }
+
+    deleteRulePreset(filename) {
+        if (!filename || filename === 'custom') return false;
+        const filePath = path.join(this.path.ruleDir, filename);
+        if (fs.existsSync(filePath)) {
+            try {
+                fs.unlinkSync(filePath);
+                log.write(`🗑️ 지침 프리셋 파일 삭제됨: ${filename}`);
+                return true;
+            } catch (error) {
+                log.write(`❌ 지침 프리셋 파일 삭제 실패: ${error.message}`);
+                return false;
+            }
+        }
+        return false;
     }
 }
 

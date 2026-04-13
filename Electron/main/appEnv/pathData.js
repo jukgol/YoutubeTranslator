@@ -16,21 +16,24 @@ class PathData {
         this.translateDir = path.join(dataDir, "translate");
         this.combineDir = path.join(dataDir, "combine");
         this.resultFinalDir = path.join(dataDir, "result");
-        this.videoDir = path.join(dataDir, "video");      // 영상 파일(.mp4) 저장 위치
+        this.videoDir = "E:\\video\\youtube";      // 영상 파일(.mp4) 저장 위치
 
         // config 폴더 경로
         this.configDir = path.join(this.base_dir, "setconfig");
+        this.ruleDir = path.join(this.configDir, "rule");
 
         // --- [2. 파일 경로 정의] ---
         this.apiFile = path.join(this.configDir, "api.txt");
-        this.ruleFile = path.join(this.configDir, "rule.txt");
+        this.ruleFile = path.join(this.ruleDir, "rule.txt");
         this.geminiVerFile = path.join(this.configDir, "gemini_ver.txt");
         this.cookieFile = path.join(this.configDir, "cookies.txt");
+        this.initDataFile = path.join(this.configDir, "initdata.json");
 
         // --- [3. 폴더 자동 생성] ---
         this.allDirs = [
             this.originDir, this.splitDir, this.translateDir,
-            this.combineDir, this.resultFinalDir, this.videoDir
+            this.combineDir, this.resultFinalDir, this.videoDir,
+            this.ruleDir
         ];
 
         this._createDirectories();

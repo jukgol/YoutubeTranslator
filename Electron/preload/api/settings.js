@@ -7,4 +7,10 @@ module.exports = (ipcRenderer) => ({
   loadVersion: () => ipcRenderer.invoke('setting:load-version'),
   saveRule: (rule) => ipcRenderer.invoke('setting:save-rule', rule),
   loadRule: () => ipcRenderer.invoke('setting:load-rule'),
+  getRuleFiles: () => ipcRenderer.invoke('setting:get-rule-files'),
+  readRulePreset: (filename) => ipcRenderer.invoke('setting:read-rule-preset', filename),
+  saveSelectedRulePreset: (presetName) => ipcRenderer.invoke('setting:save-init-data', presetName),
+  loadSelectedRulePreset: () => ipcRenderer.invoke('setting:load-selected-rule-preset'),
+  createRulePreset: (filename, content) => ipcRenderer.invoke('setting:create-rule-preset', filename, content),
+  deleteRulePreset: (filename) => ipcRenderer.invoke('setting:delete-rule-preset', filename),
 });

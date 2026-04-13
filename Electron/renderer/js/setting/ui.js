@@ -64,6 +64,54 @@ export async function loadSettingsUI() {
         if (promptRuleTextarea) {
             promptRuleTextarea.value = promptRule;
         }
+
+        // Rule Preset section
+        const promptRuleSelect = document.getElementById('promptRuleSelect');
+        if (promptRuleSelect) {
+            let ruleFiles = [];
+            try {
+                ruleFiles = await window.electronAPI.settings.getRuleFiles();
+                console.log('[UI Debug] Fetched Rule Files:', ruleFiles);
+            } catch (ipcError) {
+                log(`[UI Error] Failed to fetch rule files: ${ipcError.message}`);
+                console.error('[UI Error] Failed to fetch rule files:', ipcError);
+            }
+
+            promptRuleSelect.innerHTML = ''; // Clear existing
+            // Add "직접 입력" as the default/first option
+            const customOption = document.createElement('option');
+            customOption.value = 'custom';
+            customOption.textContent = '직접 입력';
+            promptRuleSelect.appendChild(customOption);
+
+            ruleFiles.forEach(file => {
+                const option = document.createElement('option');
+                option.value = file;
+                option.textContent = file;
+                promptRuleSelect.appendChild(option);
+            });
+
+            // Set the selected preset from saved state
+            try {
+                const selectedPreset = await window.electronAPI.settings.loadSelectedRulePreset();
+                console.log('[UI Debug] Loaded Selected Preset Name:', selectedPreset);
+                if (selectedPreset) {
+                    // Check if the saved preset exists in the list (or if it's 'custom')
+                    const options = Array.from(promptRuleSelect.options);
+                    const exists = options.some(opt => opt.value === selectedPreset);
+                    if (exists) {
+                        promptRuleSelect.value = selectedPreset;
+                    } else {
+                        promptRuleSelect.value = 'custom';
+                    }
+                } else {
+                    promptRuleSelect.value = 'custom';
+                }
+            } catch (ipcError) {
+                log(`[UI Error] Failed to load selected rule preset: ${ipcError.message}`);
+                console.error('[UI Error] Failed to load selected rule preset:', ipcError);
+            }
+        }
         console.log('[UI] Settings loaded successfully.'); // Debug log to console
     } catch (generalError) {
         log(`[UI Error] Error in loadSettingsUI: ${generalError.message}`);

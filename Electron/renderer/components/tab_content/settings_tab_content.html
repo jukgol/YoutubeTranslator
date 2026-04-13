@@ -20,9 +20,21 @@
         </div>
         <hr>
         <!-- Rule Section -->
+        <div class="setting-row">
+            <label>번역 지침 선택:</label>
+            <select id="promptRuleSelect">
+                <option value="custom">직접 입력</option>
+            </select>
+            <button id="deleteRulePresetBtn" class="delete-btn">선택 삭제</button>
+        </div>
         <div class="setting-row" style="align-items: start;">
             <label>번역 지침(Rule):</label>
             <textarea id="promptRuleTextarea"></textarea>
+        </div>
+        <div class="setting-row">
+            <label>지침 파일 생성:</label>
+            <input type="text" id="newRuleFileName" placeholder="파일 이름을 입력하세요 (예: rule1.txt)">
+            <button id="createRuleFileBtn">생성</button>
         </div>
     </div>
 </div>

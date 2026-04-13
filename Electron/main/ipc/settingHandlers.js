@@ -26,5 +26,23 @@ module.exports = {
     ipcMain.handle('setting:load-rule', () => {
       return settingServiceInstance.loadRule();
     });
+    ipcMain.handle('setting:get-rule-files', () => {
+      return settingServiceInstance.getRuleFiles();
+    });
+    ipcMain.handle('setting:read-rule-preset', (event, filename) => {
+      return settingServiceInstance.readRulePreset(filename);
+    });
+    ipcMain.handle('setting:save-init-data', (event, presetName) => {
+      return settingServiceInstance.saveInitData(presetName);
+    });
+    ipcMain.handle('setting:load-selected-rule-preset', () => {
+      return settingServiceInstance.configData.selectedRulePreset;
+    });
+    ipcMain.handle('setting:create-rule-preset', (event, filename, content) => {
+      return settingServiceInstance.createRulePreset(filename, content);
+    });
+    ipcMain.handle('setting:delete-rule-preset', (event, filename) => {
+      return settingServiceInstance.deleteRulePreset(filename);
+    });
   }
 };
