@@ -8,6 +8,7 @@ export class QueueSection {
     #startBtn;
     #stopBtn;
     #clearBtn;
+    #promptSelect;
     #queue = [];
     #sectionName = 'RunAll_Queue';
 
@@ -28,6 +29,7 @@ export class QueueSection {
         this.#startBtn = this.#element.querySelector('#queue-start-btn');
         this.#stopBtn = this.#element.querySelector('#queue-stop-btn');
         this.#clearBtn = this.#element.querySelector('#clear-queue-btn');
+        this.#promptSelect = this.#element.querySelector('#queue-prompt-select');
         
         this.#bindEvents();
         this.refresh();
@@ -61,6 +63,22 @@ export class QueueSection {
             this.#renderList();
             this.#updateButtonStates();
         });
+
+        if (this.#promptSelect) {
+            this.#promptSelect.addEventListener('change', async () => {
+                const filename = this.#promptSelect.value;
+                try {
+                    await window.electronAPI.settings.saveSelectedRulePreset(filename);
+                    if (filename && filename !== 'custom') {
+                        const content = await window.electronAPI.settings.readRulePreset(filename);
+                        await window.electronAPI.settings.saveRule(content);
+                        log(`[UI] 번역 지침이 프리셋에서 로드되었습니다: ${filename}`);
+                    }
+                } catch (error) {
+                    log(`[Error] 지침 변경 중 오류 발생: ${error.message}`);
+                }
+            });
+        }
     }
 
 
@@ -198,8 +216,43 @@ export class QueueSection {
 
     async refresh() {
         log('QueueSection refreshed.');
+        await this.#populatePromptSelect();
         this.#renderList();
         this.#updateButtonStates(); // Ensure buttons are updated on refresh
+    }
+
+    async #populatePromptSelect() {
+        if (!this.#promptSelect) return;
+
+        try {
+            const ruleFiles = await window.electronAPI.settings.getRuleFiles();
+            const selectedPreset = await window.electronAPI.settings.loadSelectedRulePreset();
+
+            this.#promptSelect.innerHTML = '';
+            
+            // Add "직접 입력" (custom) option
+            const customOption = document.createElement('option');
+            customOption.value = 'custom';
+            customOption.textContent = '직접 입력';
+            this.#promptSelect.appendChild(customOption);
+
+            ruleFiles.forEach(file => {
+                const option = document.createElement('option');
+                option.value = file;
+                option.textContent = file;
+                this.#promptSelect.appendChild(option);
+            });
+
+            if (selectedPreset) {
+                const options = Array.from(this.#promptSelect.options);
+                const exists = options.some(opt => opt.value === selectedPreset);
+                this.#promptSelect.value = exists ? selectedPreset : 'custom';
+            } else {
+                this.#promptSelect.value = 'custom';
+            }
+        } catch (error) {
+            log(`[Error] 지침 목록 로드 실패: ${error.message}`);
+        }
     }
 
     getQueueItems() {

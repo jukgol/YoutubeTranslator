@@ -11,6 +11,7 @@ export class SplitSection {
     #openFolderButton;
     #clearFolderButton;
     #processButton;
+    #promptSelect;
     #sectionName = '스플릿';
     #translateSection = null;
 
@@ -21,6 +22,7 @@ export class SplitSection {
         this.#openFolderButton = this.#element.querySelector('.open-folder-button');
         this.#clearFolderButton = this.#element.querySelector('.clear-folder-button');
         this.#processButton = this.#element.querySelector('.process-button');
+        this.#promptSelect = this.#element.querySelector('#runstep-split-prompt-select');
 
         this.#bindEvents();
         this.refresh();
@@ -113,15 +115,65 @@ export class SplitSection {
             const data = elementToHighlight.dataset.data;
 
         });
+
+        if (this.#promptSelect) {
+            this.#promptSelect.addEventListener('change', async () => {
+                const filename = this.#promptSelect.value;
+                try {
+                    await window.electronAPI.settings.saveSelectedRulePreset(filename);
+                    if (filename && filename !== 'custom') {
+                        const content = await window.electronAPI.settings.readRulePreset(filename);
+                        await window.electronAPI.settings.saveRule(content);
+                        log(`[UI] 번역 지침이 프리셋에서 로드되었습니다: ${filename}`);
+                    }
+                } catch (error) {
+                    log(`[Error] 지침 변경 중 오류 발생: ${error.message}`);
+                }
+            });
+        }
     }
 
     async refresh() {
         try {
+            await this.#populatePromptSelect();
             const data = await window.electronAPI.paths.getSplitFiles();
             renderNestedList(this.#listField, data, this.#sectionName);
         } catch (error) {
             console.error('Error loading split files:', error);
             this.#listField.innerHTML = `<div class="error-message">스플릿 파일 로딩 중 오류가 발생했습니다.</div>`;
+        }
+    }
+
+    async #populatePromptSelect() {
+        if (!this.#promptSelect) return;
+
+        try {
+            const ruleFiles = await window.electronAPI.settings.getRuleFiles();
+            const selectedPreset = await window.electronAPI.settings.loadSelectedRulePreset();
+
+            this.#promptSelect.innerHTML = '';
+            
+            const customOption = document.createElement('option');
+            customOption.value = 'custom';
+            customOption.textContent = '직접 입력';
+            this.#promptSelect.appendChild(customOption);
+
+            ruleFiles.forEach(file => {
+                const option = document.createElement('option');
+                option.value = file;
+                option.textContent = file;
+                this.#promptSelect.appendChild(option);
+            });
+
+            if (selectedPreset) {
+                const options = Array.from(this.#promptSelect.options);
+                const exists = options.some(opt => opt.value === selectedPreset);
+                this.#promptSelect.value = exists ? selectedPreset : 'custom';
+            } else {
+                this.#promptSelect.value = 'custom';
+            }
+        } catch (error) {
+            log(`[Error] 지침 목록 로드 실패: ${error.message}`);
         }
     }
 }

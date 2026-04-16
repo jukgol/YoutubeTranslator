@@ -64,7 +64,8 @@ export async function refreshRunallTab() {
     if (resultSectionInstance) {
         await resultSectionInstance.refresh();
     }
-    // Note: progressSection and queueSection do not have a 'refresh' method for file lists
-    // as per the user's initial request.
+    if (queueSectionInstance) {
+        await queueSectionInstance.refresh();
+    }
 }
 

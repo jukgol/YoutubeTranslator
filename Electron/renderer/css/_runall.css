@@ -15,11 +15,32 @@
     background-color: var(--card-bg);
 }
 
+.section-header-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
 .section-header {
     font-weight: bold;
     font-size: 1.1em;
     margin-bottom: 10px;
     color: var(--text-main);
+}
+
+.section-header-row .section-header {
+    margin-bottom: 0; /* Align with select when in row */
+}
+
+.header-select {
+    padding: 4px 8px;
+    border-radius: 4px;
+    border: 1px solid var(--border-color);
+    background-color: var(--bg-color);
+    color: var(--text-main);
+    font-size: 0.85em;
+    min-width: 120px;
 }
 
 .list-field {
