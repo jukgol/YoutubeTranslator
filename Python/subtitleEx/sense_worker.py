@@ -137,7 +137,7 @@ class SubtitleExtractor:
             # Step A: Run VAD with tightened parameters
             vad_res = self.vad_model.generate(
                 input=audio_data,
-                max_single_segment_time=3000, # 3s as requested
+                max_single_segment_time= 1000, # 3s as requested
                 max_end_silence_time=500, # 0.5s as requested
                 speech_threshold=0.8, # Tightened from 0.5 (ignores noises like water drops)
                 min_speech_duration_ms=300, # Ignores pops/clicks shorter than 0.3s
