@@ -142,9 +142,6 @@ export class ProgressSection {
                 // For INFO messages, we use the standard UI update, which handles "Loading..." style
                 this.#updateUI(`🔔 ${displayMsg}`, isLoading);
 
-            } else if (logLine.startsWith('[STATUS]')) {
-                const statusText = logLine.replace('[STATUS]', '').trim();
-                this.#updateUI(statusText, false); // No extra dot animation needed as Python provides them
             } else if (logLine.startsWith('[ERROR]')) {
                 const errText = logLine.replace('[ERROR]', '').trim();
                 this.#updateUI(`❌ 오류: ${errText}`, false);

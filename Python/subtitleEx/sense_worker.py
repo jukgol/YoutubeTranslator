@@ -69,8 +69,8 @@ class SubtitleExtractor:
             while not stop_loading_event.is_set():
                 dots = "." * dot_count
                 # Use \r to return to start of line and print
-                // We use sys.__stdout__ to ensure it goes to the real stdout stream
-                sys.__stdout__.write(f"\r[STATUS] 자막 작업을 준비 중입니다{dots}   ")
+                # We use sys.__stdout__ to ensure it goes to the real stdout stream
+                sys.__stdout__.write(f"\r[PROGRESS] 자막 작업을 준비 중입니다{dots}   ")
                 sys.__stdout__.flush()
                 dot_count = (dot_count % 3) + 1
                 time.sleep(1)
@@ -93,7 +93,7 @@ class SubtitleExtractor:
         os.environ['MODELSCOPE_CACHE'] = final_model_dir
         os.environ["MODELSCOPE_LOG_LEVEL"] = "50" 
         os.environ["FUNASR_LOG_LEVEL"] = "ERROR"
-        os.environ["TQDM_MININTERVAL"] = "10.0" 
+        os.environ["TQDM_MININTERVAL"] = "10" 
         
         for logger_name in ["funasr", "modelscope", "mslib"]:
             logging.getLogger(logger_name).setLevel(logging.CRITICAL)

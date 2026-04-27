@@ -1,91 +1,65 @@
 const { ipcMain } = require('electron');
 const { spawn } = require('child_process');
 const path = require('path');
-const fs = require('fs');
-const log = require('../js/logManager');
 const appEnv = require('../appEnv/appEnv');
+const log = require('../js/logManager');
 const { activeProcesses } = require('./pythonProcessManager');
 
 function setupPythonDownloadHandlers() {
-    ipcMain.handle('python:run-download', async (event, url, outputTmpl, formatOpt, subs, autoSubs) => {
-        return runPythonDownload(url, outputTmpl, formatOpt, subs, autoSubs, (progressMsg) => {
-            event.sender.send('python:download-progress', progressMsg);
-        });
-    });
-}
-
-function runPythonDownload(url, outputTmpl, formatOpt, subs, autoSubs, onProgress) {
-    const projectRoot = path.resolve(__dirname, '../../../Python');
-    const downloadScript = path.join(projectRoot, 'download', 'downloader.py');
-
-    return new Promise((resolve) => {
-        // Use direct python.exe from .venv to bypass poetry overhead/quoting issues
+    // 모델 다운로드 전용 핸들러
+    ipcMain.handle('python:download-model', async (event, engine) => {
+        const projectRoot = path.resolve(__dirname, '../../../Python');
         const pythonExe = path.join(projectRoot, '.venv', 'Scripts', 'python.exe');
-        const relativeScriptPath = path.join('download', 'downloader.py');
-        
+        const relativeScriptPath = path.join('subtitleEx', 'main.py');
+
         const args = [
             '-u', relativeScriptPath,
-            '--url', url,
-            '--output', outputTmpl,
-            '--format', formatOpt
+            '--download_only',
+            '--engine', engine || 'sense',
+            '--model_dir', appEnv.pathData.modelDir
         ];
 
-        if (subs) args.push('--subs');
-        if (autoSubs) args.push('--autosubs');
+        return new Promise((resolve) => {
+            const pythonProcess = spawn(pythonExe, args, {
+                cwd: projectRoot,
+                env: { ...process.env, PYTHONIOENCODING: 'utf-8' }
+            });
 
-        // Add cookies if available (skip for Dailymotion to avoid 401 error)
-        const isDailymotion = url.includes('dailymotion.com') || url.includes('dai.ly');
-        if (!isDailymotion && fs.existsSync(appEnv.pathData.cookieFile)) {
-            args.push('--cookies', appEnv.pathData.cookieFile);
-        }
+            activeProcesses.add(pythonProcess);
 
-        // console.log(`[Python] Spawning: ${pythonExe} ${args.join(' ')}`);
-
-        const pythonProcess = spawn(pythonExe, args, {
-            cwd: projectRoot,
-            env: { ...process.env, PYTHONIOENCODING: 'utf-8' }
-        });
-
-        activeProcesses.add(pythonProcess);
-        // console.log(`[Python] Download process spawned (PID: ${pythonProcess.pid}). Total active: ${activeProcesses.size}`);
-
-        pythonProcess.stdout.on('data', (data) => {
-            const lines = data.toString().split('\n');
-            lines.forEach(line => {
-                const trimmed = line.trim();
-                if (trimmed) {
-                    if (trimmed.startsWith('[PROGRESS]') && onProgress) {
-                        onProgress(trimmed);
-                    } else if (trimmed.startsWith('[ERROR]')) {
-                        log.write(`[Python Downloader] ${trimmed}`);
-                    } else if (trimmed.startsWith('[INFO]') || trimmed.startsWith('[DONE]')) {
-                        // Suppress info/done logs from both UI and Console to keep it clean
-                        // console.log(`[Python Downloader] ${trimmed}`);
-                    }
+            pythonProcess.stdout.on('data', (data) => {
+                const ansiRegex = /[\u001b\u009b][[()#;?]*(?:[0-9]{1,4}(?:;[0-9]{0,4})*)?[0-9A-ORZcf-nqry=><]/g;
+                const str = data.toString().replace(ansiRegex, '').trim();
+                if (str) {
+                    log.write(`[Model Download] ${str}`);
                 }
             });
-        });
 
-        pythonProcess.stderr.on('data', (data) => {
-            log.write(`[Python Downloader Stderr] ${data.toString().trim()}`);
-        });
+            pythonProcess.stderr.on('data', (data) => {
+                const ansiRegex = /[\u001b\u009b][[()#;?]*(?:[0-9]{1,4}(?:;[0-9]{0,4})*)?[0-9A-ORZcf-nqry=><]/g;
+                const str = data.toString().replace(ansiRegex, '').trim();
+                if (str) {
+                    const isProgressBar = str.includes('%|') && str.includes('|');
+                    log.write(`[Model Download Stderr] ${str}`, isProgressBar);
+                }
+            });
 
-        pythonProcess.on('close', (code) => {
-            activeProcesses.delete(pythonProcess);
-            // console.log(`[Python] Download process closed (PID: ${pythonProcess.pid}). Remaining: ${activeProcesses.size}`);
-            if (code === 0) {
-                resolve({ success: true });
-            } else {
-                resolve({ success: false, message: `Exit code ${code}` });
-            }
-        });
+            pythonProcess.on('close', (code) => {
+                activeProcesses.delete(pythonProcess);
+                if (code === 0) {
+                    resolve({ success: true, message: 'Model download complete.' });
+                } else {
+                    resolve({ success: false, message: `Process failed with code ${code}` });
+                }
+            });
 
-        pythonProcess.on('error', (err) => {
-            activeProcesses.delete(pythonProcess);
-            log.write(`[Python Downloader] Spawn error: ${err.message}`);
-            resolve({ success: false, message: err.message });
+            pythonProcess.on('error', (err) => {
+                activeProcesses.delete(pythonProcess);
+                log.write(`[Model Download] Error: ${err.message}`);
+                resolve({ success: false, message: err.message });
+            });
         });
     });
 }
 
-module.exports = { setupPythonDownloadHandlers, runPythonDownload };
+module.exports = { setupPythonDownloadHandlers };

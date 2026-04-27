@@ -58,14 +58,20 @@ def main():
             sys.exit(0)
 
     try:
-        # 4. Initialize Extractor (This triggers model download/loading)
+        # 4. Download Only Case: Use dedicated downloader scripts
+        if args.download_only:
+            if args.engine == "sense":
+                import sense_downloader
+                sense_downloader.download_sense_model(args.model, args.model_dir)
+            else:
+                import whisper_downloader
+                whisper_downloader.download_whisper_model(args.model, args.model_dir)
+            sys.exit(0)
+
+        # 5. Initialize Extractor (For actual transcription)
         extractor = SubtitleExtractor(model_size=args.model, device=args.device, model_dir=args.model_dir)
         
-        if args.download_only:
-            print("[DONE] 모델 다운로드 및 로드가 완료되었습니다.")
-            sys.exit(0)
-            
-        # 5. Run Transcription
+        # 6. Run Transcription
         lang = args.language if args.language else "auto"
         segments = extractor.transcribe(input_file, language=lang, task=args.task)
         
