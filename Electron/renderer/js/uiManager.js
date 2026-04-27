@@ -4,9 +4,11 @@ import { initializeDownloadTab, refreshDownloadTab } from './download/index.js';
 import { initializeRunstepTab, refreshRunstepTab } from './runstep/index.js';
 import { initializeRunallTab, refreshRunallTab } from './runall/index.js';
 import { initializeSubtitleTab, refreshSubtitleTab } from './subtitle/index.js';
+import { initializeEnvTab } from './env/index.js';
 
 
 const settings = initializeSettings(); // Initialize the settings module once
+const env = initializeEnvTab();
 
 function initCloseButton() {
     const closeBtn = document.getElementById('close-btn');
@@ -47,6 +49,12 @@ const tabConfig = [
         contentId: 'settings-content',
         setup: () => settings.loadSettingsUI(), // Settings UI is its own setup/refresh
         refresh: () => settings.loadSettingsUI() // Assuming loadSettingsUI also refreshes
+    },
+    {
+        tabId: 'tab-env',
+        contentId: 'env-content',
+        setup: () => env.initEnvHandlers(),
+        refresh: () => env.loadEnvUI()
     }
 ];
 

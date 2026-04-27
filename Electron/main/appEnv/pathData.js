@@ -3,31 +3,31 @@ const fs = require('fs');
 const { app } = require('electron'); // Import Electron's app module
 
 class PathData {
-    constructor() {
+    constructor(filePathData) {
         // Determine base directory
         this.base_dir = app.isPackaged
             ? path.dirname(app.getPath('exe')) // For packaged app
             : path.resolve(__dirname, '../../..'); // Corrected path: Electron/main/appEnv -> project_root (F:\ProjectGit\YoutubeTranslator)
 
         // --- [1. 폴더 경로 정의] ---
-        const dataDir = path.join(this.base_dir, "data");
-        this.originDir = path.join(dataDir, "origin");
-        this.splitDir = path.join(dataDir, "split");
-        this.translateDir = path.join(dataDir, "translate");
-        this.combineDir = path.join(dataDir, "combine");
-        this.resultFinalDir = path.join(dataDir, "result");
-        this.videoDir = "E:\\video\\youtube";      // 영상 파일(.mp4) 저장 위치
+        const dataDir = path.join(this.base_dir, filePathData.dataDir);
+        this.originDir = path.join(dataDir, filePathData.originDir);
+        this.splitDir = path.join(dataDir, filePathData.splitDir);
+        this.translateDir = path.join(dataDir, filePathData.translateDir);
+        this.combineDir = path.join(dataDir, filePathData.combineDir);
+        this.resultFinalDir = path.join(dataDir, filePathData.resultDir);
+        this.videoDir = filePathData.videoDir;      // 영상 파일(.mp4) 저장 위치
 
         // config 폴더 경로
-        this.configDir = path.join(this.base_dir, "setconfig");
-        this.ruleDir = path.join(this.configDir, "rule");
+        this.configDir = path.join(this.base_dir, filePathData.configDir);
+        this.ruleDir = path.join(this.configDir, filePathData.ruleDir);
 
         // --- [2. 파일 경로 정의] ---
-        this.apiFile = path.join(this.configDir, "api.txt");
-        this.ruleFile = path.join(this.ruleDir, "rule.txt");
-        this.geminiVerFile = path.join(this.configDir, "gemini_ver.txt");
-        this.cookieFile = path.join(this.configDir, "cookies.txt");
-        this.initDataFile = path.join(this.configDir, "initdata.json");
+        this.apiFile = path.join(this.configDir, filePathData.apiFile);
+        this.ruleFile = path.join(this.ruleDir, filePathData.ruleFile);
+        this.geminiVerFile = path.join(this.configDir, filePathData.geminiVerFile);
+        this.cookieFile = path.join(this.configDir, filePathData.cookieFile);
+        this.initDataFile = path.join(this.configDir, filePathData.initDataFile);
 
         // --- [3. 폴더 자동 생성] ---
         this.allDirs = [

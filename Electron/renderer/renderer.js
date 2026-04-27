@@ -34,6 +34,10 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (settingsContent) {
             await loadComponent('components/tab_content/settings_tab_content.html', settingsContent);
         }
+        const envContent = document.getElementById('env-content');
+        if (envContent) {
+            await loadComponent('components/tab_content/env_tab_content.html', envContent);
+        }
         await initializeUI();
 
         // --- 여기서부터 로딩 화면 전환 로직 ---

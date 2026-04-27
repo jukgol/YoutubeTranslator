@@ -12,4 +12,6 @@ module.exports = (ipcRenderer) => ({
   getAppCombineDirectory: () => ipcRenderer.invoke('path:get-app-combine-directory'),
   getAppResultDirectory: () => ipcRenderer.invoke('path:get-app-result-directory'),
   openPath: (path) => ipcRenderer.invoke('path:open-path', path),
+  getFilepathData: () => ipcRenderer.invoke('path:get-filepath-data'),
+  setFilepathData: (newData) => ipcRenderer.invoke('path:set-filepath-data', newData)
 });

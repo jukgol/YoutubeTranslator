@@ -7,6 +7,7 @@ const PathData = require('./pathData'); // Import the PathData class
 const PathFunc = require('./pathFunc'); // Import the PathFunc class directly
 const configData = require('./configData'); // Import the configData module
 const ConfigFunc = require('./configFunc'); // Import the ConfigFunc class
+const FilePath = require('./filePath'); // Add this
 
 class AppEnv {
     constructor() {
@@ -16,7 +17,13 @@ class AppEnv {
         AppEnv._instance = this;
         // Initialize environment variables or settings here
         this.env = {}; // Example: an object to hold environment variables
-        this.pathData = new PathData(); // Instantiate PathData here
+
+        // 1. FilePath 초기화 (설정 폴더 및 파일명 관리)
+        this.filePath = new FilePath();
+
+        // 2. PathData 초기화 (FilePath의 파일명 데이터를 전달)
+        this.pathData = new PathData(this.filePath.data); 
+
         this.pathFunc = new PathFunc(this); // Pass the appEnv instance itself
         this.pathFuncUtils = PathFunc; // To keep access to utility functions via appEnv if needed
         this.configData = configData; // Assign the imported configData module

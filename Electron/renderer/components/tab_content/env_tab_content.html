@@ -1,0 +1,49 @@
+<div style="width: 100%;">
+    <div class="settings-title">환경 설정 (시스템 경로 및 파일명)</div>
+    <div class="setting-section">
+        <!-- Directory Section -->
+        <div class="setting-row">
+            <label>비디오 저장 경로 (videoDir):</label>
+            <input type="text" id="videoDirInput" style="flex: 1;" placeholder="예: E:\video\youtube">
+            <button id="selectVideoDirBtn">폴더 선택</button>
+        </div>
+        
+        <hr style="margin: 20px 0; border: 0; border-top: 1px solid #eee;">
+        
+        <!-- File Name Section -->
+        <div class="settings-title" style="font-size: 1.1em; margin-bottom: 15px;">설정 파일 이름 정의 (파일명만 입력)</div>
+        
+        <div class="setting-row">
+            <label>API 키 파일 (apiFile):</label>
+            <input type="text" id="apiFileNameInput" placeholder="api.txt">
+        </div>
+        
+        <div class="setting-row">
+            <label>기본 규칙 파일 (ruleFile):</label>
+            <input type="text" id="ruleFileNameInput" placeholder="rule.txt">
+        </div>
+        
+        <div class="setting-row">
+            <label>Gemini 버전 파일 (geminiVerFile):</label>
+            <input type="text" id="geminiVerFileNameInput" placeholder="gemini_ver.txt">
+        </div>
+        
+        <div class="setting-row">
+            <label>쿠키 파일 (cookieFile):</label>
+            <input type="text" id="cookieFileNameInput" placeholder="cookies.txt">
+        </div>
+        
+        <div class="setting-row">
+            <label>초기 데이터 파일 (initDataFile):</label>
+            <input type="text" id="initDataFileNameInput" placeholder="initdata.json">
+        </div>
+        
+        <hr style="margin: 20px 0; border: 0; border-top: 1px solid #eee;">
+        
+        <div class="setting-row" style="justify-content: flex-end; margin-top: 20px;">
+            <button id="saveEnvSettingsBtn" style="padding: 10px 25px; background-color: #3b82f6; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: bold;">
+                저장하기
+            </button>
+        </div>
+    </div>
+</div>

@@ -74,5 +74,14 @@ module.exports = {
         return { success: false, error: error.message };
       }
     });
+
+    // --- FilePath Data Handlers ---
+    ipcMain.handle('path:get-filepath-data', () => {
+      return appEnv.filePath.data;
+    });
+
+    ipcMain.handle('path:set-filepath-data', (event, newData) => {
+      return appEnv.filePath.save(newData);
+    });
   }
 };

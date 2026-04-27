@@ -1,4 +1,4 @@
-#settings-content {
+#settings-content, #env-content {
     display: none;
     flex-direction: column;
 }
