@@ -7,6 +7,7 @@
 **/.vs/
 
 node_modules/
+release/
 
 # 데이터 폴더
 /data/
