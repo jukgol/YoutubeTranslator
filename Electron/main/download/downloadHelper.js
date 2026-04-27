@@ -112,7 +112,7 @@ exports._runDownloadProcess = async (url, title, quality, downloadSubs) => {
             // Since we're in Main, we can't easily "invoke" our own ipcMain handlers directly 
             // like a renderer would. We should have exported the core logic function.
             // Let's go back and export the core runner from pythonHandlers.js.
-            const { runPythonDownload } = require('../ipc/pythonDownloadHandlers');
+            const { runPythonDownload } = require('../ipc/pythonVideoHandlers');
             runPythonDownload(url, outputTmpl, formatOption, downloadSubs, downloadSubs, (progressMsg) => {
                 // Parse "[PROGRESS] 10.5% of 100MiB"
                 const percentMatch = progressMsg.match(/(\d+\.\d+)%/);

@@ -11,7 +11,8 @@ const { registerUrlHandlers } = require('./ipc/urlHandlers.js');
 const { setupProcessHandlers } = require('./ipc/processHandlers.js');
 const { setupFsHandlers } = require('./ipc/fsHandlers.js'); // Add this line
 const { cleanupPythonProcesses } = require('./ipc/pythonProcessManager.js'); // Updated
-const { setupPythonDownloadHandlers } = require('./ipc/pythonDownloadHandlers.js'); // New
+const { setupPythonModelHandlers } = require('./ipc/pythonModelHandlers.js'); // New
+const { setupPythonVideoHandlers } = require('./ipc/pythonVideoHandlers.js'); // New
 const { setupPythonSubtitleHandlers } = require('./ipc/pythonSubtitleHandlers.js'); // New
 const { urlManager } = require('./download/urlManager.js'); // 새로 추가: urlManager 인스턴스 가져오기
 const { autoUpdater } = require('electron-updater');
@@ -45,7 +46,8 @@ app.whenReady().then(async () => {
   setupProcessHandlers();
   setupFsHandlers(); // Add this line
   setupPythonSubtitleHandlers(); // Updated
-  setupPythonDownloadHandlers(); // Updated
+  setupPythonModelHandlers(); // New
+  setupPythonVideoHandlers(); // New
   
   // 자동 업데이트 확인 및 알림
   autoUpdater.checkForUpdatesAndNotify();

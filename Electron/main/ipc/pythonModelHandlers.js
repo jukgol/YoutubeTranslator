@@ -5,23 +5,23 @@ const appEnv = require('../appEnv/appEnv');
 const log = require('../js/logManager');
 const { activeProcesses } = require('./pythonProcessManager');
 
-function setupPythonDownloadHandlers() {
+function setupPythonModelHandlers() {
     // 모델 다운로드 전용 핸들러
     ipcMain.handle('python:download-model', async (event, engine) => {
         const projectRoot = path.resolve(__dirname, '../../../Python');
-        const relativeScriptPath = path.join('subtitleEx', 'main.py');
+        const pythonExe = path.join(projectRoot, '.venv', 'Scripts', 'python.exe');
+        const scriptPath = path.join(projectRoot, 'subtitleEx', 'main.py');
         const args = [
-            'run', 'python', '-u', relativeScriptPath,
+            '-u', scriptPath,
             '--download_only',
             '--engine', engine || 'sense',
             '--model_dir', appEnv.pathData.modelDir
         ];
 
         return new Promise((resolve) => {
-            const pythonProcess = spawn('poetry', args, {
+            const pythonProcess = spawn(pythonExe, args, {
                 cwd: projectRoot,
-                env: { ...process.env, PYTHONIOENCODING: 'utf-8' },
-                shell: true
+                env: { ...process.env, PYTHONIOENCODING: 'utf-8' }
             });
 
             activeProcesses.add(pythonProcess);
@@ -30,7 +30,7 @@ function setupPythonDownloadHandlers() {
                 const ansiRegex = /[\u001b\u009b][[()#;?]*(?:[0-9]{1,4}(?:;[0-9]{0,4})*)?[0-9A-ORZcf-nqry=><]/g;
                 const str = data.toString().replace(ansiRegex, '').trim();
                 if (str) {
-                    log.write(`[Model Download] ${str}`);
+                    log.write(str);
                 }
             });
 
@@ -39,7 +39,7 @@ function setupPythonDownloadHandlers() {
                 const str = data.toString().replace(ansiRegex, '').trim();
                 if (str) {
                     const isProgressBar = str.includes('%|') && str.includes('|');
-                    log.write(`[Model Download Stderr] ${str}`, isProgressBar);
+                    log.write(`[PROGRESS] ${str}`, isProgressBar);
                 }
             });
 
@@ -61,4 +61,4 @@ function setupPythonDownloadHandlers() {
     });
 }
 
-module.exports = { setupPythonDownloadHandlers };
+module.exports = { setupPythonModelHandlers };
