@@ -58,7 +58,8 @@
   "homepage": "https://github.com/jukgol/YoutubeTranslator#readme",
   "devDependencies": {
     "electron": "^40.1.0",
-    "electron-builder": "^26.8.1"
+    "electron-builder": "^26.8.1",
+    "electron-packager": "^17.1.2"
   },
   "dependencies": {
     "@google/generative-ai": "^0.24.1",

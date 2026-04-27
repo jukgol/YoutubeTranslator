@@ -1,33 +1,26 @@
 @echo off
-@chcp 65001 > nul
 setlocal
 cd /d "%~dp0.."
 
 echo ========================================
-echo   YoutubeTranslator 로컬 빌드 테스트
+echo   YoutubeTranslator Build Test (Admin)
 echo ========================================
 
-echo.
-echo [1/1] 로컬 빌드 시작 (업로드 안함, 서명 스킵)...
-echo (결과물은 프로젝트 루트의 'release' 폴더에 생성됩니다.)
-echo.
+echo [1/1] Building Portable EXE...
+echo (This may take a few minutes.)
 
-:: 서명 단계를 완전히 건너뛰도록 설정
+:: Set environment to skip signing
 set CSC_SKIP=true
 
-:: 로컬 빌드만 실행 (publish 옵션 제외)
+:: Run build
 call npm run build
 
 if %ERRORLEVEL% neq 0 (
-    echo.
-    echo [ERROR] 빌드 중 오류가 발생했습니다.
+    echo [ERROR] Build failed. Make sure you ran this as ADMIN.
     pause
     exit /b 1
 )
 
 echo.
-echo ========================================
-echo   빌드가 완료되었습니다!
-echo   'release' 폴더를 확인하세요.
-echo ========================================
+echo [SUCCESS] Build complete! Check the 'release' folder.
 pause

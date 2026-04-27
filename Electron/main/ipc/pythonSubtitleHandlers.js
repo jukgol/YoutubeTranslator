@@ -18,11 +18,10 @@ function setupPythonSubtitleHandlers() {
 
 
         return new Promise((resolve) => {
-            const pythonExe = path.join(projectRoot, '.venv', 'Scripts', 'python.exe');
             const relativeScriptPath = path.join('subtitleEx', 'main.py');
 
             const args = [
-                '-u', relativeScriptPath,
+                'run', 'python', '-u', relativeScriptPath,
                 '--file', videoPath,
                 '--output', originDir,
                 '--task', 'transcribe',
@@ -36,9 +35,10 @@ function setupPythonSubtitleHandlers() {
 
 
 
-            const pythonProcess = spawn(pythonExe, args, {
+            const pythonProcess = spawn('poetry', args, {
                 cwd: projectRoot,
-                env: { ...process.env, PYTHONIOENCODING: 'utf-8', HF_HUB_DISABLE_SYMLINKS_WARNING: '1' }
+                env: { ...process.env, PYTHONIOENCODING: 'utf-8', HF_HUB_DISABLE_SYMLINKS_WARNING: '1' },
+                shell: true
             });
 
             activeProcesses.add(pythonProcess);

@@ -12,6 +12,7 @@ const { setupProcessHandlers } = require('./ipc/processHandlers.js');
 const { setupFsHandlers } = require('./ipc/fsHandlers.js'); // Add this line
 const { cleanupPythonProcesses } = require('./ipc/pythonProcessManager.js'); // Updated
 const { setupPythonDownloadHandlers } = require('./ipc/pythonDownloadHandlers.js'); // New
+const { setupPythonSubtitleHandlers } = require('./ipc/pythonSubtitleHandlers.js'); // New
 const { urlManager } = require('./download/urlManager.js'); // 새로 추가: urlManager 인스턴스 가져오기
 const { autoUpdater } = require('electron-updater');
 

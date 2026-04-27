@@ -9,20 +9,19 @@ function setupPythonDownloadHandlers() {
     // 모델 다운로드 전용 핸들러
     ipcMain.handle('python:download-model', async (event, engine) => {
         const projectRoot = path.resolve(__dirname, '../../../Python');
-        const pythonExe = path.join(projectRoot, '.venv', 'Scripts', 'python.exe');
         const relativeScriptPath = path.join('subtitleEx', 'main.py');
-
         const args = [
-            '-u', relativeScriptPath,
+            'run', 'python', '-u', relativeScriptPath,
             '--download_only',
             '--engine', engine || 'sense',
             '--model_dir', appEnv.pathData.modelDir
         ];
 
         return new Promise((resolve) => {
-            const pythonProcess = spawn(pythonExe, args, {
+            const pythonProcess = spawn('poetry', args, {
                 cwd: projectRoot,
-                env: { ...process.env, PYTHONIOENCODING: 'utf-8' }
+                env: { ...process.env, PYTHONIOENCODING: 'utf-8' },
+                shell: true
             });
 
             activeProcesses.add(pythonProcess);
