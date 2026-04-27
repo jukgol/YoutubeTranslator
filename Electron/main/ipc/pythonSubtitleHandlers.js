@@ -26,7 +26,8 @@ function setupPythonSubtitleHandlers() {
                 '--file', videoPath,
                 '--output', originDir,
                 '--task', 'transcribe',
-                '--engine', engine || 'sense'
+                '--engine', engine || 'sense',
+                '--model_dir', appEnv.pathData.modelDir
             ];
             
             if (language) {
@@ -58,7 +59,7 @@ function setupPythonSubtitleHandlers() {
                         successMarkerFound = true;
                     }
 
-                    if (trimmed.startsWith('[PROGRESS]')) {
+                    if (trimmed.startsWith('[PROGRESS]') || trimmed.startsWith('[STATUS]')) {
                         event.sender.send('python:progress', trimmed);
                     } else if (trimmed.startsWith('[INFO]') || trimmed.startsWith('[ERROR]') || trimmed.startsWith('[DONE]')) {
                         event.sender.send('python:progress', trimmed);
@@ -105,6 +106,64 @@ function setupPythonSubtitleHandlers() {
                 activeProcesses.delete(pythonProcess);
                 log.write(`[Python] Spawn error: ${err.message}`);
                 resolve({ success: false, message: `Failed to start Python process: ${err.message}` });
+            });
+        });
+    });
+    
+    // New handler for downloading models only
+    ipcMain.handle('python:download-model', async (event, engine) => {
+        const projectRoot = path.resolve(__dirname, '../../../Python');
+        const pythonExe = path.join(projectRoot, '.venv', 'Scripts', 'python.exe');
+        const relativeScriptPath = path.join('subtitleEx', 'main.py');
+
+        const args = [
+            '-u', relativeScriptPath,
+            '--download_only',
+            '--engine', engine || 'sense',
+            '--model_dir', appEnv.pathData.modelDir
+        ];
+
+        return new Promise((resolve) => {
+            const pythonProcess = spawn(pythonExe, args, {
+                cwd: projectRoot,
+                env: { ...process.env, PYTHONIOENCODING: 'utf-8' }
+            });
+
+            activeProcesses.add(pythonProcess);
+
+            pythonProcess.stdout.on('data', (data) => {
+                const str = data.toString().trim();
+                if (str) {
+                    // UI에는 항상 전송
+                    event.sender.send('python:progress', str);
+                    
+                    // [STATUS] 태그가 붙은 메시지는 콘솔 로그(log.write)에서 제외
+                    if (!str.startsWith('[STATUS]')) {
+                        log.write(`[Model Download] ${str}`);
+                    }
+                }
+            });
+
+            pythonProcess.stderr.on('data', (data) => {
+                const str = data.toString().trim();
+                if (str) {
+                    log.write(`[Model Download Stderr] ${str}`);
+                    event.sender.send('python:progress', `[INFO] ${str}`);
+                }
+            });
+
+            pythonProcess.on('close', (code) => {
+                activeProcesses.delete(pythonProcess);
+                if (code === 0) {
+                    resolve({ success: true, message: 'Model download complete.' });
+                } else {
+                    resolve({ success: false, message: `Process failed with code ${code}` });
+                }
+            });
+
+            pythonProcess.on('error', (err) => {
+                activeProcesses.delete(pythonProcess);
+                resolve({ success: false, message: err.message });
             });
         });
     });

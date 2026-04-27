@@ -43,11 +43,12 @@ except ImportError:
     sys.exit(1)
 
 class SubtitleExtractor:
-    def __init__(self, model_size="large-v3", device="cuda", compute_type="float16"):
+    def __init__(self, model_size="large-v3", device="cuda", compute_type="float16", model_dir=None):
         # add_nvidia_dll_paths() # Called at top level
         self.model_size = model_size
         self.device = device
         self.compute_type = compute_type
+        self.model_dir = model_dir
         self.model = None
         self._load_model(device)
 
@@ -59,7 +60,17 @@ class SubtitleExtractor:
             if device == "cpu":
                 compute_type = "int8"
             
-            self.model = WhisperModel(self.model_size, device=device, compute_type=compute_type)
+            # 모델 저장 경로 설정
+            if self.model_dir:
+                # setconfig/models/whisper 하위 폴더 생성
+                final_model_dir = os.path.join(self.model_dir, "whisper")
+            else:
+                final_model_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), "setconfig", "models", "whisper")
+            
+            if not os.path.exists(final_model_dir):
+                os.makedirs(final_model_dir, exist_ok=True)
+
+            self.model = WhisperModel(self.model_size, device=device, compute_type=compute_type, download_root=final_model_dir)
             self.device = device
             print(f"[INFO] Model loaded successfully on {device}.", flush=True)
         except Exception as e:

@@ -47,9 +47,10 @@ def _patch_tqdm_init(original_init):
 tqdm.tqdm.__init__ = _patch_tqdm_init(tqdm.tqdm.__init__)
 
 class SubtitleExtractor:
-    def __init__(self, model_size="iic/SenseVoiceSmall", device="cuda", compute_type="float16"):
+    def __init__(self, model_size="iic/SenseVoiceSmall", device="cuda", compute_type="float16", model_dir=None):
         self.model_name = model_size
         self.device = device
+        self.model_dir = model_dir
         self.asr_model = None
         self.vad_model = None
         self._load_models(device)
@@ -68,8 +69,8 @@ class SubtitleExtractor:
             while not stop_loading_event.is_set():
                 dots = "." * dot_count
                 # Use \r to return to start of line and print
-                # We use sys.__stdout__ to ensure it goes to the real stdout stream
-                sys.__stdout__.write(f"\r[INFO] 자막 작업을 준비 중입니다{dots}   ")
+                // We use sys.__stdout__ to ensure it goes to the real stdout stream
+                sys.__stdout__.write(f"\r[STATUS] 자막 작업을 준비 중입니다{dots}   ")
                 sys.__stdout__.flush()
                 dot_count = (dot_count % 3) + 1
                 time.sleep(1)
@@ -79,6 +80,17 @@ class SubtitleExtractor:
         dot_thread = threading.Thread(target=print_dots, daemon=True)
         
         # 2. Set library log levels to silence them as much as possible
+        # 모델 저장 경로 설정
+        if self.model_dir:
+            # setconfig/models/sense 하위 폴더 생성
+            final_model_dir = os.path.join(self.model_dir, "sense")
+        else:
+            final_model_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), "setconfig", "models", "sense")
+            
+        if not os.path.exists(final_model_dir):
+            os.makedirs(final_model_dir, exist_ok=True)
+            
+        os.environ['MODELSCOPE_CACHE'] = final_model_dir
         os.environ["MODELSCOPE_LOG_LEVEL"] = "50" 
         os.environ["FUNASR_LOG_LEVEL"] = "ERROR"
         os.environ["TQDM_MININTERVAL"] = "10.0" 

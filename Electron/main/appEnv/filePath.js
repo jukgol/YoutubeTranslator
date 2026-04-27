@@ -17,6 +17,7 @@ class FilePath {
             // [1. 폴더 이름 정의]
             configDir: "setconfig",
             ruleDir: "rule",
+            modelDir: "models",
             dataDir: "data",
             originDir: "origin",
             splitDir: "split",

@@ -21,6 +21,7 @@ class PathData {
         // config 폴더 경로
         this.configDir = path.join(this.base_dir, filePathData.configDir);
         this.ruleDir = path.join(this.configDir, filePathData.ruleDir);
+        this.modelDir = path.join(this.configDir, filePathData.modelDir); // setconfig/models
 
         // --- [2. 파일 경로 정의] ---
         this.apiFile = path.join(this.configDir, filePathData.apiFile);

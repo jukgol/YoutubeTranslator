@@ -27,6 +27,7 @@ try {
     process: process,
     python: { // Add this
       runSubtitle: (videoPath, language, engine) => ipcRenderer.invoke('python:run-subtitle', videoPath, language, engine),
+      downloadModel: (engine) => ipcRenderer.invoke('python:download-model', engine),
       onProgress: (callback) => ipcRenderer.on('python:progress', (event, data) => callback(data))
     },
     fs: fs, // Add this line

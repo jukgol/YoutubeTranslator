@@ -14,6 +14,7 @@ export class ProgressSection {
     #engineWhisper;
     #engineSense;
     #languageSelect;
+    #modelDownloadBtn;
 
     constructor(sectionElement) {
         this.#element = sectionElement;
@@ -33,6 +34,7 @@ export class ProgressSection {
         this.#engineWhisper = this.#element.querySelector('#engine-whisper');
         this.#engineSense = this.#element.querySelector('#engine-sense');
         this.#languageSelect = this.#element.querySelector('#subtitle-language-select');
+        this.#modelDownloadBtn = this.#element.querySelector('#model-download-btn');
 
         if (this.#engineWhisper && this.#engineSense && this.#languageSelect) {
             const toggleLanguageSelect = () => {
@@ -48,6 +50,33 @@ export class ProgressSection {
 
             // Initial sync
             toggleLanguageSelect();
+        }
+
+        if (this.#modelDownloadBtn) {
+            this.#modelDownloadBtn.addEventListener('click', async () => {
+                const engine = this.#engineWhisper.checked ? 'whisper' : 'sense';
+                
+                // 이전 진행 상태 초기화
+                this.reset();
+                
+                // 진행 사항 표시
+                const engineDisplay = engine === 'whisper' ? 'Whisper (Large-v3)' : 'SenseVoice (Small)';
+                this.#updateUI(`🔔 ${engineDisplay} 모델 다운로드/체크 중...`, true);
+                
+                try {
+                    // 모델 다운로드 API 호출
+                    const result = await window.electronAPI.python.downloadModel(engine);
+                    
+                    if (result.success) {
+                        this.#updateUI(`✅ ${engineDisplay} 모델 준비 완료`, false);
+                    } else {
+                        this.#updateUI(`❌ 오류: ${result.message}`, false);
+                    }
+                } catch (error) {
+                    console.error('Model download error:', error);
+                    this.#updateUI(`❌ 시스템 오류: ${error.message}`, false);
+                }
+            });
         }
     }
 
@@ -113,6 +142,9 @@ export class ProgressSection {
                 // For INFO messages, we use the standard UI update, which handles "Loading..." style
                 this.#updateUI(`🔔 ${displayMsg}`, isLoading);
 
+            } else if (logLine.startsWith('[STATUS]')) {
+                const statusText = logLine.replace('[STATUS]', '').trim();
+                this.#updateUI(statusText, false); // No extra dot animation needed as Python provides them
             } else if (logLine.startsWith('[ERROR]')) {
                 const errText = logLine.replace('[ERROR]', '').trim();
                 this.#updateUI(`❌ 오류: ${errText}`, false);
