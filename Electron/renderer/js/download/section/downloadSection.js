@@ -3,12 +3,15 @@
 import { addUrl } from '../ipc_url.js'; // 경로 수정
 import { addFlatListItem } from '../listRenderers.js'; // 경로 수정
 import { createItemClickHandler } from '../selectionHandler.js'; // 경로 수정
+import { parseUrlsFromTextFile } from '../textFileParser.js';
 
 export class DownloadSection {
     constructor(sectionElement, completeSection) {
         this.sectionElement = sectionElement;
         this.completeSection = completeSection; // Store the instance
         this.addUrlButton = sectionElement.querySelector('#add-url-button');
+        this.addTextButton = sectionElement.querySelector('#add-text-button');
+        this.textFileInput = sectionElement.querySelector('#text-file-input');
         this.startDownloadButton = sectionElement.querySelector('#start-download-button');
         this.urlInput = sectionElement.querySelector('#url-input');
         this.downloadUrlList = sectionElement.querySelector('#downloadUrlList');
@@ -46,19 +49,61 @@ export class DownloadSection {
         if (this.addUrlButton && this.urlInput && this.downloadUrlList) {
             this.addUrlButton.addEventListener('click', async () => {
                 console.log('URL 추가 버튼 클릭됨 (DownloadSection)');
-                const url = this.urlInput.value.trim();
-                if (url) {
+                const rawInput = this.urlInput.value.trim();
+                if (rawInput) {
                     this.addUrlButton.disabled = true;
-                    const newItem = await addUrl(url);
-                    if (newItem) {
-                        console.log('URL 추가 완료:', newItem);
-                        // downloadItems 배열 없이 바로 DOM에 추가
-                        addFlatListItem(this.downloadUrlList, newItem, '영상 다운로드', this.handleItemClick);
+
+                    // URL 정규식 추출 또는 공백/줄바꿈/콤마 단위로 개별 URL 분리
+                    let urls = rawInput.match(/https?:\/\/[^\s"',;]+/gi);
+                    if (!urls || urls.length === 0) {
+                        urls = rawInput
+                            .split(/[\r\n\s,;]+/)
+                            .map(url => url.trim())
+                            .filter(url => url.length > 0);
                     }
+
+                    for (const url of urls) {
+                        const newItem = await addUrl(url);
+                        if (newItem) {
+                            console.log('URL 추가 완료:', newItem);
+                            addFlatListItem(this.downloadUrlList, newItem, '영상 다운로드', this.handleItemClick);
+                        }
+                    }
+
                     this.urlInput.value = '';
                     this.addUrlButton.disabled = false;
                 } else {
                     console.log('URL이 비어 있습니다.');
+                }
+            });
+        }
+
+        if (this.addTextButton && this.textFileInput && this.downloadUrlList) {
+            this.addTextButton.addEventListener('click', () => {
+                this.textFileInput.value = '';
+                this.textFileInput.click();
+            });
+
+            this.textFileInput.addEventListener('change', async (event) => {
+                const file = event.target.files[0];
+                if (!file) return;
+
+                try {
+                    const lines = await parseUrlsFromTextFile(file);
+                    if (lines.length === 0) return;
+
+                    this.addTextButton.disabled = true;
+                    for (const url of lines) {
+                        const newItem = await addUrl(url);
+                        if (newItem) {
+                            console.log('Text 파일 내 URL 추가 완료:', newItem);
+                            addFlatListItem(this.downloadUrlList, newItem, '영상 다운로드', this.handleItemClick);
+                        }
+                    }
+                } catch (error) {
+                    console.error('Text 파일 처리 중 오류 발생:', error);
+                } finally {
+                    this.addTextButton.disabled = false;
                 }
             });
         }
